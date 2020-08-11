@@ -1,0 +1,12 @@
+{
+  "name": "tripityReactNative",
+  "displayName": "tripityReactNative",
+  "expo": {
+    "name": "tripityReactNative",
+    "slug": "tripityReactNative",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  }
+}
