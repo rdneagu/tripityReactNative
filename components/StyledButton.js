@@ -137,7 +137,9 @@ class StyledButton extends Component {
   render() {
     return (
       <TouchableWithoutFeedback onPress={this.onPress}>
-        <View>{this.button}</View>
+        <View>
+          {this.button}
+        </View>
       </TouchableWithoutFeedback>
     );
   }

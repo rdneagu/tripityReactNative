@@ -13,9 +13,9 @@ import { observable, computed } from "mobx"
 import { observer } from "mobx-react"
 
 /* App components */
-import TextInput from './input/TextInput';
-import DateTimePicker from './input/DateTimePicker';
-import Select from './input/Select';
+import TextInput from './Input/TextInput';
+import DateTimePicker from './Input/DateTimePicker';
+import Select from './Input/Select';
 
 export const INPUT_TYPE = {
   DATEPICKER: 1,

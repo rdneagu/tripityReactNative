@@ -12,7 +12,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Entypo, Ionicons, EvilIcons, Fontisto } from '@expo/vector-icons';
 
 /* React navigator */
-import { navigationRef, ReactNavigator } from './navigator';
+import { ReactNavigator } from './navigator';
 
 /* Community packages */
 import _ from 'lodash';
@@ -65,7 +65,7 @@ class App extends React.Component {
   async componentDidMount() {
     try {
       // Prevent splash screen to be hidden until hideAsync is called
-      SplashScreen.preventAutoHideAsync();
+      // SplashScreen.preventAutoHideAsync();
 
       await TptyTasks.startLocationUpdates();
       await TptyTasks.startGeofencing();
@@ -87,7 +87,7 @@ class App extends React.Component {
       TptyLog.warn(e);
     } finally {
       this.assetsLoading = false;
-      SplashScreen.hideAsync();
+      // SplashScreen.hideAsync();
     }
   }
 
@@ -96,7 +96,7 @@ class App extends React.Component {
       return null;
     } else {
       return (
-        <NavigationContainer ref={navigationRef}>
+        <NavigationContainer ref={store.NavigationStore.navigationRef} onReady={store.NavigationStore.OnReady} onStateChange={store.NavigationStore.OnStateChange}>
           <View style={styles.main}>
             <StatusBar hidden />
             <ImageBackground source={require('./assets/images/tripity_bg.png')} style={styles.background} />

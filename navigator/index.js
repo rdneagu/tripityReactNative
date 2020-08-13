@@ -2,8 +2,14 @@
 import React, { createRef } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 
+/* Expo packages */
+import { Entypo } from '@expo/vector-icons';
+
 /* Community packages */
 import _ from 'lodash';
+
+/* App components */
+import { NavigationBottom } from '../components';
 
 const slideOutIn = ({ current, next, layouts }) => {
   return {
@@ -12,14 +18,14 @@ const slideOutIn = ({ current, next, layouts }) => {
         {
           translateX: current.progress.interpolate({
             inputRange: [0, 1],
-            outputRange: [layouts.screen.width, 0],
+            outputRange: [layouts.screen.width, -1],
           }),
         },
         {
           translateX: next
             ? next.progress.interpolate({
                 inputRange: [0, 1],
-                outputRange: [1, -layouts.screen.width],
+                outputRange: [0, -layouts.screen.width],
               })
             : 1,
         },
@@ -69,15 +75,30 @@ function MainStack() {
   const Stack = createStackNavigator();
   const options = {
     general: {
-      initialRouteName: 'Screen.Main.Splash',
+      initialRouteName: 'Splash',
     }
   };
+  const tabs = [
+    {
+      name: 'Itinerary',
+      component: ScreenMainItinerary,
+      icon: <Entypo name="aircraft" size={20} color="white" />
+    },
+    {
+      name: 'GrabPhotos',
+      component: ScreenMainGrabPhotos,
+      icon: <Entypo name="aircraft" size={20} color="white" />
+    },
+
+  ]
   return (
-    <Stack.Navigator {...getStackOptions(options)}>
-      <Stack.Screen name='Splash' component={ScreenMainSplash} />
-      <Stack.Screen name='Itinerary' component={ScreenMainItinerary} />
-      <Stack.Screen name='GrabPhotos' component={ScreenMainGrabPhotos} />
-    </Stack.Navigator>
+    <>
+      <Stack.Navigator {...getStackOptions(options)}>
+        <Stack.Screen name='Splash' component={ScreenMainSplash} />
+        {tabs.map((tab, i) => <Stack.Screen key={i} name={tab.name} component={tab.component} />)}
+      </Stack.Navigator>
+      <NavigationBottom tabs={tabs} />
+    </>
   )
 }
 
@@ -89,7 +110,7 @@ function AuthStack() {
   const Stack = createStackNavigator();
   const options = {
     general: {
-      initialRouteName: 'Screen.Auth.Login',
+      initialRouteName: 'Login',
     }
   };
   return (
@@ -106,17 +127,4 @@ export function ReactNavigator() {
   return (
     <RootStack />
   )
-}
-
-import { StackActions } from '@react-navigation/native';
-export const navigationRef = createRef();
-
-export function navigate(name, params) {
-  navigationRef.current?.navigate(name, params);
-}
-export function push(...args) {
-  navigationRef.current?.dispatch(StackActions.push(...args));
-}
-export function replace(name, params) {
-  navigationRef.current?.dispatch(StackActions.replace(name, params));
 }

@@ -6,7 +6,7 @@ import { StyleSheet, Image, View, Text } from 'react-native';
 import { Entypo } from '@expo/vector-icons';
 
 /* Community packages */
-import { observable } from "mobx"
+import { observable, action } from "mobx"
 import { observer, inject } from "mobx-react"
 
 /* App components */
@@ -17,14 +17,9 @@ import { StyledButton, StyledLink, IndeterminateLoading } from '../../components
 class ScreenMainSplash extends Component {
   @observable isLoading = true;
 
-  constructor() {
-    super();
-  }
-
   async componentDidMount() {
     try {
-      console.dir(this.props.navigation);
-      await this.props.store.UserStore.getUserSession();
+      // await this.props.store.UserStore.getUserSession();
     } catch (e) {
       console.warn(e);
     } finally {
@@ -60,7 +55,7 @@ class ScreenMainSplash extends Component {
         <Text style={styles.name}>Tripity</Text>
         {/* TODO: Logo */}
         <Image source={require('../../assets/images/placeholder.png')} style={styles.logo} />
-        {load}
+        {load}        
       </View>
     )
   }
