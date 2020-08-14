@@ -19,7 +19,7 @@ class ScreenMainSplash extends Component {
 
   async componentDidMount() {
     try {
-      // await this.props.store.UserStore.getUserSession();
+      await this.props.store.UserStore.getUserSession();
     } catch (e) {
       console.warn(e);
     } finally {

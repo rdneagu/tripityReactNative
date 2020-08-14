@@ -11,21 +11,23 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { Entypo, Ionicons, EvilIcons, Fontisto } from '@expo/vector-icons';
 
+// MobX store
+import store from './store';
+
 /* React navigator */
-import { ReactNavigator } from './navigator';
+import ReactNavigator from './navigator';
 
 /* Community packages */
 import _ from 'lodash';
 import AWS from 'aws-sdk';
+import Mapbox from '@react-native-mapbox-gl/maps';
 import { observable } from "mobx"
 import { observer, Provider } from "mobx-react"
 
-/* Tripity library */
+/* App library */
 import TptyLog from './lib/log';
 import TptyTasks from './lib/tasks';
-
-// Import mobx store
-import store from './store';
+import Realm from './lib/realm';
 
 /* Initialize location and geofencing tasks */
 TptyTasks.defineLocationTask(({ data, error }) => {
@@ -58,6 +60,8 @@ AWS.config.credentials = new AWS.CognitoIdentityCredentials({
     IdentityPoolId: 'eu-west-2:90ab4a10-d197-4bea-bb99-a14427d1779d',
 });
 
+Mapbox.setAccessToken('pk.eyJ1IjoiZGF2aWRwYWciLCJhIjoiY2szb3FwamRvMDFnMDNtcDA2bHV0ZWpwNCJ9.vY5NCGfl39eGMZozkUM9LA');
+
 @observer
 class App extends React.Component {
   @observable assetsLoading = true;
@@ -65,7 +69,10 @@ class App extends React.Component {
   async componentDidMount() {
     try {
       // Prevent splash screen to be hidden until hideAsync is called
-      // SplashScreen.preventAutoHideAsync();
+      SplashScreen.preventAutoHideAsync();
+
+      // Disable telemetry collection
+      Mapbox.setTelemetryEnabled(false);
 
       await TptyTasks.startLocationUpdates();
       await TptyTasks.startGeofencing();
@@ -83,11 +90,14 @@ class App extends React.Component {
         'Nunito-Bold': require('./assets/fonts/Nunito-Bold.ttf'),
         'Nunito-Black': require('./assets/fonts/Nunito-Black.ttf'),
       });
+
+      // Initialize realm
+      await Realm.openRealm();
     } catch (e) {
       TptyLog.warn(e);
     } finally {
       this.assetsLoading = false;
-      // SplashScreen.hideAsync();
+      SplashScreen.hideAsync();
     }
   }
 

@@ -49,9 +49,8 @@ class NavigationBottom extends Component {
     this.tabs[tabIndex].x = layout.x;
     this.tabs[tabIndex].width = layout.width;
 
-    const tab = this.tabs[tabIndex];
-    if (this.isTabSelected(tab)) {
-      const position = (tab.x + (tab.width / 2)) - 28;
+    if (this.isTabSelected(this.tabs[tabIndex])) {
+      const position = this.computeThumbPosition(tabIndex);
       this.animation.left.setValue(position);
       this.current = tabIndex;
     }
@@ -67,10 +66,15 @@ class NavigationBottom extends Component {
     NavigationStore.replace(this.tabs[tabIndex].name);
   }
 
+  @action
+  computeThumbPosition(tabIndex) {
+    return (tabIndex !== -1) ? (this.tabs[tabIndex].x + (this.tabs[tabIndex].width / 2)) - 20 : -82;
+  }
+
   @action.bound
   animateThumb(screen) {
     const tabIndex = _.findIndex(this.tabs, (tab) => tab.name === screen);
-    const position = (tabIndex !== -1) ? (this.tabs[tabIndex].x + (this.tabs[tabIndex].width / 2)) - 28 : -82;
+    const position = this.computeThumbPosition(tabIndex);
     Animated.timing(this.animation.left, { 
       toValue: position,
       duration: 200,
@@ -134,8 +138,8 @@ const styles = StyleSheet.create({
     top: 0,
   },
   markerMiddle: {
-    height: 45,
-    width: 50,
+    height: 40,
+    width: 40,
     backgroundColor: '#4169e1',
     borderBottomLeftRadius: 23,
     borderBottomRightRadius: 23,
@@ -145,11 +149,11 @@ const styles = StyleSheet.create({
     height: 28,
     width: 80,
     backgroundColor: '#4169e1',
-    left: 49,
+    left: 39,
   },
   markerRightRound: {
     position: 'absolute',
-    height: 48,
+    height: 41,
     width: 80,
     backgroundColor: '#000e26',
     borderTopLeftRadius: 50,
@@ -160,11 +164,11 @@ const styles = StyleSheet.create({
     height: 28,
     width: 80,
     backgroundColor: '#4169e1',
-    right: 49,
+    right: 39,
   },
   markerLeftRound: {
     position: 'absolute',
-    height: 48,
+    height: 41,
     width: 80,
     backgroundColor: '#000e26',
     borderTopRightRadius: 50,

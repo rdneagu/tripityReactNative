@@ -6,7 +6,7 @@ import {
 } from 'react-native';
 import PropTypes from 'prop-types';
 
-const ANIMATION_TRANSLATE_Y = 8;
+const ANIMATION_TRANSLATE_Y = 12;
 
 class NavigationBottomTab extends Component {
 

@@ -1,3 +1,6 @@
+/* React navigator */
+import { navigationRef as Navigator } from '../navigator';
+
 /* Expo packages */
 // import * as SecureStore from 'expo-secure-store';
 import * as Permissions from 'expo-permissions';
@@ -5,11 +8,10 @@ import * as Permissions from 'expo-permissions';
 /* Community packages */
 import { observable, computed, reaction } from 'mobx';
 
-/* Tripity library */
+/* App library */
 import { invokeLambda } from '../lib/lambda';
-
-/* React navigator */
-import { navigationRef as Navigator } from '../navigator';
+import Realm from '../lib/realm';
+import TptyLog from '../lib/log';
 
 // const secureStoreOptions = {
 //   keychainService: 'kTripity',
@@ -17,7 +19,7 @@ import { navigationRef as Navigator } from '../navigator';
 // }
 
 class UserStore {
-  @observable userData;
+  @observable user;
   @observable authStep = 0;
 
   constructor(rootStore) {
@@ -30,21 +32,19 @@ class UserStore {
    * Gets the user session and updates the MobX storage
    */
   async getUserSession() {
-    // await SecureStore.deleteItemAsync('user', secureStoreOptions);
     try {
       // Attempt to parse the user key securely stored locally
-      // let user = JSON.parse(await SecureStore.getItemAsync('user', secureStoreOptions));
-      throw 'TODO';
+      let user = Realm.toPlainObject(Realm.db.objects('User').sorted('loggedAt', true)[0]);
+
+      if (!user) {
+        throw 'No sessions found';
+      }
 
       if (Date.now() > user.expiration) {
-        // If the current time went over the expiration time retrieve the user data from serverless using the stored JWT
-        const payload = {
-          id: user.id,
-          token: user.token,
-        }
-
+        // If the current time went over the expiration time verify the user token for geunuinity
         try {
-          user = await invokeLambda('userAuthenticate', 'RequestResponse', payload);
+          const response = await invokeLambda('userAuthenticate', 'RequestResponse', { id: user.id, token: user.token });
+          user.token = response.token;
         } catch(e) {
           throw 'User must relog for security reasons';
         }
@@ -52,6 +52,7 @@ class UserStore {
       await this.setUser(user);
     } catch (e) {
       this.unsetUser();
+      TptyLog.error(e);
     }
   }
 
@@ -66,15 +67,10 @@ class UserStore {
   }
 
   setHome = async (data) => {
-    const payload = {
-      id: this.userData.user.id,
-      ...data,
-    }
-    const home = await invokeLambda('userSetHome', 'RequestResponse', payload);
-  
+    const home = await invokeLambda('userSetHome', 'RequestResponse', { id: this.user.id, ...data });
     // Merge home location into user data and update the user;
-    this.userData.user = { ...this.userData.user, ...home };
-    await this.saveUser();
+    const user = { ...Realm.toPlainObject(this.user), ...home };
+    await this.saveUser(user);
 
     this.authStep = 3;
   }
@@ -86,17 +82,25 @@ class UserStore {
   /**
    * Saves the user in the secured storage
    */
-  async saveUser() {
+  saveUser(user) {
     this.userData.expiration = Date.now() + (86400 * 7 * 1000);
-    // await SecureStore.setItemAsync('user', JSON.stringify(this.userData), secureStoreOptions);
+    return new Promise((resolve) => {
+      Realm.db.write(() => {
+        const user = Realm.db.objects('User').filtered(`id = ${this.userData.id}`);
+        const modify = (user) ? true : false;
+        
+        this.user = realm.create('User', this.userData, modify);
+      });
+      resolve();
+    })
   }
 
   /**
    * Sets the user in the MobX storage and touches the session
    */
-  async setUser(data) {
-    this.userData = data;
-    await this.saveUser();
+  async setUser(user) {
+    user.loggedAt = Date.now();
+    await this.saveUser(user);
 
     this.authStep = 2;
   }

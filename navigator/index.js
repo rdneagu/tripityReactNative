@@ -3,7 +3,7 @@ import React, { createRef } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 
 /* Expo packages */
-import { Entypo } from '@expo/vector-icons';
+import { Entypo, Ionicons } from '@expo/vector-icons';
 
 /* Community packages */
 import _ from 'lodash';
@@ -82,12 +82,12 @@ function MainStack() {
     {
       name: 'Itinerary',
       component: ScreenMainItinerary,
-      icon: <Entypo name="aircraft" size={20} color="white" />
+      icon: <Entypo name="map" size={18} color="white" />
     },
     {
       name: 'GrabPhotos',
       component: ScreenMainGrabPhotos,
-      icon: <Entypo name="aircraft" size={20} color="white" />
+      icon: <Ionicons name="md-photos" size={18} color="white" />
     },
 
   ]
@@ -123,7 +123,7 @@ function AuthStack() {
   )
 }
 
-export function ReactNavigator() {
+export default function ReactNavigator() {
   return (
     <RootStack />
   )

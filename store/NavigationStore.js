@@ -32,7 +32,7 @@ class NavigationStore {
   get screenPath() {
     try {
       if (!this.navigationRefReady) {
-        throw 'Attempted to get screen path on unitialized navigationRef';
+        throw 'screenPath() attempted to get screen path on unitialized navigationRef';
       }
       let path = null;
       let state = this.state;
@@ -54,7 +54,7 @@ class NavigationStore {
   get currentScreen() {
     try {
       if (!this.navigationRefReady) {
-        throw 'Attempted to get current screen on unitialized navigationRef';
+        throw 'currentScreen() attempted to get current screen on unitialized navigationRef';
       }
       return this.screenPath.screen;
     } catch(e) {
