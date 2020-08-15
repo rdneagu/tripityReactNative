@@ -66,7 +66,7 @@ class NavigationBottomTab extends Component {
 
 NavigationBottomTab.propTypes = {
   tabIndex: PropTypes.number,
-  selected: PropTypes.boolean,
+  selected: PropTypes.any,
   onLayout: PropTypes.any,
   onPress: PropTypes.any,
 }

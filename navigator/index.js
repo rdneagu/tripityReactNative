@@ -1,5 +1,5 @@
 /* React packages */
-import React, { createRef } from 'react';
+import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 
 /* Expo packages */
@@ -10,6 +10,9 @@ import _ from 'lodash';
 
 /* App components */
 import { NavigationBottom } from '../components';
+
+/* App library */
+import store from '../store';
 
 const slideOutIn = ({ current, next, layouts }) => {
   return {
@@ -53,29 +56,30 @@ const getStackOptions = (options = {}) => {
   }
 }
 
+import ScreenMainSplash from '../screens/Splash.screen.js';
 function RootStack() {
   const Stack = createStackNavigator();
   const options = {
     general: {
-      initialRouteName: 'Screen.Main',
+      initialRouteName: 'Screen.Splash',
     }
   };
   return (
     <Stack.Navigator {...getStackOptions(options)}>
+      <Stack.Screen name="Screen.Splash" component={ScreenMainSplash} />
       <Stack.Screen name="Screen.Main" component={MainStack} />
       <Stack.Screen name="Screen.Auth" component={AuthStack} />
     </Stack.Navigator>
   )
 }
 
-import ScreenMainSplash from '../screens/Main/Splash.screen.js';
 import ScreenMainItinerary from '../screens/Main/Itinerary.screen.js';
 import ScreenMainGrabPhotos from '../screens/Main/GrabPhotos.screen.js';
 function MainStack() {
   const Stack = createStackNavigator();
   const options = {
     general: {
-      initialRouteName: 'Splash',
+      initialRouteName: 'Itinerary',
     }
   };
   const tabs = [
@@ -94,7 +98,6 @@ function MainStack() {
   return (
     <>
       <Stack.Navigator {...getStackOptions(options)}>
-        <Stack.Screen name='Splash' component={ScreenMainSplash} />
         {tabs.map((tab, i) => <Stack.Screen key={i} name={tab.name} component={tab.component} />)}
       </Stack.Navigator>
       <NavigationBottom tabs={tabs} />
@@ -115,8 +118,8 @@ function AuthStack() {
   };
   return (
     <Stack.Navigator {...getStackOptions(options)}>
-      <Stack.Screen name='Login' component={ScreenAuthLogin} />
-      <Stack.Screen name='Register' component={ScreenAuthRegister} />
+      {!store.UserStore.user && <Stack.Screen name='Login' component={ScreenAuthLogin} />}
+      {!store.UserStore.user && <Stack.Screen name='Register' component={ScreenAuthRegister} />}
       <Stack.Screen name='Country' component={ScreenAuthCountry} />
       <Stack.Screen name='Permission' component={ScreenAuthPermissions} />
     </Stack.Navigator>

@@ -53,6 +53,7 @@ class NavigationBottom extends Component {
       const position = this.computeThumbPosition(tabIndex);
       this.animation.left.setValue(position);
       this.current = tabIndex;
+      this.tabs[tabIndex].selected = true;
     }
   }
 

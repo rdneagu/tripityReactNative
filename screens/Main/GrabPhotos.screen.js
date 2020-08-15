@@ -10,18 +10,15 @@ import * as MediaLibrary from "expo-media-library";
 import _ from 'lodash';
 import axios from 'axios';
 import { observable, action } from "mobx"
-import { observer } from "mobx-react"
+import { observer, inject } from "mobx-react"
 
 /* App components */
 import { Image, StyledButton } from '../../components';
 
+@inject('store')
 @observer
 class ScreenMainGrabPhotos extends React.Component {
   @observable images = [];
-
-  constructor() {
-    super();
-  }
 
   async componentDidMount() {
     await this.getPermissionAsync();

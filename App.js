@@ -19,15 +19,13 @@ import ReactNavigator from './navigator';
 
 /* Community packages */
 import _ from 'lodash';
-import AWS from 'aws-sdk';
-import Mapbox from '@react-native-mapbox-gl/maps';
-import { observable } from "mobx"
+import { observable, action } from "mobx"
 import { observer, Provider } from "mobx-react"
 
 /* App library */
 import TptyLog from './lib/log';
 import TptyTasks from './lib/tasks';
-import Realm from './lib/realm';
+
 
 /* Initialize location and geofencing tasks */
 TptyTasks.defineLocationTask(({ data, error }) => {
@@ -54,59 +52,43 @@ TptyTasks.defineGeofencingTask(({ data: { eventType, region }, error }) => {
   }
 });
 
-/* Initialize AWS */
-AWS.config.region = 'eu-west-2';
-AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-    IdentityPoolId: 'eu-west-2:90ab4a10-d197-4bea-bb99-a14427d1779d',
-});
-
-Mapbox.setAccessToken('pk.eyJ1IjoiZGF2aWRwYWciLCJhIjoiY2szb3FwamRvMDFnMDNtcDA2bHV0ZWpwNCJ9.vY5NCGfl39eGMZozkUM9LA');
-
 @observer
 class App extends React.Component {
-  @observable assetsLoading = true;
+  @observable assetsReady = false;
+
+  @action.bound
+  async loadAssets() {
+    SplashScreen.preventAutoHideAsync();
+    // Load fonts
+    await Font.loadAsync({
+      ...Ionicons.font,
+      ...Entypo.font,
+      ...EvilIcons.font,
+      ...Fontisto.font,
+      'Nunito-Light': require('./assets/fonts/Nunito-Light.ttf'),
+      'Nunito-Regular': require('./assets/fonts/Nunito-Regular.ttf'),
+      'Nunito-SemiBold': require('./assets/fonts/Nunito-SemiBold.ttf'),
+      'Nunito-Bold': require('./assets/fonts/Nunito-Bold.ttf'),
+      'Nunito-Black': require('./assets/fonts/Nunito-Black.ttf'),
+    });
+    this.assetsReady = true;
+    SplashScreen.hideAsync();
+  }
 
   async componentDidMount() {
     try {
-      // Prevent splash screen to be hidden until hideAsync is called
-      SplashScreen.preventAutoHideAsync();
-
-      // Disable telemetry collection
-      Mapbox.setTelemetryEnabled(false);
-
-      await TptyTasks.startLocationUpdates();
-      await TptyTasks.startGeofencing();
-      await TptyTasks.listTasks();
-
-      // Load fonts
-      await Font.loadAsync({
-        ...Ionicons.font,
-        ...Entypo.font,
-        ...EvilIcons.font,
-        ...Fontisto.font,
-        'Nunito-Light': require('./assets/fonts/Nunito-Light.ttf'),
-        'Nunito-Regular': require('./assets/fonts/Nunito-Regular.ttf'),
-        'Nunito-SemiBold': require('./assets/fonts/Nunito-SemiBold.ttf'),
-        'Nunito-Bold': require('./assets/fonts/Nunito-Bold.ttf'),
-        'Nunito-Black': require('./assets/fonts/Nunito-Black.ttf'),
-      });
-
-      // Initialize realm
-      await Realm.openRealm();
+      await this.loadAssets();
     } catch (e) {
-      TptyLog.warn(e);
-    } finally {
-      this.assetsLoading = false;
-      SplashScreen.hideAsync();
+      TptyLog.error(e);
     }
   }
 
   render() {
-    if (this.assetsLoading) {
+    if (!this.assetsReady) {
       return null;
     } else {
       return (
-        <NavigationContainer ref={store.NavigationStore.navigationRef} onReady={store.NavigationStore.OnReady} onStateChange={store.NavigationStore.OnStateChange}>
+        <NavigationContainer ref={store.NavigationStore.navigationRef} onReady={store.OnApplicationReady} onStateChange={store.NavigationStore.OnStateChange}>
           <View style={styles.main}>
             <StatusBar hidden />
             <ImageBackground source={require('./assets/images/tripity_bg.png')} style={styles.background} />

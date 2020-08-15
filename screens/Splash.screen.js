@@ -6,31 +6,19 @@ import { StyleSheet, Image, View, Text } from 'react-native';
 import { Entypo } from '@expo/vector-icons';
 
 /* Community packages */
-import { observable, action } from "mobx"
 import { observer, inject } from "mobx-react"
 
 /* App components */
-import { StyledButton, StyledLink, IndeterminateLoading } from '../../components';
+import { StyledButton, StyledLink, IndeterminateLoading } from '../components';
 
 @inject('store')
 @observer
 class ScreenMainSplash extends Component {
-  @observable isLoading = true;
-
-  async componentDidMount() {
-    try {
-      await this.props.store.UserStore.getUserSession();
-    } catch (e) {
-      console.warn(e);
-    } finally {
-      this.isLoading = false;
-    }
-  }
 
   render() {
     const { navigation } = this.props;
     const memo = ['Track', 'Discover', 'Go', 'Give back'];
-    const load = (this.isLoading)
+    const content = (!this.props.store.isApplicationReady)
       ? 
         <View style={{ flexGrow: 1, width: '100%', alignItems: 'center', justifyContent: 'center' }}>
           <IndeterminateLoading />
@@ -54,8 +42,8 @@ class ScreenMainSplash extends Component {
       <View style={styles.content}>
         <Text style={styles.name}>Tripity</Text>
         {/* TODO: Logo */}
-        <Image source={require('../../assets/images/placeholder.png')} style={styles.logo} />
-        {load}        
+        <Image source={require('../assets/images/placeholder.png')} />
+        {content}        
       </View>
     )
   }
@@ -72,9 +60,9 @@ const styles = StyleSheet.create({
     fontFamily: 'Nunito-Bold',
     color: '#eee'
   },
-  logo: {
-    height: 300,
-  },
+  // logo: {
+  //   height: 300,
+  // },
   memo: {
     flexDirection: 'row',
     alignItems: 'center',

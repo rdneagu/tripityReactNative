@@ -19,7 +19,6 @@ import { StyledButton, StyledText } from '../../components';
 class ScreenAuthPermissions extends React.Component {
   @observable permissions = {
     location: { text: 'location access', type: Permissions.LOCATION },
-    camera: { text: 'camera access', type: Permissions.CAMERA },
     cameraRoll: { text: 'media access', type: Permissions.CAMERA_ROLL },
   }
 
@@ -28,7 +27,7 @@ class ScreenAuthPermissions extends React.Component {
   }
 
   async componentDidMount() {
-    const result = await Permissions.getAsync(Permissions.LOCATION, Permissions.CAMERA, Permissions.CAMERA_ROLL);
+    const result = await Permissions.getAsync(Permissions.LOCATION, Permissions.CAMERA_ROLL);
     _.forEach(result.permissions, (permission, key) => {
       this.permissions[key].granted = (permission.status === 'granted');
       this.permissions[key].denied = (permission.status === 'denied');
@@ -37,7 +36,7 @@ class ScreenAuthPermissions extends React.Component {
 
   @action.bound
   async grantPermission(key) {
-    const { status, permissions } = await Permissions.askAsync(this.permissions[key].type);
+    const { status } = await Permissions.askAsync(this.permissions[key].type);
     if (status === 'granted') {
       this.permissions[key].granted = true;
     } else if (status === 'denied') {

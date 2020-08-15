@@ -18,7 +18,7 @@ class NavigationStore {
   }
 
   @action.bound
-  OnReady() {
+  async OnReady() {
     this.state = this.navigationRef.current.getRootState();
     this.navigationRefReady = true;
   }
