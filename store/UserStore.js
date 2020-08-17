@@ -3,10 +3,10 @@
 import * as Permissions from 'expo-permissions';
 
 /* Community packages */
-import { observable, reaction, action } from 'mobx';
+import { observable, reaction, action, computed } from 'mobx';
 
 /* App library */
-import { invokeLambda } from '../lib/lambda';
+import AWS from '../lib/aws';
 import Realm from '../lib/realm';
 import TptyLog from '../lib/log';
 
@@ -53,7 +53,7 @@ class UserStore {
         // If the current time went over the expiration time verify the user token for geunuinity
         try {
           // Invoke the lambda function and update the token if successfully returned
-          const response = await invokeLambda('userAuthenticate', 'RequestResponse', { id: user.id, token: user.token });
+          const response = await AWS.invokeLambda('userAuthenticate', 'RequestResponse', { id: user.id, token: user.token });
           user.token = response.token;
         } catch(e) {
           // Redirect the user to the login screen for re-authentication if verification fails
@@ -69,23 +69,22 @@ class UserStore {
 
   @action.bound
   async register(data={}) {
-    const user = await invokeLambda('userRegister', 'RequestResponse', data);
+    const user = await AWS.invokeLambda('userRegister', 'RequestResponse', data);
     await this.setUser(user);
   }
 
   @action.bound
   async authenticate(data={}) {
-    const user = await invokeLambda('userAuthenticate', 'RequestResponse', data);
-    console.log(user);
+    const user = await AWS.invokeLambda('userAuthenticate', 'RequestResponse', data);
     await this.setUser(user);
   }
 
   @action.bound
   async setHome(data={}) {
-    await invokeLambda('userSetHome', 'RequestResponse', { id: this.user.id, ...data });
+    await AWS.invokeLambda('userSetHome', 'RequestResponse', { id: this.user.id, ...data });
 
     // Update the user if the lambda function was successful
-    this.updateUser(data);
+    await this.updateUser(data);
     this.changeStep(AUTH_STEP.STEP_PERMISSIONS);
   }
 
@@ -121,7 +120,7 @@ class UserStore {
     return new Promise((resolve, reject) => {
       // Reject the promise if the user is already set or if the id is missing from the user object
       if (this.user) {
-        return reject('The user object is already instantiated, cannot reinstantiate');
+        return this.user;
       }
       if (!user.id) {
         return reject('id is missing from the user object, authenticating an user requires the user id!');
@@ -131,6 +130,7 @@ class UserStore {
       user.isLogged = true;
       user.loggedAt = Date.now();
       user.expiration = Date.now() + (86400 * 7 * 1000);
+      user.trips = user.trips || [];
       Realm.db.write(() => {
         try {
           const found = Realm.db.objects('User').filtered(`id = ${user.id}`);
@@ -153,7 +153,6 @@ class UserStore {
    */
   @action.bound
   async unsetUser(redirect=AUTH_STEP.STEP_SPLASH) {
-    console.log('unset user');
     await this.updateUser({ isLogged: false });
     this.user = null;
     this.changeStep(redirect);
@@ -194,6 +193,15 @@ class UserStore {
 
       default:
         return this.rootStore.NavigationStore.replace('Screen.Main', { screen: 'Itinerary' });
+    }
+  }
+
+  @computed
+  get homeLocation() {
+    return {
+      homeCity: this.user.homeCity,
+      homeCountry: this.user.homeCountry,
+      postCode: this.user.postCode,
     }
   }
 }

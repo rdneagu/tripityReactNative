@@ -1,6 +1,6 @@
 /* React packages */
 import React from 'react';
-import { ImageBackground, StyleSheet, FlatList, Text, View, TouchableOpacity } from 'react-native';
+import { ActivityIndicator, ImageBackground, StyleSheet, FlatList, Text, View, TouchableOpacity } from 'react-native';
 
 /* Expo packages */
 import * as Permissions from 'expo-permissions';
@@ -12,23 +12,36 @@ import axios from 'axios';
 import { observable, action } from "mobx"
 import { observer, inject } from "mobx-react"
 
+/* App library */
+import TptyLog from '../../lib/log';
+import TptyTrip from '../../lib/trip';
+
 /* App components */
-import { Image, StyledButton } from '../../components';
+import { Image, StyledButton, StyledText, IndeterminateLoading } from '../../components';
 
 @inject('store')
 @observer
 class ScreenMainGrabPhotos extends React.Component {
-  @observable images = [];
-
-  async componentDidMount() {
-    await this.getPermissionAsync();
+  @observable parsing = {
+    finished: false,
+    photo: null,
+    trip: null,
   }
 
-  async getPermissionAsync() {
-    const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
-    if (status !== 'granted') {
-      alert('Sorry, we need camera roll permissions to make this work!');
+  async componentDidMount() {
+    try {
+      await TptyTrip.parseMedia(this.updateParsing);
+      TptyLog.success('Finished parsing');
+      this.parsing.finished = true;
+    } catch(e) {
+      TptyLog.error(e);
     }
+  }
+
+  @action.bound
+  updateParsing(photo, trip) {
+    this.parsing.photo = photo;
+    this.parsing.trip = trip;
   }
 
   @action.bound
@@ -57,16 +70,34 @@ class ScreenMainGrabPhotos extends React.Component {
   }
 
   render() {
+    const { photo, trip } = this.parsing;
     return (
       <View style={styles.content}>
-        <StyledButton style={{ marginVertical: 20 }} onPress={this.getPhotosAsync}>Grab Photos</StyledButton>
-        {this.images.length > 0 && <FlatList
+        {!this.parsing.finished && 
+          <>
+            {photo && <StyledText>Parsing photo: {photo.filename}</StyledText>}
+            {trip && <View>
+              <StyledText>In trip</StyledText>
+              <StyledText>From: {trip.pings[0].country}</StyledText>
+              <StyledText>To: {trip.pings[trip.pings.length-1].country}</StyledText> 
+            </View>}
+            <IndeterminateLoading />
+          </>
+        }
+        {this.parsing.finished && 
+          <>
+            <StyledText>Finished parsing</StyledText>
+            <StyledText>Number of trips detected: {this.props.store.UserStore.user.trips.length}</StyledText>
+          </>
+        }
+        {/* <StyledButton style={{ marginVertical: 20 }} onPress={this.getPhotosAsync}>Grab Photos</StyledButton> */}
+        {/* {this.images.length > 0 && <FlatList
           style={{ width: '100%' }}
           contentContainerStyle={{ alignItems: 'center' }}
           data={this.images}
           renderItem={({ item }) => <TouchableOpacity onPress={() => this.clickity(item)}><Image {...item } /></TouchableOpacity>}
           keyExtractor={item => item.src}
-        />}
+        />} */}
       </View>
     );
   }

@@ -121,7 +121,7 @@ function AuthStack() {
       {!store.UserStore.user && <Stack.Screen name='Login' component={ScreenAuthLogin} />}
       {!store.UserStore.user && <Stack.Screen name='Register' component={ScreenAuthRegister} />}
       <Stack.Screen name='Country' component={ScreenAuthCountry} />
-      <Stack.Screen name='Permission' component={ScreenAuthPermissions} />
+      <Stack.Screen name='Permissions' component={ScreenAuthPermissions} />
     </Stack.Navigator>
   )
 }

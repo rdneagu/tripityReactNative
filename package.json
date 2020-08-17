@@ -44,7 +44,8 @@
     "react-native-text-ticker": "^1.5.0",
     "react-native-unimodules": "~0.10.1",
     "react-native-web": "~0.11.7",
-    "realm": "^6.0.4"
+    "realm": "^6.0.4",
+    "uuid": "^3.4.0"
   },
   "devDependencies": {
     "@babel/core": "~7.9.0",

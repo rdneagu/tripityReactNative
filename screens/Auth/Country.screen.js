@@ -17,19 +17,12 @@ import form from '../../lib/form';
 import { INPUT_TYPE } from '../../components/Input';
 import { Input, StyledButton, StyledText } from '../../components';
 
-const countries = [ 'France', 'Scotland', 'Italy' ];
-const cities = {
-  France: [ 'City-France-1', 'City-France-2', 'City-France-3' ],
-  Scotland: [ 'City-Scotland-1', 'City-Scotland-2', 'City-Scotland-3' ],
-  Italy: [ 'City-Italy-1', 'City-Italy-2', 'City-Italy-3' ],
-}
-
 @inject('store')
 @observer
 class ScreenAuthCountry extends React.Component {
   @observable fields = {
-    homeCountry: { icon: <Ionicons name="ios-pin" />, label: 'COUNTRY', placeholder: 'Select your home country', type: INPUT_TYPE.SELECT, select: { options: countries }, model: this.OnCountryChange, value: this.props.store.UserStore.user.homeCountry },
-    homeCity: { icon: <Ionicons name="ios-pin" />, label: 'CITY', placeholder: 'Select your home city', type: INPUT_TYPE.SELECT, select: { options: [] }, value: this.props.store.UserStore.user.homeCity },
+    homeCountry: { icon: <Ionicons name="ios-pin" />, label: 'COUNTRY', placeholder: 'Home country', value: this.props.store.UserStore.user.homeCountry },
+    homeCity: { icon: <Ionicons name="ios-pin" />, label: 'CITY', placeholder: 'Home city', value: this.props.store.UserStore.user.homeCity },
     postCode: { icon: <Ionicons name="ios-pin" />, label: 'POSTCODE', placeholder: 'Post code', value: this.props.store.UserStore.user.postCode },
   }
 
@@ -69,8 +62,8 @@ class ScreenAuthCountry extends React.Component {
           <StyledButton throttle={2.5} style={{ marginVertical: 40 }} icon={<Entypo name="chevron-right" />} onPress={this.confirm}>Confirm</StyledButton>
         </View>
         <View style={{ marginBottom: 40, alignItems: 'center' }}>
-          <StyledText>By setting your home location</StyledText>
-          <StyledText>we are able to group your trips easier</StyledText>
+          <StyledText>By clicking on Confirm you agree to save</StyledText>
+          <StyledText>the details inserted above with our servers</StyledText>
         </View>
       </ScrollView>
     )
