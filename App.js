@@ -4,7 +4,6 @@ import { StyleSheet, ImageBackground, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 
 /* Expo packages */
-import * as Constants from 'expo-constants';
 import * as Location from 'expo-location';
 import * as Font from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
@@ -25,7 +24,7 @@ import { observer, Provider } from "mobx-react"
 /* App library */
 import TptyLog from './lib/log';
 import TptyTasks from './lib/tasks';
-
+import TptyTrip from './lib/trip';
 
 /* Initialize location and geofencing tasks */
 TptyTasks.defineLocationTask(({ data, error }) => {
@@ -34,8 +33,14 @@ TptyTasks.defineLocationTask(({ data, error }) => {
   }
   if (data) {
     const { locations } = data;
-    const date = new Date(locations[locations.length-1].timestamp);
-    TptyLog.info(`${Constants.default.deviceName}: ${date}`);
+    const lastLocation = locations[locations.length-1];
+    if (lastLocation.timestamp + (60 * 1000) < Date.now()) {
+      TptyLog.warn('Timestamp of the location ping is behind current time');
+      TptyLog.warn(`Ping time: ${new Date(lastLocation.timestamp)}`);
+      TptyLog.warn(`Current time: ${new Date(Date.now())}`);
+      return;
+    }
+    // TptyTrip.OnLocationPing(lastLocation);
   }
 });
 
@@ -43,12 +48,12 @@ TptyTasks.defineGeofencingTask(({ data: { eventType, region }, error }) => {
   if (error) {
     return TptyLog.error(error.message);
   }
-  if (eventType === Location.GeofencingEventType.Enter) {
-    TptyLog.info("You've entered region:", region);
-    // Start location updates async, start trip
-  } else if (eventType === Location.GeofencingEventType.Exit) {
-    TptyLog.info("You've left region:", region);
-    // Stop location updates async, finish trip
+
+  switch (eventType) {
+    case Location.GeofencingEventType.Enter: 
+      return TptyTrip.OnRegionEnter();
+    case Location.GeofencingEventType.Exit:
+      return TptyTrip.OnRegionLeave();
   }
 });
 
@@ -77,6 +82,7 @@ class App extends React.Component {
 
   async componentDidMount() {
     try {
+      await TptyTasks.stopLocationUpdates();
       await this.loadAssets();
     } catch (e) {
       TptyLog.error(e);

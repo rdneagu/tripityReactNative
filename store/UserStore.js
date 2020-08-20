@@ -42,7 +42,8 @@ class UserStore {
   async getUserSession() {
     try {
       // Attempt to parse the user key securely stored locally
-      let [ user ] = Realm.toPlainObject(Realm.db.objects('User').filtered('isLogged = true SORT(loggedAt DESC)').slice(0, 1));
+      let local = true;
+      let [ user ] = Realm.db.objects('User').filtered('isLogged = true SORT(loggedAt DESC)').slice(0, 1);
 
       // If no user logged has been found on the device, keep the user on the get started screen
       if (!user) {
@@ -53,15 +54,15 @@ class UserStore {
         // If the current time went over the expiration time verify the user token for geunuinity
         try {
           // Invoke the lambda function and update the token if successfully returned
-          const response = await AWS.invokeLambda('userAuthenticate', 'RequestResponse', { id: user.id, token: user.token });
-          user.token = response.token;
+          user = await AWS.invokeLambda('userAuthenticate', 'RequestResponse', { id: user.id, token: user.token });
+          local = false;
         } catch(e) {
           // Redirect the user to the login screen for re-authentication if verification fails
           return this.changeStep(AUTH_STEP.STEP_LOGIN);
         }
       }
       // Save the user object in memory and in realm DB
-      await this.setUser(user);
+      await this.setUser(user, local);
     } catch (e) {
       TptyLog.error(e);
     }
@@ -116,32 +117,36 @@ class UserStore {
    * Sets the user in the realm DB and touches the session
    */
   @action.bound
-  async setUser(user) {
+  async setUser(user={}, local=false) {
     return new Promise((resolve, reject) => {
       // Reject the promise if the user is already set or if the id is missing from the user object
-      if (this.user) {
-        return this.user;
-      }
       if (!user.id) {
         return reject('id is missing from the user object, authenticating an user requires the user id!');
       }
 
-      // Touch the session then write or update the realm DB
-      user.isLogged = true;
-      user.loggedAt = Date.now();
-      user.expiration = Date.now() + (86400 * 7 * 1000);
-      user.trips = user.trips || [];
       Realm.db.write(() => {
         try {
-          const found = Realm.db.objects('User').filtered(`id = ${user.id}`);
-          const modify = (found) ? 'modified' : null
-          
-          this.user = Realm.db.create('User', user, modify);
+          // Touch the session then write or update the realm DB
+          user.isLogged = true;
+          user.loggedAt = Date.now();
+          user.expiration = Date.now() + (86400 * 7 * 1000);
+
+          if (!local) {
+            // If the user data is not from local Realm DB
+            const found = Realm.db.objects('User').filtered(`id = ${user.id}`);
+            const modify = (found.length) ? 'modified' : null
+            
+            user.trips = user.trips || [];
+            this.user = Realm.db.create('User', user, modify);
+          } else {
+            this.user = user;
+          }
+
           this.changeStep(AUTH_STEP.STEP_COUNTRY);
+          resolve();
         } catch(e) {
           TptyLog.error(e);
         }
-        resolve();
       });
     })
   }
@@ -196,6 +201,12 @@ class UserStore {
     }
   }
 
+  // @computed
+  // get homeCoords() {
+  //   const [ coords ] = await Location.geocodeAsync(`${this.homeLocation.homeCountry}, ${this.homeLocation.homeCity}`);
+  //   return coords;
+  // }
+
   @computed
   get homeLocation() {
     return {
@@ -203,6 +214,12 @@ class UserStore {
       homeCountry: this.user.homeCountry,
       postCode: this.user.postCode,
     }
+  }
+
+  @computed
+  get lastTrip() {
+    const len = this.user.trips.length;
+    return (len) ? this.user.trips[len-1] : null;
   }
 }
 

@@ -9,6 +9,7 @@ import { observable, action, computed } from "mobx"
 import AWS from '../lib/aws';
 import Realm from '../lib/realm';
 import TptyTasks from '../lib/tasks';
+import TptyLog from '../lib/log';
 
 import Mapbox from '@react-native-mapbox-gl/maps';
 
@@ -28,25 +29,29 @@ class Store {
 
   @action.bound
   async OnApplicationReady() {
-    // Initialize navigation ref
-    this.NavigationStore.OnReady();
-    
-    // Initialize AWS
-    AWS.initialize();
+    try {
+      // Initialize navigation ref
+      this.NavigationStore.OnReady();
+      
+      // Initialize AWS
+      AWS.initialize();
 
-    // Set Mapbox token and disable telemetry
-    Mapbox.setAccessToken('pk.eyJ1IjoiZGF2aWRwYWciLCJhIjoiY2szb3FwamRvMDFnMDNtcDA2bHV0ZWpwNCJ9.vY5NCGfl39eGMZozkUM9LA');
-    Mapbox.setTelemetryEnabled(false);
+      // Set Mapbox token and disable telemetry
+      Mapbox.setAccessToken('pk.eyJ1IjoiZGF2aWRwYWciLCJhIjoiY2szb3FwamRvMDFnMDNtcDA2bHV0ZWpwNCJ9.vY5NCGfl39eGMZozkUM9LA');
+      Mapbox.setTelemetryEnabled(false);
 
-    // Open Realm DB and get the user's session
-    await Realm.openRealm();
-    await this.UserStore.getUserSession();
+      // Open Realm DB and get the user's session
+      await Realm.openRealm();
+      await this.UserStore.getUserSession();
 
-    // Start background tasks
-    await TptyTasks.startLocationUpdates();
-    await TptyTasks.startGeofencing();
+      // Start background tasks
+      await TptyTasks.startGeofencing();
 
-    this.applicationReady = true;
+      this.applicationReady = true;
+    } catch(e) {
+      console.log(e);
+      TptyLog.error(e);
+    }
   }
 }
 
