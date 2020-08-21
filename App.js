@@ -8,13 +8,14 @@ import * as Location from 'expo-location';
 import * as Font from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
+import { Asset } from 'expo-asset';
 import { Entypo, Ionicons, EvilIcons, Fontisto } from '@expo/vector-icons';
 
 // MobX store
 import store from './store';
 
-/* React navigator */
-import ReactNavigator from './navigator';
+/* React routes */
+import ReactRoutes from './routes';
 
 /* Community packages */
 import _ from 'lodash';
@@ -22,12 +23,13 @@ import { observable, action } from "mobx"
 import { observer, Provider } from "mobx-react"
 
 /* App library */
+import TptyCipher from './lib/cipher';
 import TptyLog from './lib/log';
 import TptyTasks from './lib/tasks';
 import TptyTrip from './lib/trip';
 
 /* Initialize location and geofencing tasks */
-TptyTasks.defineLocationTask(({ data, error }) => {
+TptyTasks.defineLocationTask(async ({ data, error }) => {
   if (error) {
     return TptyLog.error(error.message);
   }
@@ -40,7 +42,7 @@ TptyTasks.defineLocationTask(({ data, error }) => {
       TptyLog.warn(`Current time: ${new Date(Date.now())}`);
       return;
     }
-    // TptyTrip.OnLocationPing(lastLocation);
+    TptyTrip.OnLocationPing(lastLocation);
   }
 });
 
@@ -51,9 +53,9 @@ TptyTasks.defineGeofencingTask(({ data: { eventType, region }, error }) => {
 
   switch (eventType) {
     case Location.GeofencingEventType.Enter: 
-      return TptyTrip.OnRegionEnter();
+      return TptyTrip.OnRegionEnter(region);
     case Location.GeofencingEventType.Exit:
-      return TptyTrip.OnRegionLeave();
+      return TptyTrip.OnRegionLeave(region);
   }
 });
 
@@ -63,8 +65,13 @@ class App extends React.Component {
 
   @action.bound
   async loadAssets() {
-    SplashScreen.preventAutoHideAsync();
-    // Load fonts
+    // SplashScreen.preventAutoHideAsync();
+    // Generate encryption key
+    await TptyCipher.generateKey();
+    // Load assets
+    await Asset.loadAsync([
+      require('./assets/images/tripity_bg.png'),
+    ]);
     await Font.loadAsync({
       ...Ionicons.font,
       ...Entypo.font,
@@ -77,12 +84,11 @@ class App extends React.Component {
       'Nunito-Black': require('./assets/fonts/Nunito-Black.ttf'),
     });
     this.assetsReady = true;
-    SplashScreen.hideAsync();
+    // SplashScreen.hideAsync();
   }
 
   async componentDidMount() {
     try {
-      await TptyTasks.stopLocationUpdates();
       await this.loadAssets();
     } catch (e) {
       TptyLog.error(e);
@@ -99,7 +105,7 @@ class App extends React.Component {
             <StatusBar hidden />
             <ImageBackground source={require('./assets/images/tripity_bg.png')} style={styles.background} />
             <Provider store={store}>
-              <ReactNavigator />
+              <ReactRoutes />
             </Provider>
           </View>
         </NavigationContainer>

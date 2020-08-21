@@ -2,8 +2,11 @@
 import React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 
-/* App library */
+/* Community packages */
 import { MapView, Camera } from '@react-native-mapbox-gl/maps';
+
+/* App library */
+import TptyTrip from '../../lib/trip';
 
 class ScreenMainItinerary extends React.Component {
   
@@ -12,6 +15,10 @@ class ScreenMainItinerary extends React.Component {
 
     this.map = React.createRef();
     this.camera = React.createRef();
+  }
+
+  async componentDidMount() {
+    await TptyTrip.parsePings();
   }
 
   render() {

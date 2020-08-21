@@ -35,6 +35,8 @@ PODS:
   - EXPermissions (9.0.1):
     - UMCore
     - UMPermissionsInterface
+  - EXSecureStore (9.0.1):
+    - UMCore
   - EXSplashScreen (0.3.1):
     - UMCore
   - EXSQLite (8.2.1):
@@ -362,6 +364,8 @@ PODS:
   - RealmJS (6.0.4):
     - GCDWebServer
     - React
+  - RNCAsyncStorage (1.12.0):
+    - React
   - RNCMaskedView (0.1.10):
     - React
   - RNDateTimePicker (3.0.0):
@@ -405,6 +409,7 @@ DEPENDENCIES:
   - EXLocation (from `../node_modules/expo-location/ios`)
   - EXMediaLibrary (from `../node_modules/expo-media-library/ios`)
   - EXPermissions (from `../node_modules/expo-permissions/ios`)
+  - EXSecureStore (from `../node_modules/expo-secure-store/ios`)
   - EXSplashScreen (from `../node_modules/expo-splash-screen/ios`)
   - EXSQLite (from `../node_modules/expo-sqlite/ios`)
   - EXTaskManager (from `../node_modules/expo-task-manager/ios`)
@@ -457,6 +462,7 @@ DEPENDENCIES:
   - ReactCommon/callinvoker (from `../node_modules/react-native/ReactCommon`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - RealmJS (from `../node_modules/realm`)
+  - "RNCAsyncStorage (from `../node_modules/@react-native-community/async-storage`)"
   - "RNCMaskedView (from `../node_modules/@react-native-community/masked-view`)"
   - "RNDateTimePicker (from `../node_modules/@react-native-community/datetimepicker`)"
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
@@ -519,6 +525,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-media-library/ios"
   EXPermissions:
     :path: "../node_modules/expo-permissions/ios"
+  EXSecureStore:
+    :path: "../node_modules/expo-secure-store/ios"
   EXSplashScreen:
     :path: "../node_modules/expo-splash-screen/ios"
   EXSQLite:
@@ -579,6 +587,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon"
   RealmJS:
     :path: "../node_modules/realm"
+  RNCAsyncStorage:
+    :path: "../node_modules/@react-native-community/async-storage"
   RNCMaskedView:
     :path: "../node_modules/@react-native-community/masked-view"
   RNDateTimePicker:
@@ -634,6 +644,7 @@ SPEC CHECKSUMS:
   EXLocation: c50022a5a829bad7a621d42eaecc60e171d8efa7
   EXMediaLibrary: 6fa26fee6650f8ea403b9b0bf7e13960e6759f3d
   EXPermissions: b6d7134b7215c33420318c2bbb5d362c20ac9726
+  EXSecureStore: 4e2f86185b51da130beb67572e27dcab4428d4d1
   EXSplashScreen: 820fada8feff48f1d7504ee842240572b825a88f
   EXSQLite: b001ba35deb3001bd6e4b256581a558ae745ef2f
   EXTaskManager: 78737e385835cd98459ca1ff405997351e1d9548
@@ -675,6 +686,7 @@ SPEC CHECKSUMS:
   React-RCTVibration: 4356114dbcba4ce66991096e51a66e61eda51256
   ReactCommon: ed4e11d27609d571e7eee8b65548efc191116eb3
   RealmJS: 085f4e44ee1de3a98e9c8c6b8c2a11b527beba9d
+  RNCAsyncStorage: 3eea36d9460c5159b592f9ecbe5a77f8aca98006
   RNCMaskedView: f5c7d14d6847b7b44853f7acb6284c1da30a3459
   RNDateTimePicker: 4eaf4032b374e818a19e183f13f2c833fbea3815
   RNGestureHandler: 8f09cd560f8d533eb36da5a6c5a843af9f056b38

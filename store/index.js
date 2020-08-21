@@ -8,7 +8,6 @@ import { observable, action, computed } from "mobx"
 /* App library */
 import AWS from '../lib/aws';
 import Realm from '../lib/realm';
-import TptyTasks from '../lib/tasks';
 import TptyLog from '../lib/log';
 
 import Mapbox from '@react-native-mapbox-gl/maps';
@@ -30,22 +29,19 @@ class Store {
   @action.bound
   async OnApplicationReady() {
     try {
-      // Initialize navigation ref
-      this.NavigationStore.OnReady();
-      
       // Initialize AWS
-      AWS.initialize();
+      AWS.ready();
 
       // Set Mapbox token and disable telemetry
       Mapbox.setAccessToken('pk.eyJ1IjoiZGF2aWRwYWciLCJhIjoiY2szb3FwamRvMDFnMDNtcDA2bHV0ZWpwNCJ9.vY5NCGfl39eGMZozkUM9LA');
       Mapbox.setTelemetryEnabled(false);
 
+      // Initialize navigation ref
+      this.NavigationStore.ready();
+
       // Open Realm DB and get the user's session
       await Realm.openRealm();
       await this.UserStore.getUserSession();
-
-      // Start background tasks
-      await TptyTasks.startGeofencing();
 
       this.applicationReady = true;
     } catch(e) {

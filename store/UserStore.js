@@ -1,6 +1,7 @@
 /* Expo packages */
 // import * as SecureStore from 'expo-secure-store';
 import * as Permissions from 'expo-permissions';
+import * as Location from 'expo-location';
 
 /* Community packages */
 import { observable, reaction, action, computed } from 'mobx';
@@ -9,11 +10,7 @@ import { observable, reaction, action, computed } from 'mobx';
 import AWS from '../lib/aws';
 import Realm from '../lib/realm';
 import TptyLog from '../lib/log';
-
-// const secureStoreOptions = {
-//   keychainService: 'kTripity',
-//   keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
-// }
+import TptyTasks from '../lib/tasks';
 
 // AUTH_STEP enum
 const AUTH_STEP = {
@@ -35,6 +32,15 @@ class UserStore {
     reaction(() => this.auth.step, this.OnAuthStepChange.bind(this));
   }
 
+  async getLastLogged() {
+    if (this.user) {
+      return this.user;
+    }
+
+    let [ user ] = await Realm.run(() => Realm.db.objects('User').filtered('isLogged = true LIMIT(1)'));
+    return user;
+  }
+
   /**
    * Gets the user session and updates the MobX storage
    */
@@ -43,7 +49,8 @@ class UserStore {
     try {
       // Attempt to parse the user key securely stored locally
       let local = true;
-      let [ user ] = Realm.db.objects('User').filtered('isLogged = true SORT(loggedAt DESC)').slice(0, 1);
+      let user = await this.getLastLogged();
+      console.log(user);
 
       // If no user logged has been found on the device, keep the user on the get started screen
       if (!user) {
@@ -64,7 +71,7 @@ class UserStore {
       // Save the user object in memory and in realm DB
       await this.setUser(user, local);
     } catch (e) {
-      TptyLog.error(e);
+      TptyLog.error('getUserSession() ->', e);
     }
   }
 
@@ -84,8 +91,9 @@ class UserStore {
   async setHome(data={}) {
     await AWS.invokeLambda('userSetHome', 'RequestResponse', { id: this.user.id, ...data });
 
-    // Update the user if the lambda function was successful
+    // Update the user and restart the geofencing service
     await this.updateUser(data);
+    await this.startHomeGeofencing();
     this.changeStep(AUTH_STEP.STEP_PERMISSIONS);
   }
 
@@ -118,37 +126,38 @@ class UserStore {
    */
   @action.bound
   async setUser(user={}, local=false) {
-    return new Promise((resolve, reject) => {
+    try {
       // Reject the promise if the user is already set or if the id is missing from the user object
       if (!user.id) {
-        return reject('id is missing from the user object, authenticating an user requires the user id!');
+        throw 'id is missing from the user object, authenticating an user requires the user id!';
       }
 
-      Realm.db.write(() => {
-        try {
-          // Touch the session then write or update the realm DB
-          user.isLogged = true;
-          user.loggedAt = Date.now();
-          user.expiration = Date.now() + (86400 * 7 * 1000);
+      Realm.db.beginTransaction();
+      try {
+        // Touch the session then write or update the realm DB
+        user.isLogged = true;
+        user.loggedAt = Date.now();
+        user.expiration = Date.now() + (86400 * 7 * 1000);
 
-          if (!local) {
-            // If the user data is not from local Realm DB
-            const found = Realm.db.objects('User').filtered(`id = ${user.id}`);
-            const modify = (found.length) ? 'modified' : null
-            
-            user.trips = user.trips || [];
-            this.user = Realm.db.create('User', user, modify);
-          } else {
-            this.user = user;
-          }
-
-          this.changeStep(AUTH_STEP.STEP_COUNTRY);
-          resolve();
-        } catch(e) {
-          TptyLog.error(e);
+        if (!local) {
+          // If the user data is not from local Realm DB         
+          user.trips = user.trips || [];
+          this.user = Realm.db.create('User', user, 'all');
+        } else {
+          this.user = user;
         }
-      });
-    })
+
+        this.changeStep(AUTH_STEP.STEP_COUNTRY);
+        Realm.db.commitTransaction();
+      } catch(e) {
+        Realm.db.cancelTransaction();
+        throw e;
+      }
+
+      await this.startHomeGeofencing();
+    } catch(e) {
+      TptyLog.error('setUser() ->', e);
+    }
   }
 
   /**
@@ -160,6 +169,8 @@ class UserStore {
   async unsetUser(redirect=AUTH_STEP.STEP_SPLASH) {
     await this.updateUser({ isLogged: false });
     this.user = null;
+
+    await this.stopHomeGeofencing();
     this.changeStep(redirect);
   }
 
@@ -171,7 +182,6 @@ class UserStore {
   /**
    * Callback observer when authentication step changes
    */
-  @action.bound
   async OnAuthStepChange(step) {
     switch (step) {
       case AUTH_STEP.STEP_SPLASH:
@@ -201,11 +211,55 @@ class UserStore {
     }
   }
 
-  // @computed
-  // get homeCoords() {
-  //   const [ coords ] = await Location.geocodeAsync(`${this.homeLocation.homeCountry}, ${this.homeLocation.homeCity}`);
-  //   return coords;
-  // }
+  /**
+   * Starts the geofencing service on current's user home location
+   */
+  async startHomeGeofencing() {
+    try {
+      if (!this.user) {
+        throw 'Attempted to start geofencing service without a logged in user';
+      }
+
+      const homeCoords = await this.getHomeCoords();
+      if (!homeCoords) {
+        throw 'Invalid home location, cannot start geofencing service';
+      }
+      const regions = [{
+        ...homeCoords,
+        radius: 20 * 1000,
+      }];
+      await TptyTasks.restartGeofencing(regions);
+    } catch(e) {
+      TptyLog.error('startHomeGeofencing() ->', e);
+    }
+  }
+
+  /**
+   * Stops the geofencing service on current's user home location
+   */
+  async stopHomeGeofencing() {
+    try {
+      if (this.user) {
+        throw 'Attempted to stop geofencing service with a logged in user';
+      }
+
+      await TptyTasks.stopGeofencing();
+    } catch(e) {
+      TptyLog.error('stopHomeGeofencing() ->', e);
+    }
+  }
+
+  async getHomeCoords() {
+    try {
+      const [ coords ] = await Location.geocodeAsync(`${this.user.homeCountry}, ${this.user.homeCity}`);
+      if (!coords) {
+        throw 'Failed to parse the home location';
+      }
+      return coords;
+    } catch(e) {
+      TptyLog.error('getHomeCoords() ->', e);
+    }
+  }
 
   @computed
   get homeLocation() {
@@ -214,12 +268,6 @@ class UserStore {
       homeCountry: this.user.homeCountry,
       postCode: this.user.postCode,
     }
-  }
-
-  @computed
-  get lastTrip() {
-    const len = this.user.trips.length;
-    return (len) ? this.user.trips[len-1] : null;
   }
 }
 
