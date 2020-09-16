@@ -13,7 +13,8 @@ import { observable, action } from "mobx"
 import { observer, inject } from "mobx-react"
 
 /* App library */
-import TptyLog from '../../lib/log';
+import * as sim from '../../lib/sim';
+import logger from '../../lib/log';
 import TptyTrip from '../../lib/trip';
 
 /* App components */
@@ -30,12 +31,13 @@ class ScreenMainGrabPhotos extends React.Component {
 
   async componentDidMount() {
     try {
+      await sim.run();
       await TptyTrip.parsePings();
       // await TptyTrip.parseMedia(this.updateParsing);
-      TptyLog.success('Finished parsing');
+      logger.success('Finished parsing');
       this.parsing.finished = true;
     } catch(e) {
-      TptyLog.error(e);
+      logger.error(e);
     }
   }
 

@@ -6,7 +6,7 @@ import { StackActions } from '@react-navigation/native';
 import { observable, action, computed } from 'mobx';
 
 /* App library */
-import TptyLog from '../lib/log';
+import logger from '../lib/log';
 
 class NavigationStore {
   @observable state = {};
@@ -46,7 +46,7 @@ class NavigationStore {
       }
       return path;  
     } catch(e) {
-      TptyLog.error(e);
+      logger.error(e);
     }
   }
 
@@ -58,7 +58,7 @@ class NavigationStore {
       }
       return this.screenPath.screen;
     } catch(e) {
-      TptyLog.error(e);
+      logger.error(e);
     }
   }
 

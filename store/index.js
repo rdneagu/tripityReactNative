@@ -8,7 +8,7 @@ import { observable, action, computed } from "mobx"
 /* App library */
 import AWS from '../lib/aws';
 import Realm from '../lib/realm';
-import TptyLog from '../lib/log';
+import logger from '../lib/log';
 
 import Mapbox from '@react-native-mapbox-gl/maps';
 
@@ -41,13 +41,12 @@ class Store {
 
       // Open Realm DB and get the user's session
       await Realm.openRealm();
-      // Realm.clearRealm();
+      Realm.clearRealm();
       await this.UserStore.getUserSession();
 
       this.applicationReady = true;
     } catch(e) {
-      console.log(e);
-      TptyLog.error(e);
+      logger.error(e);
     }
   }
 }

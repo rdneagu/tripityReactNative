@@ -24,22 +24,22 @@ import { observer, Provider } from "mobx-react"
 
 /* App library */
 import TptyCipher from './lib/cipher';
-import TptyLog from './lib/log';
+import logger from './lib/log';
 import TptyTasks from './lib/tasks';
 import TptyTrip from './lib/trip';
 
 /* Initialize location and geofencing tasks */
 TptyTasks.defineLocationTask(async ({ data, error }) => {
   if (error) {
-    return TptyLog.error(error.message);
+    return logger.error(error.message);
   }
   if (data) {
     const { locations } = data;
     const lastLocation = locations[locations.length-1];
     if (lastLocation.timestamp + (60 * 1000) < Date.now()) {
-      TptyLog.warn('Timestamp of the location ping is behind current time');
-      TptyLog.warn(`Ping time: ${new Date(lastLocation.timestamp)}`);
-      TptyLog.warn(`Current time: ${new Date(Date.now())}`);
+      logger.warn('Timestamp of the location ping is behind current time');
+      logger.warn(`Ping time: ${new Date(lastLocation.timestamp)}`);
+      logger.warn(`Current time: ${new Date(Date.now())}`);
       return;
     }
     TptyTrip.OnLocationPing(lastLocation);
@@ -48,7 +48,7 @@ TptyTasks.defineLocationTask(async ({ data, error }) => {
 
 TptyTasks.defineGeofencingTask(({ data: { eventType, region }, error }) => {
   if (error) {
-    return TptyLog.error(error.message);
+    return logger.error(error.message);
   }
 
   switch (eventType) {
@@ -91,7 +91,7 @@ class App extends React.Component {
     try {
       await this.loadAssets();
     } catch (e) {
-      TptyLog.error(e);
+      logger.error(e);
     }
   }
 

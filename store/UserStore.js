@@ -5,11 +5,12 @@ import * as Location from 'expo-location';
 
 /* Community packages */
 import { observable, reaction, action, computed } from 'mobx';
+import axios from 'axios';
 
 /* App library */
 import AWS from '../lib/aws';
 import Realm from '../lib/realm';
-import TptyLog from '../lib/log';
+import logger from '../lib/log';
 import TptyTasks from '../lib/tasks';
 
 // AUTH_STEP enum
@@ -33,12 +34,7 @@ class UserStore {
   }
 
   async getLastLogged() {
-    if (this.user) {
-      return this.user;
-    }
-
-    let [ user ] = await Realm.run(() => Realm.db.objects('User').filtered('isLogged = true LIMIT(1)'));
-    return user;
+    return this.user || (await Realm.run(() => Realm.db.objects('User').filtered('isLogged = true LIMIT(1)')))[0];
   }
 
   /**
@@ -50,7 +46,6 @@ class UserStore {
       // Attempt to parse the user key securely stored locally
       let local = true;
       let user = await this.getLastLogged();
-      console.log(user);
 
       // If no user logged has been found on the device, keep the user on the get started screen
       if (!user) {
@@ -61,7 +56,13 @@ class UserStore {
         // If the current time went over the expiration time verify the user token for geunuinity
         try {
           // Invoke the lambda function and update the token if successfully returned
-          user = await AWS.invokeLambda('userAuthenticate', 'RequestResponse', { id: user.id, token: user.token });
+          user = await AWS.invokeAPI('/users/authenticate', {
+            method: 'post',
+            data: { 
+              userId: user.userId,
+              token: user.token,
+            }
+          });
           local = false;
         } catch(e) {
           // Redirect the user to the login screen for re-authentication if verification fails
@@ -71,25 +72,38 @@ class UserStore {
       // Save the user object in memory and in realm DB
       await this.setUser(user, local);
     } catch (e) {
-      TptyLog.error('getUserSession() ->', e);
+      logger.error('getUserSession() ->', e);
     }
   }
 
   @action.bound
-  async register(data={}) {
-    const user = await AWS.invokeLambda('userRegister', 'RequestResponse', data);
+  async register(data) {
+    // const user = await AWS.invokeLambda('userRegister', 'RequestResponse', data);
+    const user = await AWS.invokeAPI('/users/register', {
+      method: 'post',
+      data,
+    });
     await this.setUser(user);
   }
 
   @action.bound
-  async authenticate(data={}) {
-    const user = await AWS.invokeLambda('userAuthenticate', 'RequestResponse', data);
+  async authenticate(data) {
+    // const user = await AWS.invokeLambda('userAuthenticate', 'RequestResponse', data);
+    const user = await AWS.invokeAPI('/users/authenticate', {
+      method: 'post',
+      data,
+    });
+
     await this.setUser(user);
   }
 
   @action.bound
-  async setHome(data={}) {
-    await AWS.invokeLambda('userSetHome', 'RequestResponse', { id: this.user.id, ...data });
+  async setHome(data) {
+    // await AWS.invokeLambda('userSetHome', 'RequestResponse', { id: this.user.id, ...data });
+    await AWS.invokeAPI(`/users/${this.user.userId}/update`, {
+      method: 'patch',
+      data,
+    });
 
     // Update the user and restart the geofencing service
     await this.updateUser(data);
@@ -115,7 +129,7 @@ class UserStore {
       
       // Update the user in the realm DB and fulfill the promise
       Realm.db.write(() => {
-        this.user = Realm.db.create('User', { id: this.user.id, ...user }, 'modified');
+        this.user = Realm.db.create('User', { userId: this.user.userId, ...user }, 'modified');
         resolve();
       });
     });
@@ -128,7 +142,7 @@ class UserStore {
   async setUser(user={}, local=false) {
     try {
       // Reject the promise if the user is already set or if the id is missing from the user object
-      if (!user.id) {
+      if (!user.userId) {
         throw 'id is missing from the user object, authenticating an user requires the user id!';
       }
 
@@ -154,9 +168,13 @@ class UserStore {
         throw e;
       }
 
+      axios.defaults.headers = {
+        ...axios.defaults.headers,
+        Authorization: `Bearer ${user.userId}:${user.token}`,
+      }
       await this.startHomeGeofencing();
     } catch(e) {
-      TptyLog.error('setUser() ->', e);
+      logger.error('setUser() ->', e);
     }
   }
 
@@ -230,7 +248,7 @@ class UserStore {
       }];
       await TptyTasks.restartGeofencing(regions);
     } catch(e) {
-      TptyLog.error('startHomeGeofencing() ->', e);
+      logger.error('startHomeGeofencing() ->', e);
     }
   }
 
@@ -245,7 +263,7 @@ class UserStore {
 
       await TptyTasks.stopGeofencing();
     } catch(e) {
-      TptyLog.error('stopHomeGeofencing() ->', e);
+      logger.error('stopHomeGeofencing() ->', e);
     }
   }
 
@@ -257,7 +275,7 @@ class UserStore {
       }
       return coords;
     } catch(e) {
-      TptyLog.error('getHomeCoords() ->', e);
+      logger.error('getHomeCoords() ->', e);
     }
   }
 
