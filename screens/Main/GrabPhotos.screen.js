@@ -32,7 +32,7 @@ class ScreenMainGrabPhotos extends React.Component {
   async componentDidMount() {
     try {
       await sim.run();
-      await TptyTrip.parsePings();
+      await TptyTrip.parseTrips();
       // await TptyTrip.parseMedia(this.updateParsing);
       logger.success('Finished parsing');
       this.parsing.finished = true;

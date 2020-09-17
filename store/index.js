@@ -41,7 +41,7 @@ class Store {
 
       // Open Realm DB and get the user's session
       await Realm.openRealm();
-      Realm.clearRealm();
+      // Realm.clearRealm();
       await this.UserStore.getUserSession();
 
       this.applicationReady = true;

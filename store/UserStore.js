@@ -6,6 +6,7 @@ import * as Location from 'expo-location';
 /* Community packages */
 import { observable, reaction, action, computed } from 'mobx';
 import axios from 'axios';
+import _ from 'lodash';
 
 /* App library */
 import AWS from '../lib/aws';
@@ -146,8 +147,7 @@ class UserStore {
         throw 'id is missing from the user object, authenticating an user requires the user id!';
       }
 
-      Realm.db.beginTransaction();
-      try {
+      await Realm.write((realm) => {
         // Touch the session then write or update the realm DB
         user.isLogged = true;
         user.loggedAt = Date.now();
@@ -156,17 +156,13 @@ class UserStore {
         if (!local) {
           // If the user data is not from local Realm DB         
           user.trips = user.trips || [];
-          this.user = Realm.db.create('User', user, 'all');
+          this.user = realm.create('User', user, 'all');
         } else {
           this.user = user;
         }
 
         this.changeStep(AUTH_STEP.STEP_COUNTRY);
-        Realm.db.commitTransaction();
-      } catch(e) {
-        Realm.db.cancelTransaction();
-        throw e;
-      }
+      });
 
       axios.defaults.headers = {
         ...axios.defaults.headers,
