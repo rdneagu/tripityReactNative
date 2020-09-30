@@ -28,6 +28,9 @@ import logger from './lib/log';
 import TptyTasks from './lib/tasks';
 import TptyTrip from './lib/trip';
 
+/* App components */
+import { OverlayLoading } from './components';
+
 /* Initialize location and geofencing tasks */
 TptyTasks.defineLocationTask(async ({ data, error }) => {
   if (error) {
@@ -107,6 +110,7 @@ class App extends React.Component {
             <Provider store={store}>
               <ReactRoutes />
             </Provider>
+            <OverlayLoading />
           </View>
         </NavigationContainer>
       )

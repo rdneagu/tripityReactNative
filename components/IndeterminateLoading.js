@@ -3,6 +3,9 @@ import React, { Component } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Animated, Easing } from 'react-native';
 
+/* App components */
+import StyledText from './StyledText';
+
 class IndeterminateLoading extends Component {
   constructor() {
     super();
@@ -86,8 +89,11 @@ class IndeterminateLoading extends Component {
   render() {
     return (
       <View style={styles.loadingWrapper}>
-        <Animated.View style={{ ...styles.loadingBar, width: this.interpolated.increase.width, left: this.interpolated.increase.left }}></Animated.View>
-        <Animated.View style={{ ...styles.loadingBar, width: this.interpolated.decrease.width, left: this.interpolated.decrease.left }}></Animated.View>
+        <View style={styles.loadingBarWrapper}>
+          <Animated.View style={{ ...styles.loadingBar, width: this.interpolated.increase.width, left: this.interpolated.increase.left }}></Animated.View>
+          <Animated.View style={{ ...styles.loadingBar, width: this.interpolated.decrease.width, left: this.interpolated.decrease.left }}></Animated.View>
+        </View>
+        {this.props.children && <StyledText>{this.props.children}</StyledText>}
       </View>
     )
   }
@@ -95,6 +101,11 @@ class IndeterminateLoading extends Component {
 
 const styles = StyleSheet.create({
   loadingWrapper: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingBarWrapper: {
     width: '80%',
     height: 5,
     backgroundColor: 'rgba(74, 141, 248, 0.4)',

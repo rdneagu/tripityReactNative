@@ -1,6 +1,7 @@
 import UserStore from './UserStore';
 import NavigationStore from './NavigationStore';
 import SimStore from './SimStore';
+import LoadingStore from './LoadingStore';
 
 /* Community packages */
 import { observable, action, computed } from "mobx"
@@ -18,6 +19,7 @@ class Store {
   constructor() {
     this.UserStore = new UserStore(this);
     this.NavigationStore = new NavigationStore(this);
+    this.LoadingStore = new LoadingStore(this);
     this.SimStore = SimStore;
   }
 
@@ -41,10 +43,31 @@ class Store {
 
       // Open Realm DB and get the user's session
       await Realm.openRealm();
-      // Realm.clearRealm();
+      Realm.clearRealm();
       await this.UserStore.getUserSession();
 
       this.applicationReady = true;
+
+      this.LoadingStore.createLoader(() => {
+        return new Promise((resolve) => {
+          console.log('running promise 1');
+          setTimeout(() => {
+            this.LoadingStore.createLoader(() => {
+              return new Promise((resolve) => {
+                console.log('running promise 3');
+                setTimeout(resolve, 4000);
+              });
+            }, { message: 'Loading test #3' });
+            resolve();
+          }, 3000);
+        });
+      }, { message: 'Loading test' });
+      this.LoadingStore.createLoader(() => {
+        return new Promise((resolve) => {
+          console.log('running promise 2');
+          setTimeout(resolve, 1000);
+        });
+      }, { message: 'Loading test #2' });
     } catch(e) {
       logger.error(e);
     }

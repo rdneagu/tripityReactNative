@@ -84,6 +84,7 @@ class UserStore {
       method: 'post',
       data,
     });
+
     await this.setUser(user);
   }
 
@@ -234,10 +235,7 @@ class UserStore {
         throw 'Attempted to start geofencing service without a logged in user';
       }
 
-      const homeCoords = await this.getHomeCoords();
-      if (!homeCoords) {
-        throw 'Invalid home location, cannot start geofencing service';
-      }
+      const { homeCoords } = await this.getHomeLocation();
       const regions = [{
         ...homeCoords,
         radius: 20 * 1000,
@@ -263,16 +261,25 @@ class UserStore {
     }
   }
 
-  async getHomeCoords() {
-    try {
-      const [ coords ] = await Location.geocodeAsync(`${this.user.homeCountry}, ${this.user.homeCity}`);
-      if (!coords) {
-        throw 'Failed to parse the home location';
-      }
-      return coords;
-    } catch(e) {
-      logger.error('getHomeCoords() ->', e);
+  async getHomeLocation() {
+    logger.info(`Fetching coords for user's home location...`);
+  
+    const { homeCountry, homeCity } = this.homeLocation;
+    if (!homeCountry || !homeCity) {
+      throw 'Cannot proceed without a home location set';
     }
+
+    const [ homeCoords ] = await Location.geocodeAsync(`${homeCountry}, ${homeCity}`);
+    if (!homeCoords) {
+      throw 'Failed to parse the home location';
+    }
+
+    logger.success('Home location detected!');
+    logger.info(`Country: ${homeCountry}`);
+    logger.info(`City: ${homeCity}`);
+    logger.info(`Coords: ${homeCoords.latitude} lat, ${homeCoords.longitude} lon`);
+
+    return { homeCountry, homeCity, homeCoords };
   }
 
   @computed

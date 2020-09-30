@@ -21,7 +21,7 @@ class ScreenMainSplash extends Component {
     const content = (!this.props.store.isApplicationReady)
       ? 
         <View style={{ flexGrow: 1, width: '100%', alignItems: 'center', justifyContent: 'center' }}>
-          <IndeterminateLoading />
+          <IndeterminateLoading>Initiating application</IndeterminateLoading>
         </View>
       : 
         <>
