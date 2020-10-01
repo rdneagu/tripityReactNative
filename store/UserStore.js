@@ -30,7 +30,7 @@ class UserStore {
   };
 
   constructor(rootStore) {
-    this.rootStore = rootStore;
+    this.store = rootStore;
     reaction(() => this.auth.step, this.OnAuthStepChange.bind(this));
   }
 
@@ -148,6 +148,8 @@ class UserStore {
         throw 'id is missing from the user object, authenticating an user requires the user id!';
       }
 
+      const requireSync = (Date.now() - (user.loggedAt || 0) > 60 * 1000);
+
       await Realm.write((realm) => {
         // Touch the session then write or update the realm DB
         user.isLogged = true;
@@ -155,8 +157,8 @@ class UserStore {
         user.expiration = Date.now() + (86400 * 7 * 1000);
 
         if (!local) {
-          // If the user data is not from local Realm DB         
-          user.trips = user.trips || [];
+          // If the user data is not from local Realm DB
+          user.trips = [];
           this.user = realm.create('User', user, 'all');
         } else {
           this.user = user;
@@ -169,6 +171,29 @@ class UserStore {
         ...axios.defaults.headers,
         Authorization: `Bearer ${user.userId}:${user.token}`,
       }
+
+      if (requireSync) {
+        this.store.LoadingStore.createLoader(async () => {
+          const trips = await AWS.invokeAPI('/trips/synchronize', {});
+          const tripsToSync = trips.filter(trip => {
+            const conditionUpdated = (this.user.trips.find(local => trip.tripId === local.tripId && trip.synced > local.synced));
+            const conditionNew = (!this.user.trips.find(local => trip.tripId === local.tripId));
+            return conditionUpdated || conditionNew;
+          });
+          logger.info(tripsToSync);
+          await Realm.write((realm) => {
+            tripsToSync.forEach(trip => {
+              const realmTrip = realm.create('Trip', trip, 'all');
+              this.user.trips.push(realmTrip);
+            });
+          });
+        }, {
+          message: 'Synchronizing trips',
+          failMessage: 'Failed synchronization',
+          obligatory: true,
+        });
+      }
+
       await this.startHomeGeofencing();
     } catch(e) {
       logger.error('setUser() ->', e);
@@ -200,15 +225,15 @@ class UserStore {
   async OnAuthStepChange(step) {
     switch (step) {
       case AUTH_STEP.STEP_SPLASH:
-        return this.rootStore.NavigationStore.replace('Screen.Splash', { screen: 'Login' });
+        return this.store.NavigationStore.replace('Screen.Splash', { screen: 'Login' });
  
       case AUTH_STEP.STEP_LOGIN:
-        return this.rootStore.NavigationStore.replace('Screen.Auth', { screen: 'Login' });
+        return this.store.NavigationStore.replace('Screen.Auth', { screen: 'Login' });
 
       case AUTH_STEP.STEP_COUNTRY:
         const { homeCountry, homeCity, postCode } = this.user;
         if (!homeCountry || !homeCity || !postCode) {
-          return this.rootStore.NavigationStore.replace('Screen.Auth', { screen: 'Country' });
+          return this.store.NavigationStore.replace('Screen.Auth', { screen: 'Country' });
         }
         this.changeStep(AUTH_STEP.STEP_PERMISSIONS);
         break;
@@ -216,13 +241,13 @@ class UserStore {
       case AUTH_STEP.STEP_PERMISSIONS:
         const permissions = await Permissions.getAsync(Permissions.LOCATION, Permissions.CAMERA_ROLL);
         if (permissions.status !== 'granted') {
-          return this.rootStore.NavigationStore.replace('Screen.Auth', { screen: 'Permissions' });
+          return this.store.NavigationStore.replace('Screen.Auth', { screen: 'Permissions' });
         }
         this.changeStep(AUTH_STEP.STEP_FINISHED);
         break;
 
       default:
-        return this.rootStore.NavigationStore.replace('Screen.Main', { screen: 'Itinerary' });
+        return this.store.NavigationStore.replace('Screen.Main');
     }
   }
 

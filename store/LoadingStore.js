@@ -24,9 +24,9 @@ class LoadingStore {
 
   @action.bound
   createLoader(run, options={}) {
-    const { message, obligatory } = options;
+    const { message, failMessage, obligatory } = options;
 
-    const loader = { run, message, obligatory };
+    const loader = { run, message, failMessage, obligatory };
     this.addLoader([ loader ]);
   }
   
@@ -61,6 +61,7 @@ class LoadingStore {
     }    
   }
 
+  @action.bound
   async runLoader(loader) {
     // Attempt to run the loader, fail the loading if an obligatory loader threw an error
     try {
@@ -70,7 +71,7 @@ class LoadingStore {
     } catch(e) {
       if (loader.obligatory) {
         this.status = LOADING_STATUS.FAILED;
-        this.message = FAILED_MESSAGE;
+        this.message = `${loader.failMessage || FAILED_MESSAGE}: ${e.message}`;
         logger.error('An obligatory loader failed!').error(loader);
       }
     }

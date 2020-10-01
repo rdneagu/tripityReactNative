@@ -33,10 +33,10 @@ class OverlayLoading extends Component {
     if (LoadingStore.currentLoader) {
       switch (this.loadingType) {
         case LOADING_TYPE.INDETERMINATE: 
-          loader = <IndeterminateLoading>{LoadingStore.currentLoader.message}</IndeterminateLoading>
+          loader = <IndeterminateLoading>{LoadingStore.message}</IndeterminateLoading>
           break;
         case LOADING_TYPE.DETERMINATE:
-          loader = <IndeterminateLoading>{LoadingStore.currentLoader.message}</IndeterminateLoading>
+          loader = <IndeterminateLoading>{LoadingStore.message}</IndeterminateLoading>
           // TODO: TPA-38
       }
     }

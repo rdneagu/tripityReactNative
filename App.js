@@ -36,6 +36,7 @@ TptyTasks.defineLocationTask(async ({ data, error }) => {
   if (error) {
     return logger.error(error.message);
   }
+
   if (data) {
     const { locations } = data;
     const lastLocation = locations[locations.length-1];
@@ -49,9 +50,15 @@ TptyTasks.defineLocationTask(async ({ data, error }) => {
   }
 });
 
-TptyTasks.defineGeofencingTask(({ data: { eventType, region }, error }) => {
+TptyTasks.defineGeofencingTask(async ({ data: { eventType, region }, error }) => {
   if (error) {
-    return logger.error(error.message);
+    logger.error(error.message);
+    return;
+  }
+
+  if (!store.UserStore.getLastLogged()) {
+    await store.UserStore.stopHomeGeofencing();
+    return;
   }
 
   switch (eventType) {

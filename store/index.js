@@ -43,31 +43,18 @@ class Store {
 
       // Open Realm DB and get the user's session
       await Realm.openRealm();
-      Realm.clearRealm();
-      await this.UserStore.getUserSession();
+      // Realm.clearRealm();
 
-      this.applicationReady = true;
+      // Create a loader for user session authentication
+      this.LoadingStore.createLoader(async () => {
+        await this.UserStore.getUserSession();
 
-      this.LoadingStore.createLoader(() => {
-        return new Promise((resolve) => {
-          console.log('running promise 1');
-          setTimeout(() => {
-            this.LoadingStore.createLoader(() => {
-              return new Promise((resolve) => {
-                console.log('running promise 3');
-                setTimeout(resolve, 4000);
-              });
-            }, { message: 'Loading test #3' });
-            resolve();
-          }, 3000);
-        });
-      }, { message: 'Loading test' });
-      this.LoadingStore.createLoader(() => {
-        return new Promise((resolve) => {
-          console.log('running promise 2');
-          setTimeout(resolve, 1000);
-        });
-      }, { message: 'Loading test #2' });
+        this.applicationReady = true;
+      }, { 
+        message: 'Authenticating',
+        failMessage: 'Authentication failed',
+        obligatory: true,
+      });
     } catch(e) {
       logger.error(e);
     }

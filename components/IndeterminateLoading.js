@@ -93,7 +93,7 @@ class IndeterminateLoading extends Component {
           <Animated.View style={{ ...styles.loadingBar, width: this.interpolated.increase.width, left: this.interpolated.increase.left }}></Animated.View>
           <Animated.View style={{ ...styles.loadingBar, width: this.interpolated.decrease.width, left: this.interpolated.decrease.left }}></Animated.View>
         </View>
-        {this.props.children && <StyledText>{this.props.children}</StyledText>}
+        {this.props.children && <StyledText style={styles.loadingMsg}>{this.props.children}</StyledText>}
       </View>
     )
   }
@@ -115,7 +115,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     height: 5,
     backgroundColor: 'rgb(74, 141, 248)',
-  }
+  },
+  loadingMsg: {
+    textAlign: 'center',
+  },
 });
 
 export default IndeterminateLoading;

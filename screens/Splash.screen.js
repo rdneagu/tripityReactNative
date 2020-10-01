@@ -18,13 +18,14 @@ class ScreenMainSplash extends Component {
   render() {
     const { navigation } = this.props;
     const memo = ['Track', 'Discover', 'Go', 'Give back'];
-    const content = (!this.props.store.isApplicationReady)
-      ? 
-        <View style={{ flexGrow: 1, width: '100%', alignItems: 'center', justifyContent: 'center' }}>
-          <IndeterminateLoading>Initiating application</IndeterminateLoading>
-        </View>
-      : 
-        <>
+        
+    return (
+      <View style={styles.content}>
+        <Text style={styles.name}>Tripity</Text>
+        {/* TODO: Logo */}
+        <Image source={require('../assets/images/placeholder.png')} />
+        {this.props.store.isApplicationReady && 
+          <>
           <View style={styles.memo}>
             {memo.map((m, i) => (
               <View key={i} style={styles.memo}>
@@ -37,13 +38,7 @@ class ScreenMainSplash extends Component {
           <View style={styles.extra}>
             <Text style={styles.extraText}>Already have an account? <StyledLink onPress={() => navigation.replace('Screen.Auth', { screen: 'Login' })}>Sign In</StyledLink></Text>
           </View>
-        </>
-    return (
-      <View style={styles.content}>
-        <Text style={styles.name}>Tripity</Text>
-        {/* TODO: Logo */}
-        <Image source={require('../assets/images/placeholder.png')} />
-        {content}        
+        </>}
       </View>
     )
   }

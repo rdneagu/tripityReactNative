@@ -73,16 +73,22 @@ function RootStack() {
   )
 }
 
+import ScreenMainTrips from '../screens/Main/Trips.screen.js';
 import ScreenMainItinerary from '../screens/Main/Itinerary.screen.js';
 import ScreenMainGrabPhotos from '../screens/Main/GrabPhotos.screen.js';
 function MainStack() {
   const Stack = createStackNavigator();
   const options = {
     general: {
-      initialRouteName: 'Itinerary',
+      initialRouteName: 'Trips',
     }
   };
   const tabs = [
+    {
+      name: 'Trips',
+      component: ScreenMainTrips,
+      icon: <Entypo name="map" size={18} color="white" />
+    },
     {
       name: 'Itinerary',
       component: ScreenMainItinerary,
