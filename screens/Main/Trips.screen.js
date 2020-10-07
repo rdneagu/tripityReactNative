@@ -1,29 +1,20 @@
 /* React packages */
 import React from 'react';
 import { 
-  ActivityIndicator, 
-  StyleSheet, FlatList, Text, View, 
-  TouchableOpacity,
+  StyleSheet, FlatList, View, 
   SafeAreaView,
 } from 'react-native';
 
 /* Expo packages */
-import * as Permissions from 'expo-permissions';
-import * as MediaLibrary from "expo-media-library";
+import { Entypo } from '@expo/vector-icons';
 
 /* Community packages */
 import _ from 'lodash';
-import axios from 'axios';
 import { observable, action } from "mobx"
 import { observer, inject } from "mobx-react"
 
-/* App library */
-import * as sim from '../../lib/sim';
-import logger from '../../lib/log';
-import TptyTrip from '../../lib/trip';
-
 /* App components */
-import { Image, StyledButton, StyledText, IndeterminateLoading } from '../../components';
+import { StyledText, NavigationHeader } from '../../components';
 
 @inject('store')
 @observer
@@ -38,8 +29,8 @@ class ScreenMainTrips extends React.Component {
   render() {
     return (
       <SafeAreaView style={styles.content}>
-        <StyledText>Trips</StyledText>
-        <FlatList data={this.props.store.UserStore.user.trips} renderItem={this.renderItem} keyExtractor={item => item.tripId} />
+        <NavigationHeader icon={<Entypo name="map" size={18} color="white" />}>YOUR TRIPS</NavigationHeader>
+        <FlatList data={this.props.store.User.user.trips} renderItem={this.renderItem} keyExtractor={item => item.tripId} />
       </SafeAreaView>
     );
   }

@@ -32,7 +32,7 @@ class ScreenAuthLogin extends React.Component {
   authenticate() {
     this.fields.email.value = 'robertneagu194@gmail.com';
     this.fields.password.value = 'zxcv123v';
-    form.submit(this.fields, this.props.store.UserStore.authenticate);
+    form.submit(this.fields, this.props.store.User.authenticate);
   }
 
   render() {

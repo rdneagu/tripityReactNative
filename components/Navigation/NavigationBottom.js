@@ -29,10 +29,10 @@ class NavigationBottom extends Component {
   }
 
   componentDidMount() {
-    const { NavigationStore } = this.props.store;
+    const { Navigation } = this.props.store;
 
     this.tabs = this.props.tabs;
-    this._reaction = reaction(() => NavigationStore.currentScreen, this.animateThumb);
+    this._reaction = reaction(() => Navigation.currentScreen, this.animateThumb);
   }
 
   // componentWillUnmount() {
@@ -59,12 +59,12 @@ class NavigationBottom extends Component {
 
   @action.bound
   onPress(tabIndex) {
-    const { NavigationStore } = this.props.store;
+    const { Navigation } = this.props.store;
 
-    if (this.tabs[tabIndex].name === NavigationStore.currentScreen) {
+    if (this.tabs[tabIndex].name === Navigation.currentScreen) {
       return;
     }
-    NavigationStore.replace(this.tabs[tabIndex].name);
+    Navigation.replace(this.tabs[tabIndex].name);
   }
 
   @action
@@ -94,14 +94,14 @@ class NavigationBottom extends Component {
 
   @action.bound
   isTabSelected(tab) {
-    const { NavigationStore } = this.props.store;
-    return (tab.name === NavigationStore.currentScreen);
+    const { Navigation } = this.props.store;
+    return (tab.name === Navigation.currentScreen);
   }
 
   render() {
-    const { NavigationStore } = this.props.store;
+    const { Navigation } = this.props.store;
 
-    if (!NavigationStore.navigationRefReady) {
+    if (!Navigation.navigationRefReady) {
       return null;
     } else {
       return (

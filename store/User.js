@@ -23,7 +23,7 @@ const AUTH_STEP = {
   STEP_PERMISSIONS: 3,
 }
 
-class UserStore {
+class User {
   @observable user;
   @observable auth = {
     step: AUTH_STEP.STEP_SPLASH,
@@ -173,7 +173,7 @@ class UserStore {
       }
 
       if (requireSync) {
-        this.store.LoadingStore.createLoader(async () => {
+        this.store.Loading.createLoader(async () => {
           const trips = await AWS.invokeAPI('/trips/synchronize', {});
           const tripsToSync = trips.filter(trip => {
             const conditionUpdated = (this.user.trips.find(local => trip.tripId === local.tripId && trip.synced > local.synced));
@@ -225,15 +225,15 @@ class UserStore {
   async OnAuthStepChange(step) {
     switch (step) {
       case AUTH_STEP.STEP_SPLASH:
-        return this.store.NavigationStore.replace('Screen.Splash', { screen: 'Login' });
+        return this.store.Navigation.replace('Screen.Splash', { screen: 'Login' });
  
       case AUTH_STEP.STEP_LOGIN:
-        return this.store.NavigationStore.replace('Screen.Auth', { screen: 'Login' });
+        return this.store.Navigation.replace('Screen.Auth', { screen: 'Login' });
 
       case AUTH_STEP.STEP_COUNTRY:
         const { homeCountry, homeCity, postCode } = this.user;
         if (!homeCountry || !homeCity || !postCode) {
-          return this.store.NavigationStore.replace('Screen.Auth', { screen: 'Country' });
+          return this.store.Navigation.replace('Screen.Auth', { screen: 'Country' });
         }
         this.changeStep(AUTH_STEP.STEP_PERMISSIONS);
         break;
@@ -241,13 +241,13 @@ class UserStore {
       case AUTH_STEP.STEP_PERMISSIONS:
         const permissions = await Permissions.getAsync(Permissions.LOCATION, Permissions.CAMERA_ROLL);
         if (permissions.status !== 'granted') {
-          return this.store.NavigationStore.replace('Screen.Auth', { screen: 'Permissions' });
+          return this.store.Navigation.replace('Screen.Auth', { screen: 'Permissions' });
         }
         this.changeStep(AUTH_STEP.STEP_FINISHED);
         break;
 
       default:
-        return this.store.NavigationStore.replace('Screen.Main');
+        return this.store.Navigation.replace('Screen.Main');
     }
   }
 
@@ -317,4 +317,4 @@ class UserStore {
   }
 }
 
-export default UserStore;
+export default User;

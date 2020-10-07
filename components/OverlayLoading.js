@@ -10,7 +10,6 @@ import { observer } from "mobx-react"
 
 /* MobX store */
 import store from '../store';
-const { LoadingStore } = store;
 
 /* App components */
 import IndeterminateLoading from './IndeterminateLoading';
@@ -30,19 +29,19 @@ class OverlayLoading extends Component {
 
   render() {
     let loader;
-    if (LoadingStore.currentLoader) {
+    if (store.Loading.currentLoader) {
       switch (this.loadingType) {
         case LOADING_TYPE.INDETERMINATE: 
-          loader = <IndeterminateLoading>{LoadingStore.message}</IndeterminateLoading>
+          loader = <IndeterminateLoading>{store.Loading.message}</IndeterminateLoading>
           break;
         case LOADING_TYPE.DETERMINATE:
-          loader = <IndeterminateLoading>{LoadingStore.message}</IndeterminateLoading>
+          loader = <IndeterminateLoading>{store.Loading.message}</IndeterminateLoading>
           // TODO: TPA-38
       }
     }
     
     return (
-      <Modal isVisible={LoadingStore.isVisible} style={{ margin: 0 }} animationIn="fadeIn" animationOut="fadeOut">
+      <Modal isVisible={store.Loading.isVisible} style={{ margin: 0 }} animationIn="fadeIn" animationOut="fadeOut">
         <View style={styles.loadingWrapper}>
           {loader}
         </View>

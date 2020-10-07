@@ -90,7 +90,7 @@ class ScreenMainGrabPhotos extends React.Component {
         {this.parsing.finished && 
           <>
             <StyledText>Finished parsing</StyledText>
-            <StyledText>Number of trips detected: {this.props.store.UserStore.user.trips.length}</StyledText>
+            <StyledText>Number of trips detected: {this.props.store.User.user.trips.length}</StyledText>
           </>
         }
         {/* <StyledButton style={{ marginVertical: 20 }} onPress={this.getPhotosAsync}>Grab Photos</StyledButton> */}

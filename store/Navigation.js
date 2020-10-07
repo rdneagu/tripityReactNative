@@ -3,12 +3,14 @@ import { createRef } from 'react';
 import { StackActions } from '@react-navigation/native';
 
 /* Community packages */
+import _ from 'lodash';
 import { observable, action, computed } from 'mobx';
 
 /* App library */
 import logger from '../lib/log';
 
-class NavigationStore {
+class Navigation {
+  @observable screens = {};
   @observable state = {};
   @observable navigationRefReady = false;
 
@@ -26,6 +28,38 @@ class NavigationStore {
   @action.bound
   OnStateChange(state) {
     this.state = state;
+  }
+
+  @action.bound
+  addScreen(options) {
+    this.screens[options.name] = observable(options);
+  }
+
+  @action.bound
+  getScreens(parent, tabs) {
+    return _.filter(this.screens, screen => screen.name.startsWith(parent) && screen.isTab === tabs);
+  }  
+
+  @action.bound
+  getScreenData(screen) {
+    return this.screens[screen];
+  }
+
+  @action.bound
+  setScreenData(screen, key, data) {
+    this.screens[screen][key] = data;
+  }
+
+  @computed
+  get screenData() {
+    try {
+      if (!this.navigationRefReady) {
+        throw 'screenData() attempted to get screen data on unitialized navigationRef';
+      }
+      return this.screens[this.currentScreen];
+    } catch(e) {
+      logger.error(e);
+    }
   }
 
   @computed
@@ -76,4 +110,4 @@ class NavigationStore {
   
 }
 
-export default NavigationStore;
+export default Navigation;

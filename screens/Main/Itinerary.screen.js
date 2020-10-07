@@ -2,8 +2,14 @@
 import React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 
+/* Expo packages */
+import { Entypo } from '@expo/vector-icons';
+
 /* Community packages */
 import { MapView, Camera } from '@react-native-mapbox-gl/maps';
+
+/* App components */
+import { NavigationHeader } from '../../components';
 
 class ScreenMainItinerary extends React.Component {
   
@@ -32,6 +38,7 @@ class ScreenMainItinerary extends React.Component {
     }
     return (
       <View style={styles.mapStyle}>
+        <NavigationHeader icon={<Entypo name="map" size={18} color="white" />}>ITINERARY</NavigationHeader>
         <MapView ref={this.map} style={styles.mapStyle} {...mapConfig}>
           <Camera ref={this.camera} {...cameraConfig} /> 
         </MapView>

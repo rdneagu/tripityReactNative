@@ -56,8 +56,8 @@ TptyTasks.defineGeofencingTask(async ({ data: { eventType, region }, error }) =>
     return;
   }
 
-  if (!store.UserStore.getLastLogged()) {
-    await store.UserStore.stopHomeGeofencing();
+  if (!store.User.getLastLogged()) {
+    await store.User.stopHomeGeofencing();
     return;
   }
 
@@ -110,7 +110,7 @@ class App extends React.Component {
       return null;
     } else {
       return (
-        <NavigationContainer ref={store.NavigationStore.navigationRef} onReady={store.OnApplicationReady} onStateChange={store.NavigationStore.OnStateChange}>
+        <NavigationContainer ref={store.Navigation.navigationRef} onReady={store.OnApplicationReady} onStateChange={store.Navigation.OnStateChange}>
           <View style={styles.main}>
             <StatusBar hidden />
             <ImageBackground source={require('./assets/images/tripity_bg.png')} style={styles.background} />

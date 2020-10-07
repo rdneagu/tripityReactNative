@@ -13,7 +13,7 @@ const LOADING_STATUS = {
 const DEFAULT_MESSAGE = 'Loading';
 const FAILED_MESSAGE = 'Loading has failed, cannot continue';
 
-class LoadingStore {
+class Loading {
   @observable loaders = [];
   @observable message = DEFAULT_MESSAGE;
   @observable status = LOADING_STATUS.FINISHED;
@@ -113,4 +113,4 @@ class LoadingStore {
   }
 }
 
-export default LoadingStore;
+export default Loading;

@@ -1,7 +1,7 @@
-import UserStore from './UserStore';
-import NavigationStore from './NavigationStore';
+import User from './User';
+import Navigation from './Navigation';
 import SimStore from './SimStore';
-import LoadingStore from './LoadingStore';
+import Loading from './Loading';
 
 /* Community packages */
 import { observable, action, computed } from "mobx"
@@ -17,9 +17,9 @@ class Store {
   @observable applicationReady = false;
 
   constructor() {
-    this.UserStore = new UserStore(this);
-    this.NavigationStore = new NavigationStore(this);
-    this.LoadingStore = new LoadingStore(this);
+    this.User = new User(this);
+    this.Navigation = new Navigation(this);
+    this.Loading = new Loading(this);
     this.SimStore = SimStore;
   }
 
@@ -39,15 +39,15 @@ class Store {
       Mapbox.setTelemetryEnabled(false);
 
       // Initialize navigation ref
-      this.NavigationStore.ready();
+      this.Navigation.ready();
 
       // Open Realm DB and get the user's session
       await Realm.openRealm();
       // Realm.clearRealm();
 
       // Create a loader for user session authentication
-      this.LoadingStore.createLoader(async () => {
-        await this.UserStore.getUserSession();
+      this.Loading.createLoader(async () => {
+        await this.User.getUserSession();
 
         this.applicationReady = true;
       }, { 
