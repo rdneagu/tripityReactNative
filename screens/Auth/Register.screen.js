@@ -23,7 +23,7 @@ class ScreenAuthRegister extends React.Component {
     password: { icon: <Ionicons name="ios-lock" />, label: 'PASSWORD', secured: true, placeholder: 'Password' },
     confirmPassword: { icon: <Ionicons name="ios-lock" />, label: 'CONFIRM PASSWORD', secured: true, placeholder: 'Password' },
     fullName: { icon: <Ionicons name="md-person" />, label: 'FULL NAME', placeholder: 'Full name' },
-    birthDay: { icon: <Ionicons name="md-calendar" />, label: 'BIRTHDAY', placeholder: 'DD/MM/YYYY', type: INPUT_TYPE.DATEPICKER },
+    birthDay: { icon: <Ionicons name="md-calendar" />, label: 'BIRTHDAY', placeholder: 'DD/MM/YYYY', type: INPUT_TYPE.DATEPICKER, datePicker: { maximumDate: new Date(Date.now()) } },
   }
   @observable pending = false;
 
@@ -62,7 +62,7 @@ class ScreenAuthRegister extends React.Component {
         </View>
         {/* Extra */}
         <View style={styles.extra}>
-          <Text style={styles.extraText}>Already have an account? <StyledLink onPress={() => navigation.replace('Screen.Auth', { screen: 'Login' })}>Sign In</StyledLink></Text>
+          <Text style={styles.extraText}>Already have an account? <StyledLink onPress={() => navigation.replace('Screen.Auth', { screen: 'Auth.Login' })}>Sign In</StyledLink></Text>
         </View>
       </ScrollView>
     )

@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import PropTypes from 'prop-types';
 
-import { StyledText } from '../../components';
+import StyledText from '../StyledText';
 
 class NavigationHeader extends Component {
   render() {

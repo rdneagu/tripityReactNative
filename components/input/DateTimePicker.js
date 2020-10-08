@@ -20,8 +20,8 @@ class _DateTimePicker extends Component {
   @observable visible = false;
   @observable selected = null;
 
-  constructor(props) {
-    super(props);
+  constructor() {
+    super();
   }
 
   @computed
@@ -60,7 +60,7 @@ class _DateTimePicker extends Component {
                   <StyledButton type="bordered" icon={<Ionicons name="md-close" />} onPress={this.hide}>Cancel</StyledButton>
                   <StyledButton type="bordered" fill icon={<Ionicons name="md-checkmark" />} onPress={this.select}>Select</StyledButton>
                 </View>
-                <DateTimePicker value={this.formattedDate} maximumDate={new Date(Date.now() + 1)} onChange={date => this.selected = date.nativeEvent.timestamp } />
+                <DateTimePicker value={this.formattedDate} minimumDate={this.props.minimumDate} maximumDate={this.props.maximumDate} onChange={date => this.selected = date.nativeEvent.timestamp} textColor="#00aaff" />
               </View>
             </Modal>
           </View>
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     width: '100%',
     bottom: 0,
     paddingVertical: 8,
-    backgroundColor: '#fff',
+    backgroundColor: '#000e26',
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
     shadowColor: '#000',

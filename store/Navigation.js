@@ -37,7 +37,10 @@ class Navigation {
 
   @action.bound
   getScreens(parent, tabs) {
-    return _.filter(this.screens, screen => screen.name.startsWith(parent) && screen.isTab === tabs);
+    return _.filter(this.screens, screen => {
+      const passedCondition = (screen.condition !== undefined) ? screen.condition() : true;
+      return screen.name.startsWith(parent) && (screen.isTab === tabs) && passedCondition;
+    });
   }  
 
   @action.bound

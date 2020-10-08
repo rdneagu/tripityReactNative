@@ -13,6 +13,9 @@ import _ from 'lodash';
 import { observable, action } from "mobx"
 import { observer, inject } from "mobx-react"
 
+/* App library */
+import logger from '../../lib/log';
+
 /* App components */
 import { StyledText, NavigationHeader } from '../../components';
 
@@ -21,17 +24,58 @@ import { StyledText, NavigationHeader } from '../../components';
 class ScreenMainTrips extends React.Component {
 
   renderItem({ item }) {
+    const destination = {
+      counter: 0,
+    }
+    const visitedCountries = [];
+    const tripStartLocation = item.pings[0].country;
+    const tripEndLocation = item.pings.reduce((acc, ping) => {
+      if (ping.country) {
+        if (destination.name !== ping.country) {
+          destination.name = ping.country;
+          destination.counter = 0;
+        }
+        destination.counter++;
+        if (destination.counter > 4 && acc !== destination.name) {
+          visitedCountries.push(destination.name);
+          acc = destination.name;
+        }
+      }
+      return acc;
+    }, undefined);
+
+    const visitedLocations = item.pings.reduce((acc, ping) => {
+      if (ping.venue) {
+        acc[ping.venue.name] = (acc[ping.venue.name] || 0) + 1;
+      }
+      return acc;
+    }, {})
+
+    const tripStartDate = new Date(item.pings[0].timestamp);
+    const [ startYear, startMonth, startDay ] = [ tripStartDate.getFullYear(), tripStartDate.getMonth() + 1, tripStartDate.getDate() ];
+    const [ startHours, startMinutes ] = [ tripStartDate.getHours().toString(), tripStartDate.getMinutes().toString() ];
+
+    const tripEndDate = new Date(item.pings[item.pings.length-1].timestamp);
+    const [ endYear, endMonth, endDay ] = [ tripEndDate.getFullYear(), tripEndDate.getMonth() + 1, tripEndDate.getDate() ];
+    const [ endHours, endMinutes ] = [ tripEndDate.getHours().toString(), tripEndDate.getMinutes().toString() ];
+  
     return  <View style={styles.trip}>
-              <StyledText>Trip Id: {item.tripId}</StyledText>
+              <StyledText style={styles.tripTitle} weight='semibold'>{tripStartLocation} to {tripEndLocation}</StyledText>
+              <View style={styles.separator} />
+              <StyledText>Trip start: {startDay}/{startMonth}/{startYear} {startHours.padStart(2, '0')}:{startMinutes.padStart(2, '0')}</StyledText>
+              <StyledText>Trip end: {endDay}/{endMonth}/{endYear} {endHours.padStart(2, '0')}:{endMinutes.padStart(2, '0')}</StyledText>
+              <View style={styles.separator} />
+              <StyledText>Countries visited: {visitedCountries.join(', ')}</StyledText>
+              <StyledText>Locations visited: {Object.keys(visitedLocations).length}</StyledText>
             </View>
   }
 
   render() {
     return (
-      <SafeAreaView style={styles.content}>
+      <View style={styles.content}>
         <NavigationHeader icon={<Entypo name="map" size={18} color="white" />}>YOUR TRIPS</NavigationHeader>
         <FlatList data={this.props.store.User.user.trips} renderItem={this.renderItem} keyExtractor={item => item.tripId} />
-      </SafeAreaView>
+      </View>
     );
   }
 }
@@ -39,15 +83,22 @@ class ScreenMainTrips extends React.Component {
 const styles = StyleSheet.create({
   content: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   trip: {
     padding: 5,
     marginVertical: 10,
+    marginHorizontal: 20,
     borderWidth: 1,
-    borderColor: '#fff',
+    borderColor: '#000e26',
+    borderRadius: 4,
+    backgroundColor: 'rgba(0, 0, 0, .2)',
   },
+  tripTitle: {
+    textAlign: 'center',
+  },
+  separator: {
+    marginVertical: 5,
+  }
 });
 
 export default ScreenMainTrips;

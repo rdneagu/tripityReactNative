@@ -1,7 +1,9 @@
 /* React packages */
 import React from 'react';
-import { StyleSheet, ImageBackground, View } from 'react-native';
+import { StyleSheet, ImageBackground, SafeAreaView, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
+import { enableScreens } from 'react-native-screens';
+enableScreens();
 
 /* Expo packages */
 import * as Location from 'expo-location';
@@ -111,14 +113,14 @@ class App extends React.Component {
     } else {
       return (
         <NavigationContainer ref={store.Navigation.navigationRef} onReady={store.OnApplicationReady} onStateChange={store.Navigation.OnStateChange}>
-          <View style={styles.main}>
+          <SafeAreaView style={styles.main}>
             <StatusBar hidden />
             <ImageBackground source={require('./assets/images/tripity_bg.png')} style={styles.background} />
             <Provider store={store}>
               <ReactRoutes />
             </Provider>
             <OverlayLoading />
-          </View>
+          </SafeAreaView>
         </NavigationContainer>
       )
     }
@@ -128,7 +130,7 @@ class App extends React.Component {
 const styles = StyleSheet.create({
   main: {
     flex: 1,
-    backgroundColor: '#00aaff',
+    backgroundColor: '#000',
   },
   background: {
     position: 'absolute',

@@ -23,6 +23,10 @@ class NavigationBottom extends Component {
   constructor(props) {
     super(props);
 
+    console.log(this.props.state);
+    console.log(this.props.descriptors);
+    console.log(this.props.navigation);
+
     this.animation = {
       left: new Animated.Value(-82),
     };
@@ -105,7 +109,7 @@ class NavigationBottom extends Component {
       return null;
     } else {
       return (
-        <View style={{ position: 'absolute', bottom: 0, width: '100%', paddingVertical: 8, backgroundColor: '#000e26', overflow: 'hidden' }}>
+        <View style={{ width: '100%', paddingVertical: 8, backgroundColor: '#000e26', overflow: 'hidden' }}>
           <Animated.View style={{ ...styles.marker, left: this.animation.left }}>
             <View style={styles.markerLeft}>
               <View style={styles.markerLeftRound} />

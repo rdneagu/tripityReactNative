@@ -48,12 +48,12 @@ class ScreenAuthLogin extends React.Component {
         <View style={styles.form}>
           {fields}
           <StyledButton throttle={2.5} style={{ marginVertical: 40 }} icon={<Entypo name="chevron-right" />} onPress={this.authenticate}>Sign In</StyledButton>
-          <StyledButton icon={<Entypo name="bug" />} onPress={() => navigation.replace('Screen.Main', { screen: 'Itinerary' })}>Dev Login</StyledButton>
+          <StyledButton icon={<Entypo name="bug" />} onPress={() => navigation.replace('Screen.Main', { screen: 'Main.Tab.Itinerary' })}>Dev Login</StyledButton>
         </View>
         {/* Extra */}
         <View style={styles.extra}>
           <StyledLink onPress={() => 'forgot'}>Forgot Password?</StyledLink>
-          <Text style={styles.extraText}>Don't have an account? <StyledLink onPress={() => navigation.replace('Screen.Auth', { screen: 'Register' })}>Sign Up</StyledLink></Text>
+          <Text style={styles.extraText}>Don't have an account? <StyledLink onPress={() => navigation.replace('Screen.Auth', { screen: 'Auth.Register' })}>Sign Up</StyledLink></Text>
         </View>
       </View>
     )

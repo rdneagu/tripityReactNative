@@ -1,6 +1,7 @@
 /* React packages */
 import React, { Component } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 /* Expo packages */
 import { Entypo, Ionicons } from '@expo/vector-icons';
@@ -17,11 +18,13 @@ import store from '../store';
 const slideOutIn = ({ current, next, layouts }) => {
   return {
     cardStyle: {
+      left: -1, // -1 is required to remove the left gap
+      width: layouts.screen.width + 1, // +1 is required to remove the gap between screens during transition
       transform: [
         {
           translateX: current.progress.interpolate({
             inputRange: [0, 1],
-            outputRange: [layouts.screen.width, -1],
+            outputRange: [layouts.screen.width, 0],
           }),
         },
         {
@@ -58,11 +61,13 @@ const getStackOptions = (options = {}) => {
 
 import ScreenSplash from '../screens/Splash.screen.js';
 class RootStack extends Component {
+  #initialRoute = 'Screen.Splash';
+
   constructor() {
     super();
 
     store.Navigation.addScreen({
-      name: 'Screen.Splash',
+      name: this.#initialRoute,
       component: ScreenSplash,
     });
     store.Navigation.addScreen({
@@ -79,15 +84,14 @@ class RootStack extends Component {
     const Stack = createStackNavigator();
     const options = {
       general: {
-        initialRouteName: 'Screen.Splash',
+        initialRouteName: this.#initialRoute,
       }
     };
 
+    const screens = store.Navigation.getScreens('Screen');
     return (
       <Stack.Navigator {...getStackOptions(options)}>
-        <Stack.Screen name="Screen.Splash" component={ScreenSplash} />
-        <Stack.Screen name="Screen.Main" component={MainStack} />
-        <Stack.Screen name="Screen.Auth" component={AuthStack} />
+        {screens.map((screen, i) => <Stack.Screen key={i} name={screen.name} component={screen.component} />)}
       </Stack.Navigator>
     )
   }
@@ -97,11 +101,13 @@ import ScreenMainTrips from '../screens/Main/Trips.screen.js';
 import ScreenMainItinerary from '../screens/Main/Itinerary.screen.js';
 import ScreenMainGrabPhotos from '../screens/Main/GrabPhotos.screen.js';
 class MainStack extends Component {
+  #initialRoute = 'Main.Tab.Trips';
+
   constructor() {
     super();
 
     store.Navigation.addScreen({
-      name: 'Main.Tab.Trips',
+      name: this.#initialRoute,
       component: ScreenMainTrips,
       header: 'YOUR TRIPS',
       icon: <Entypo name="map" size={18} color="white" />,
@@ -127,7 +133,7 @@ class MainStack extends Component {
     const Stack = createStackNavigator();
     const options = {
       general: {
-        initialRouteName: 'Trips',
+        initialRouteName: this.#initialRoute,
       }
     }
 
@@ -148,11 +154,13 @@ import ScreenAuthRegister from '../screens/Auth/Register.screen.js';
 import ScreenAuthCountry from '../screens/Auth/Country.screen.js';
 import ScreenAuthPermissions from '../screens/Auth/Permissions.screen.js';
 class AuthStack extends Component {
+  #initialRoute = 'Auth.Login';
+
   constructor() {
     super();
 
     store.Navigation.addScreen({
-      name: 'Auth.Login',
+      name: this.#initialRoute,
       component: ScreenAuthLogin,
       condition: () => !store.User.user,
     });
@@ -177,16 +185,14 @@ class AuthStack extends Component {
     const Stack = createStackNavigator();
     const options = {
       general: {
-        initialRouteName: 'Login',
+        initialRouteName: this.#initialRoute,
       }
     };
 
+    const screens = store.Navigation.getScreens('Auth');
     return (
       <Stack.Navigator {...getStackOptions(options)}>
-        {!store.User.user && <Stack.Screen name='Login' component={ScreenAuthLogin} />}
-        {!store.User.user && <Stack.Screen name='Register' component={ScreenAuthRegister} />}
-        <Stack.Screen name='Country' component={ScreenAuthCountry} />
-        <Stack.Screen name='Permissions' component={ScreenAuthPermissions} />
+        {screens.map((screen, i) => <Stack.Screen key={i} name={screen.name} component={screen.component} />)}
       </Stack.Navigator>
     )
   }

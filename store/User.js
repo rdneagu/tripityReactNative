@@ -225,15 +225,15 @@ class User {
   async OnAuthStepChange(step) {
     switch (step) {
       case AUTH_STEP.STEP_SPLASH:
-        return this.store.Navigation.replace('Screen.Splash', { screen: 'Login' });
+        return this.store.Navigation.replace('Screen.Splash');
  
       case AUTH_STEP.STEP_LOGIN:
-        return this.store.Navigation.replace('Screen.Auth', { screen: 'Login' });
+        return this.store.Navigation.replace('Screen.Auth', { screen: 'Auth.Login' });
 
       case AUTH_STEP.STEP_COUNTRY:
         const { homeCountry, homeCity, postCode } = this.user;
         if (!homeCountry || !homeCity || !postCode) {
-          return this.store.Navigation.replace('Screen.Auth', { screen: 'Country' });
+          return this.store.Navigation.replace('Screen.Auth', { screen: 'Auth.Country' });
         }
         this.changeStep(AUTH_STEP.STEP_PERMISSIONS);
         break;
@@ -241,13 +241,13 @@ class User {
       case AUTH_STEP.STEP_PERMISSIONS:
         const permissions = await Permissions.getAsync(Permissions.LOCATION, Permissions.CAMERA_ROLL);
         if (permissions.status !== 'granted') {
-          return this.store.Navigation.replace('Screen.Auth', { screen: 'Permissions' });
+          return this.store.Navigation.replace('Screen.Auth', { screen: 'Auth.Permissions' });
         }
         this.changeStep(AUTH_STEP.STEP_FINISHED);
         break;
 
       default:
-        return this.store.Navigation.replace('Screen.Main');
+        return this.store.Navigation.replace('Screen.Main', { screen: 'Main.Tab.Trips' });
     }
   }
 

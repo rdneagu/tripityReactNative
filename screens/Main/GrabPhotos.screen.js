@@ -1,10 +1,10 @@
 /* React packages */
 import React from 'react';
-import { ActivityIndicator, ImageBackground, StyleSheet, FlatList, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, FlatList, View, TouchableOpacity } from 'react-native';
 
 /* Expo packages */
-import * as Permissions from 'expo-permissions';
 import * as MediaLibrary from "expo-media-library";
+import { Ionicons } from '@expo/vector-icons';
 
 /* Community packages */
 import _ from 'lodash';
@@ -18,7 +18,7 @@ import logger from '../../lib/log';
 import TptyTrip from '../../lib/trip';
 
 /* App components */
-import { Image, StyledButton, StyledText, IndeterminateLoading } from '../../components';
+import { Image, StyledButton, StyledText, IndeterminateLoading, NavigationHeader } from '../../components';
 
 @inject('store')
 @observer
@@ -76,6 +76,7 @@ class ScreenMainGrabPhotos extends React.Component {
     const { photo, trip } = this.parsing;
     return (
       <View style={styles.content}>
+        <NavigationHeader icon={<Ionicons name="md-photos" size={18} color="white" />}>SIMULATOR</NavigationHeader>
         {!this.parsing.finished && 
           <>
             {photo && <StyledText>Parsing photo: {photo.filename}</StyledText>}

@@ -34,9 +34,9 @@ class ScreenMainSplash extends Component {
               </View>
             ))}
           </View>
-          <StyledButton style={{ marginVertical: 60 }} icon={<Entypo name="chevron-right" />} onPress={() => navigation.replace('Screen.Auth', { screen: 'Register' })}>Get Started</StyledButton>
+          <StyledButton style={{ marginVertical: 60 }} icon={<Entypo name="chevron-right" />} onPress={() => navigation.replace('Screen.Auth', { screen: 'Auth.Register' })}>Get Started</StyledButton>
           <View style={styles.extra}>
-            <Text style={styles.extraText}>Already have an account? <StyledLink onPress={() => navigation.replace('Screen.Auth', { screen: 'Login' })}>Sign In</StyledLink></Text>
+            <Text style={styles.extraText}>Already have an account? <StyledLink onPress={() => navigation.replace('Screen.Auth', { screen: 'Auth.Login' })}>Sign In</StyledLink></Text>
           </View>
         </>}
       </View>
