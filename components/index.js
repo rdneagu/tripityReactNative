@@ -12,6 +12,7 @@ import IndeterminateLoading from './IndeterminateLoading';
 
 import NavigationHeader from './Navigation/NavigationHeader';
 import NavigationBottom from './Navigation/NavigationBottom';
+import NavigationBottomNovo from './Navigation/NavigationBottom_novo';
 import NavigationBottomTab from './Navigation/NavigationBottomTab';
 
 import OverlayLoading from './OverlayLoading';
@@ -20,5 +21,5 @@ export {
   StyledButton, StyledLink, StyledText, Image,
   Input, TextInput, DateTimePicker, Select,
   OverlayLoading, IndeterminateLoading,
-  NavigationHeader, NavigationBottom, NavigationBottomTab,
+  NavigationHeader, NavigationBottom, NavigationBottomTab, NavigationBottomNovo
 };

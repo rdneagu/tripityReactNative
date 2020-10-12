@@ -20,12 +20,8 @@ class NavigationBottom extends Component {
   @observable tabs = [];
   @observable current = -1;
 
-  constructor(props) {
-    super(props);
-
-    console.log(this.props.state);
-    console.log(this.props.descriptors);
-    console.log(this.props.navigation);
+  constructor() {
+    super();
 
     this.animation = {
       left: new Animated.Value(-82),
@@ -65,6 +61,7 @@ class NavigationBottom extends Component {
   onPress(tabIndex) {
     const { Navigation } = this.props.store;
 
+    // console.log(this.props.route);
     if (this.tabs[tabIndex].name === Navigation.currentScreen) {
       return;
     }
@@ -73,6 +70,8 @@ class NavigationBottom extends Component {
 
   @action
   computeThumbPosition(tabIndex) {
+    console.log(tabIndex);
+    console.log(this.tabs[tabIndex].width);
     return (tabIndex !== -1) ? (this.tabs[tabIndex].x + (this.tabs[tabIndex].width / 2)) - 20 : -82;
   }
 
@@ -99,6 +98,7 @@ class NavigationBottom extends Component {
   @action.bound
   isTabSelected(tab) {
     const { Navigation } = this.props.store;
+    console.log(tab.name);
     return (tab.name === Navigation.currentScreen);
   }
 

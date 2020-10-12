@@ -11,7 +11,7 @@ import { MapView, Camera } from '@react-native-mapbox-gl/maps';
 /* App components */
 import { NavigationHeader } from '../../components';
 
-class ScreenMainItinerary extends React.Component {
+class ScreenTripItinerary extends React.Component {
   
   constructor() {
     super();
@@ -66,4 +66,4 @@ const styles = StyleSheet.create({
   },
 })
 
-export default ScreenMainItinerary;
+export default ScreenTripItinerary;

@@ -10,7 +10,7 @@ import { Entypo, Ionicons } from '@expo/vector-icons';
 import _ from 'lodash';
 
 /* App components */
-import { NavigationBottom } from '../components';
+import { NavigationBottom, NavigationBottomNovo } from '../components';
 
 /* App library */
 import store from '../store';
@@ -78,6 +78,10 @@ class RootStack extends Component {
       name: 'Screen.Auth',
       component: AuthStack,
     });
+    store.Navigation.addScreen({
+      name: 'Screen.Trip',
+      component: TripStack,
+    });
   }
 
   render() {
@@ -98,7 +102,6 @@ class RootStack extends Component {
 }
 
 import ScreenMainTrips from '../screens/Main/Trips.screen.js';
-import ScreenMainItinerary from '../screens/Main/Itinerary.screen.js';
 import ScreenMainGrabPhotos from '../screens/Main/GrabPhotos.screen.js';
 class MainStack extends Component {
   #initialRoute = 'Main.Tab.Trips';
@@ -114,13 +117,6 @@ class MainStack extends Component {
       isTab: true,
     });
     store.Navigation.addScreen({
-      name: 'Main.Tab.Itinerary',
-      component: ScreenMainItinerary,
-      header: 'ITINERARY',
-      icon: <Entypo name="map" size={18} color="white" />,
-      isTab: true,
-    });
-    store.Navigation.addScreen({
       name: 'Main.Tab.GrabPhotos',
       component: ScreenMainGrabPhotos,
       header: 'SIMULATOR',
@@ -130,21 +126,68 @@ class MainStack extends Component {
   }
 
   render() {
-    const Stack = createStackNavigator();
+    const Tab = createBottomTabNavigator();
     const options = {
       general: {
         initialRouteName: this.#initialRoute,
+        sceneContainerStyle: { backgroundColor: 'transparent' },
       }
     }
 
     const tabs = store.Navigation.getScreens('Main', true);
+    console.log(this.props.navigation.dangerouslyGetState());
     return (
-      <>
-        <Stack.Navigator {...getStackOptions(options)}>
-          {tabs.map((tab, i) => <Stack.Screen key={i} name={tab.name} component={tab.component} />)}
-        </Stack.Navigator>
-        <NavigationBottom tabs={tabs} />
-      </>
+      <Tab.Navigator {...getStackOptions(options)} tabBar={props => <NavigationBottomNovo {...props} />}>
+        {tabs.map((tab, i) => <Tab.Screen key={i} name={tab.name} component={tab.component} options={{
+          tabBarIcon: tab.icon,
+          parent: 'Screen.Main',
+        }} />)}
+      </Tab.Navigator>
+    )
+  }
+}
+
+import ScreenTripDetails from '../screens/Trip/Details.screen.js';
+import ScreenTripItinerary from '../screens/Trip/Itinerary.screen.js';
+class TripStack extends Component {
+  #initialRoute = 'Trip.Tab.Details';
+
+  constructor() {
+    super();
+
+    store.Navigation.addScreen({
+      name: this.#initialRoute,
+      component: ScreenTripDetails,
+      header: 'TRIP DETAILS',
+      icon: <Entypo name="location" size={18} color="white" />,
+      isTab: true,
+    });
+    store.Navigation.addScreen({
+      name: 'Trip.Tab.Itinerary',
+      component: ScreenTripItinerary,
+      header: 'TRIP ITINERARY',
+      icon: <Entypo name="map" size={18} color="white" />,
+      isTab: true,
+    });
+  }
+
+  render() {
+    const Tab = createBottomTabNavigator();
+    const options = {
+      general: {
+        initialRouteName: this.#initialRoute,
+        sceneContainerStyle: { backgroundColor: 'transparent' },
+      }
+    }
+
+    const tabs = store.Navigation.getScreens('Trip', true);
+    return (
+      <Tab.Navigator {...getStackOptions(options)} tabBar={props => <NavigationBottomNovo {...props} />}>
+        {tabs.map((tab, i) => <Tab.Screen key={i} name={tab.name} component={tab.component} options={{
+          tabBarIcon: tab.icon,
+          parent: 'Screen.Trip',
+        }} />)}
+      </Tab.Navigator>
     )
   }
 }

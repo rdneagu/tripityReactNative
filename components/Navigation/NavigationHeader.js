@@ -5,14 +5,21 @@ import {
 } from 'react-native';
 import PropTypes from 'prop-types';
 
+/* Expo packages */
+import { Ionicons } from '@expo/vector-icons';
+
+/* App components */
 import StyledText from '../StyledText';
+import StyledButton from '../StyledButton';
 
 class NavigationHeader extends Component {
   render() {
     const { icon, back } = this.props;
+    console.log(back);
     return (
       <View style={styles.header}>
         <View style={styles.headerTitle}>
+          {/* {back && <StyledButton style={styles.back} type="bordered" icon={<Ionicons name="ios-arrow-back" size={24} />} onPress={back()} />} */}
           {icon}
           <StyledText style={styles.text} weight='semibold'>{this.props.children}</StyledText>
         </View>
@@ -40,6 +47,10 @@ const styles = StyleSheet.create({
   headerTitle: {
     flexDirection: 'row',
     justifyContent: 'center',
+  },
+  back: {
+    position: 'absolute',
+    left: 10,
   },
   text: {
     color: '#c4cace',

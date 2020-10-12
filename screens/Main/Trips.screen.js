@@ -2,7 +2,7 @@
 import React from 'react';
 import { 
   StyleSheet, FlatList, View, 
-  SafeAreaView,
+  TouchableOpacity,
 } from 'react-native';
 
 /* Expo packages */
@@ -23,6 +23,16 @@ import { StyledText, NavigationHeader } from '../../components';
 @observer
 class ScreenMainTrips extends React.Component {
 
+  constructor() {
+    super();
+  }
+
+  @action.bound
+  openTrip(tripId) {
+    this.props.navigation.replace('Screen.Trip', { screen: 'Trip.Tab.Details', params: { tripId }});
+  }
+
+  @action.bound
   renderItem({ item }) {
     const destination = {
       counter: 0,
@@ -59,15 +69,17 @@ class ScreenMainTrips extends React.Component {
     const [ endYear, endMonth, endDay ] = [ tripEndDate.getFullYear(), tripEndDate.getMonth() + 1, tripEndDate.getDate() ];
     const [ endHours, endMinutes ] = [ tripEndDate.getHours().toString(), tripEndDate.getMinutes().toString() ];
   
-    return  <View style={styles.trip}>
-              <StyledText style={styles.tripTitle} weight='semibold'>{tripStartLocation} to {tripEndLocation}</StyledText>
-              <View style={styles.separator} />
-              <StyledText>Trip start: {startDay}/{startMonth}/{startYear} {startHours.padStart(2, '0')}:{startMinutes.padStart(2, '0')}</StyledText>
-              <StyledText>Trip end: {endDay}/{endMonth}/{endYear} {endHours.padStart(2, '0')}:{endMinutes.padStart(2, '0')}</StyledText>
-              <View style={styles.separator} />
-              <StyledText>Countries visited: {visitedCountries.join(', ')}</StyledText>
-              <StyledText>Locations visited: {Object.keys(visitedLocations).length}</StyledText>
-            </View>
+    return  <TouchableOpacity onPress={() => this.openTrip(item.tripId)}>
+              <View style={styles.trip}>
+                <StyledText style={styles.tripTitle} weight='semibold'>{tripStartLocation} to {tripEndLocation}</StyledText>
+                <View style={styles.separator} />
+                <StyledText>Trip start: {startDay}/{startMonth}/{startYear} {startHours.padStart(2, '0')}:{startMinutes.padStart(2, '0')}</StyledText>
+                <StyledText>Trip end: {endDay}/{endMonth}/{endYear} {endHours.padStart(2, '0')}:{endMinutes.padStart(2, '0')}</StyledText>
+                <View style={styles.separator} />
+                <StyledText>Countries visited: {visitedCountries.join(', ')}</StyledText>
+                <StyledText>Locations visited: {Object.keys(visitedLocations).length}</StyledText>
+              </View>
+            </TouchableOpacity>
   }
 
   render() {
