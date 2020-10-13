@@ -9,12 +9,11 @@ import PropTypes from 'prop-types';
 const ANIMATION_TRANSLATE_Y = 12;
 
 class NavigationBottomTab extends Component {
-
   constructor(props) {
-    super(props);
+    super();
 
     this.animation = {
-      translateY: new Animated.Value((props.selected) ? -ANIMATION_TRANSLATE_Y : 0),
+      translateY: new Animated.Value((props.isFocused) ? -ANIMATION_TRANSLATE_Y : 0),
     };
   }
 
@@ -23,13 +22,13 @@ class NavigationBottomTab extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (prevProps.selected !== this.props.selected) {
+    if (prevProps.isFocused !== this.props.isFocused) {
       this.animateIcon(); 
     }
   }
 
   animateIcon = () => {
-    const y = this.props.selected ? -ANIMATION_TRANSLATE_Y : 0;
+    const y = this.props.isFocused ? -ANIMATION_TRANSLATE_Y : 0;
     Animated.timing(this.animation.translateY, { 
       toValue: y,
       duration: 200,
@@ -38,25 +37,12 @@ class NavigationBottomTab extends Component {
     }).start();
   }
 
-  /**
-   * Triggered when the layout is changed
-   *
-   * @param {Object} e  - Event properties
-   */
-  onLayout = (e) => {
-    this.props.onLayout(this.props.tabIndex, e.nativeEvent.layout);
-  }
-
-  onPress = (e) => {
-    this.props.onPress(this.props.tabIndex);
-  }
-
   render() {
-    const { icon } = this.props;
+    const { onPress, onLayout, icon } = this.props;
 
     return (
-      <TouchableWithoutFeedback onPress={this.onPress}>
-        <Animated.View onLayout={this.onLayout} style={{ ...styles.tab, transform: [{ translateY: this.animation.translateY }] }}>
+      <TouchableWithoutFeedback onPress={onPress}>
+        <Animated.View onLayout={onLayout} style={{ ...styles.tab, transform: [{ translateY: this.animation.translateY }] }}>
           {icon}
         </Animated.View>
       </TouchableWithoutFeedback>
@@ -65,8 +51,7 @@ class NavigationBottomTab extends Component {
 }
 
 NavigationBottomTab.propTypes = {
-  tabIndex: PropTypes.number,
-  selected: PropTypes.any,
+  isFocused: PropTypes.any,
   onLayout: PropTypes.any,
   onPress: PropTypes.any,
   icon: PropTypes.any,

@@ -29,7 +29,7 @@ class ScreenMainTrips extends React.Component {
 
   @action.bound
   openTrip(tripId) {
-    this.props.navigation.replace('Screen.Trip', { screen: 'Trip.Tab.Details', params: { tripId }});
+    this.props.navigation.push('Screen.Trip', { screen: 'Trip.Tab.Details', params: { tripId }});
   }
 
   @action.bound
@@ -85,7 +85,6 @@ class ScreenMainTrips extends React.Component {
   render() {
     return (
       <View style={styles.content}>
-        <NavigationHeader icon={<Entypo name="map" size={18} color="white" />}>YOUR TRIPS</NavigationHeader>
         <FlatList data={this.props.store.User.user.trips} renderItem={this.renderItem} keyExtractor={item => item.tripId} />
       </View>
     );

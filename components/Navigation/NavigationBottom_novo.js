@@ -12,7 +12,7 @@ import { observable, action, reaction } from "mobx"
 import { observer, inject } from "mobx-react"
 
 /* App components */
-import NavigationBottomTab_novo from './NavigationBottomTab_novo';
+import NavigationBottomTab from './NavigationBottomTab';
 
 @inject('store')
 @observer
@@ -20,8 +20,10 @@ class NavigationBottom extends Component {
   @observable tabs = [];
   @observable current = -1;
 
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
+
+    console.log(this.props.navigation.dangerouslyGetState());
 
     this.animation = {
       left: new Animated.Value(-82),
@@ -122,7 +124,7 @@ class NavigationBottom extends Component {
 
       const onPress = () => this.onPress(index, route);
       const onLayout = (e) => this.onLayout(index, e.nativeEvent.layout);
-      return <NavigationBottomTab_novo key={index} icon={options.tabBarIcon} isFocused={this.isTabSelected(index)} onPress={onPress} onLayout={onLayout} />
+      return <NavigationBottomTab key={index} icon={options.tabBarIcon} isFocused={this.isTabSelected(index)} onPress={onPress} onLayout={onLayout} />
     })
   }
 

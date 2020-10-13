@@ -38,7 +38,6 @@ class ScreenTripItinerary extends React.Component {
     }
     return (
       <View style={styles.mapStyle}>
-        <NavigationHeader icon={<Entypo name="map" size={18} color="white" />}>ITINERARY</NavigationHeader>
         <MapView ref={this.map} style={styles.mapStyle} {...mapConfig}>
           <Camera ref={this.camera} {...cameraConfig} /> 
         </MapView>

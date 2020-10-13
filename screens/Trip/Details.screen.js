@@ -77,7 +77,6 @@ class ScreenTripDetails extends React.Component {
   render() {
     return (
       <View style={styles.content}>
-        <NavigationHeader icon={<Entypo name="location" size={18} color="white" />} back={() => this.props.navigation.replace('Screen.Main', 'Main.Tab.Trips')}>TRIP DETAILS</NavigationHeader>
         {this.locations && <FlatList data={_.orderBy(this.locations, ['count', 'timestamp'], ['desc', 'asc'])} renderItem={this.renderItem} keyExtractor={item => item.name} />}
       </View>
     );

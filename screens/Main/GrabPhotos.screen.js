@@ -76,7 +76,6 @@ class ScreenMainGrabPhotos extends React.Component {
     const { photo, trip } = this.parsing;
     return (
       <View style={styles.content}>
-        <NavigationHeader icon={<Ionicons name="md-photos" size={18} color="white" />}>SIMULATOR</NavigationHeader>
         {!this.parsing.finished && 
           <>
             {photo && <StyledText>Parsing photo: {photo.filename}</StyledText>}

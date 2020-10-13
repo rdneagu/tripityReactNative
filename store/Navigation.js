@@ -88,6 +88,34 @@ class Navigation {
   }
 
   @computed
+  get currentState() {
+    try {
+      if (!this.navigationRefReady) {
+        throw 'currentState() attempted to get current state on unitialized navigationRef';
+      }
+      let state = this.state;
+      while (state.routes[state.index].state) {
+        state = state.routes[state.index].state;
+      }
+      return state;
+    } catch(e) {
+      logger.error(e);
+    }
+  }
+
+  @computed
+  get currentRoute() {
+    try {
+      if (!this.navigationRefReady) {
+        throw 'currentRoute() attempted to get current route on unitialized navigationRef';
+      }
+      return this.currentState.routes[this.currentState.index];
+    } catch(e) {
+      logger.error(e);
+    }
+  }
+
+  @computed
   get currentScreen() {
     try {
       if (!this.navigationRefReady) {
@@ -99,16 +127,26 @@ class Navigation {
     }
   }
 
-  navigate(name, params) {
+  navigate = (name, params) => {
     this.navigationRef.current?.navigate(name, params);
   }
 
-  push(...args) {
+  push = (...args) => {
     this.navigationRef.current?.dispatch(StackActions.push(...args));
   }
   
-  replace(name, params) {
+  replace = (name, params) => {
     this.navigationRef.current?.dispatch(StackActions.replace(name, params));
+  }
+
+  canGoBack = () => {
+    return this.navigationRef.current?.canGoBack();
+  }
+
+  goBack = () => {
+    if (this.canGoBack()) {
+      this.navigationRef.current?.goBack();
+    }
   }
   
 }
