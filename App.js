@@ -31,7 +31,7 @@ import TptyTasks from './lib/tasks';
 import TptyTrip from './lib/trip';
 
 /* App components */
-import { OverlayLoading } from './components';
+import { OverlayLoading, Dialog } from './components';
 
 /* Initialize location and geofencing tasks */
 TptyTasks.defineLocationTask(async ({ data, error }) => {
@@ -120,6 +120,7 @@ class App extends React.Component {
               <ReactRoutes />
             </Provider>
             <OverlayLoading />
+            <Dialog />
           </SafeAreaView>
         </NavigationContainer>
       )

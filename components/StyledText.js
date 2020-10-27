@@ -3,6 +3,14 @@ import React, { Component } from 'react';
 import { StyleSheet, Text } from 'react-native';
 import PropTypes from 'prop-types';
 
+/**
+ * Class definition for the StyledText component
+ * 
+ * @prop {Object?} style         - Extra styling
+ * @prop {String?} color         - Text color in hex format, defaults to #eee
+ * @prop {String?} weight        - Text weight (light, regular=default, semibold, bold)
+ * @prop {Number?} size          - Text size, defaults to 14
+ */
 class StyledText extends Component {
   constructor(props) {
     super(props);
@@ -18,10 +26,10 @@ class StyledText extends Component {
   }
 
   render() {
-    const font = this.getFontWeight();
-    const size = this.props.size;
+    const fontFamily = this.getFontWeight();
+    const { style, size, color, children } = this.props;
     return (
-      <Text style={{ ...styles.text, fontFamily: font, fontSize: size, ...this.props.style }}>{this.props.children}</Text>
+      <Text style={{ ...styles.text, fontFamily, fontSize: size, color, ...style }}>{children}</Text>
     );
   }
 }
@@ -33,13 +41,13 @@ StyledText.propTypes = {
 }
 
 StyledText.defaultProps = {
+  color: '#eee',
   size: 14,
 }
 
 const styles = StyleSheet.create({
   text: {
     fontFamily: 'Nunito-Regular',
-    color: '#eee',
   },
 })
 

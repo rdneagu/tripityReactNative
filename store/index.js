@@ -1,7 +1,7 @@
 import User from './User';
 import Navigation from './Navigation';
-import SimStore from './SimStore';
 import Loading from './Loading';
+import Dialog from './Dialog';
 
 /* Community packages */
 import { observable, action, computed } from "mobx"
@@ -20,7 +20,7 @@ class Store {
     this.User = new User(this);
     this.Navigation = new Navigation(this);
     this.Loading = new Loading(this);
-    this.SimStore = SimStore;
+    this.Dialog = new Dialog(this);
   }
 
   @computed
@@ -48,7 +48,6 @@ class Store {
       // Create a loader for user session authentication
       this.Loading.createLoader(async () => {
         await this.User.getUserSession();
-
         this.applicationReady = true;
       }, { 
         message: 'Authenticating',

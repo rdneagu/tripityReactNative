@@ -41,7 +41,22 @@ class ScreenAuthCountry extends React.Component {
 
   @action.bound
   confirm() {
-    form.submit(this.fields, this.props.store.User.setHome);
+    const { store } = this.props;
+    store.Dialog.showDialog({
+      title: 'Confirm your address',
+      component: 
+        <>
+          <StyledText>Make sure the location set is as accurate as possible for the best results</StyledText>
+          <StyledText style={{ marginVertical: 20 }}>If you are happy with the address you set, continue by pressing <StyledText weight="bold" color="#5390f6">Confirm</StyledText>. Otherwise, return back by pressing <StyledText weight="bold" color="#5390f6">Change</StyledText></StyledText>
+          <StyledText color="#5390f6" weight="bold" style={{ textAlign: 'center' }}>The home location will only be used by our system to determine when you engage in a trip</StyledText>
+        </>,
+      onCancel: {
+        text: 'Change',
+      },
+      onConfirm: {
+        fn: () => form.submit(this.fields, this.props.store.User.setHome),
+      }
+    })    
   }
 
   render() {
@@ -62,8 +77,8 @@ class ScreenAuthCountry extends React.Component {
           <StyledButton throttle={2.5} style={{ marginVertical: 40 }} icon={<Entypo name="chevron-right" />} onPress={this.confirm}>Confirm</StyledButton>
         </View>
         <View style={{ marginBottom: 40, alignItems: 'center' }}>
-          <StyledText>By clicking on Confirm you agree to save</StyledText>
-          <StyledText>the details inserted above with our servers</StyledText>
+          <StyledText>By clicking on Confirm you agree to share</StyledText>
+          <StyledText>the information above with our servers</StyledText>
         </View>
       </ScrollView>
     )

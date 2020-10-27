@@ -288,6 +288,7 @@ class User {
 
   async getHomeLocation() {
     logger.info(`Fetching coords for user's home location...`);
+    console.log(await Location.geocodeAsync(`United Kingdom, Glasgow, G20 6AF`));
   
     const { homeCountry, homeCity } = this.homeLocation;
     if (!homeCountry || !homeCity) {

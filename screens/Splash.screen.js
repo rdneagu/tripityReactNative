@@ -26,19 +26,20 @@ class ScreenMainSplash extends Component {
         <Image source={require('../assets/images/placeholder.png')} />
         {this.props.store.isApplicationReady && 
           <>
-          <View style={styles.memo}>
-            {memo.map((m, i) => (
-              <View key={i} style={styles.memo}>
-                {i !== 0 && <View style={styles.memoBulletWrapper}><View style={styles.memoBullet}></View></View>}
-                <Text style={styles.memoText}>{m}</Text>
-              </View>
-            ))}
-          </View>
-          <StyledButton style={{ marginVertical: 60 }} icon={<Entypo name="chevron-right" />} onPress={() => navigation.replace('Screen.Auth', { screen: 'Auth.Register' })}>Get Started</StyledButton>
-          <View style={styles.extra}>
-            <Text style={styles.extraText}>Already have an account? <StyledLink onPress={() => navigation.replace('Screen.Auth', { screen: 'Auth.Login' })}>Sign In</StyledLink></Text>
-          </View>
-        </>}
+            <View style={styles.memo}>
+              {memo.map((m, i) => (
+                <View key={i} style={styles.memo}>
+                  {i !== 0 && <View style={styles.memoBulletWrapper}><View style={styles.memoBullet}></View></View>}
+                  <Text style={styles.memoText}>{m}</Text>
+                </View>
+              ))}
+            </View>
+            <StyledButton style={{ marginVertical: 60 }} icon={<Entypo name="chevron-right" />} onPress={() => navigation.replace('Screen.Auth', { screen: 'Auth.Register' })}>Get Started</StyledButton>
+            <View style={styles.extra}>
+              <Text style={styles.extraText}>Already have an account? <StyledLink onPress={() => navigation.replace('Screen.Auth', { screen: 'Auth.Login' })}>Sign In</StyledLink></Text>
+            </View>
+          </>
+        }
       </View>
     )
   }

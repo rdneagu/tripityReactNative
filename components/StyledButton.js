@@ -2,7 +2,6 @@
 import React, { Component } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
 import { Animated, Easing } from 'react-native';
-import PropTypes from 'prop-types';
 
 /* Expo packages */
 import { LinearGradient } from 'expo-linear-gradient';
@@ -11,6 +10,21 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { observable, action, computed } from "mobx"
 import { observer } from "mobx-react"
 
+/**
+ * Class definition for the StyledButton component
+ * 
+ * @prop {Array} colors         - Button color (more than 1 color makes a gradient)
+ * @prop {String} type          - Button type (bordered, default)
+ * @prop {React} icon           - Icon component
+ * @prop {Boolean} inversed     - Whether the text or icon is first
+ * @prop {Object} style         - Extra styling for the button
+ * @prop {String} text          - The text of the button
+ * @prop {React} children       - The content of the button if the text property is empty
+ * @prop {Number} throttle      - Delay in seconds after press event
+ * @prop {Function} onPress     - Press functionality
+ * 
+ * Is an @observer class
+ */
 @observer
 class StyledButton extends Component {
   @observable layout = { width: null, height: null }
@@ -97,7 +111,7 @@ class StyledButton extends Component {
    */
   @computed
   get buttonContent() {
-    const text = (this.props.children) ? <Text style={styles.buttonText}>{this.props.children}</Text> : null;
+    const text = (this.props.text || this.props.children) ? <Text style={styles.buttonText}>{this.props.text || this.props.children}</Text> : null;
     const icon = (this.props.icon) ? React.cloneElement(this.props.icon, { style: { ...styles.buttonIcon, ...this.props.icon.props.style } }) : null;
 
     const content = (this.pending)
@@ -149,17 +163,6 @@ StyledButton.defaultProps = {
   colors: [ '#5390f6', '#4185f5' ],
   type: 'default',
   throttle: 0,
-}
-
-StyledButton.propTypes = {
-  colors: PropTypes.array,
-  type: PropTypes.string,
-  icon: PropTypes.element,
-  inversed: PropTypes.bool,
-  style: PropTypes.any,
-  children: PropTypes.any,
-  throttle: PropTypes.number,
-  onPress: PropTypes.any,
 }
 
 const styles = StyleSheet.create({
