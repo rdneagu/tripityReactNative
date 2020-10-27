@@ -14,26 +14,46 @@ import { observable, action } from "mobx"
 import { observer, inject } from "mobx-react"
 
 /* App library */
+import Realm from '../../lib/realm';
+import TptyTrip from '../../lib/trip';
 import logger from '../../lib/log';
 
 /* App components */
-import { StyledText, NavigationHeader } from '../../components';
+import { StyledText, StyledButton } from '../../components';
+
+class TripItem extends React.PureComponent {
+  
+
+  render() {
+    const { onPress, startLocation, endLocation, startDate, endDate, visitedCountries, visitedLocations } = this.props;
+    return  <TouchableOpacity onPress={onPress}>
+              <View style={styles.trip}>
+                <StyledText style={styles.tripTitle} weight='semibold'>{startLocation} to {endLocation}</StyledText>
+                <View style={styles.separator} />
+                <StyledText>Trip start: {startDate}</StyledText>
+                <StyledText>Trip end: {endDate}</StyledText>
+                <View style={styles.separator} />
+                <StyledText>Countries visited: {visitedCountries}</StyledText>
+                <StyledText>Locations visited: {Object.keys(visitedLocations).length}</StyledText>
+              </View>
+            </TouchableOpacity>
+  }  
+}
 
 @inject('store')
 @observer
-class ScreenMainTrips extends React.Component {
+class ScreenMainTrips extends React.PureComponent {
 
   constructor() {
     super();
   }
 
-  @action.bound
-  openTrip(tripId) {
+  openTrip = (tripId) => {
     this.props.navigation.push('Screen.Trip', { screen: 'Trip.Tab.Details', params: { tripId }});
   }
 
-  @action.bound
-  renderItem({ item }) {
+  // TODO: TPA-52
+  renderItem = ({ item }) => {
     const destination = {
       counter: 0,
     }
@@ -69,23 +89,35 @@ class ScreenMainTrips extends React.Component {
     const [ endYear, endMonth, endDay ] = [ tripEndDate.getFullYear(), tripEndDate.getMonth() + 1, tripEndDate.getDate() ];
     const [ endHours, endMinutes ] = [ tripEndDate.getHours().toString(), tripEndDate.getMinutes().toString() ];
   
-    return  <TouchableOpacity onPress={() => this.openTrip(item.tripId)}>
-              <View style={styles.trip}>
-                <StyledText style={styles.tripTitle} weight='semibold'>{tripStartLocation} to {tripEndLocation}</StyledText>
-                <View style={styles.separator} />
-                <StyledText>Trip start: {startDay}/{startMonth}/{startYear} {startHours.padStart(2, '0')}:{startMinutes.padStart(2, '0')}</StyledText>
-                <StyledText>Trip end: {endDay}/{endMonth}/{endYear} {endHours.padStart(2, '0')}:{endMinutes.padStart(2, '0')}</StyledText>
-                <View style={styles.separator} />
-                <StyledText>Countries visited: {visitedCountries.join(', ')}</StyledText>
-                <StyledText>Locations visited: {Object.keys(visitedLocations).length}</StyledText>
-              </View>
-            </TouchableOpacity>
+    return  <TripItem 
+                onPress={() => this.openTrip(item.tripId)}
+                startLocation={tripStartLocation}
+                endLocation={tripEndLocation}
+                startDate={`${startDay}/${startMonth}/${startYear} ${startHours.padStart(2, '0')}:${startMinutes.padStart(2, '0')}`}
+                endDate={`${endDay}/${endMonth}/${endYear} ${endHours.padStart(2, '0')}:${endMinutes.padStart(2, '0')}`}
+                visitedCountries={visitedCountries.join(', ')}
+                visitedLocations={visitedLocations}
+            />
   }
 
+  keyExtractor = (item) => item.tripId;
+
   render() {
+    const trips = Realm.toJSON(TptyTrip.getAllTrips());
     return (
       <View style={styles.content}>
-        <FlatList data={this.props.store.User.user.trips} renderItem={this.renderItem} keyExtractor={item => item.tripId} />
+        <FlatList
+          data={trips}
+          renderItem={this.renderItem}
+          keyExtractor={this.keyExtractor}
+          ListEmptyComponent={
+            <View style={{ alignItems: 'center', paddingVertical: 10 }}>
+              <StyledText style={{ marginBottom: 10 }} weight="semibold">It looks like you have no trips</StyledText>
+              <StyledText style={{ marginBottom: 5, marginHorizontal: '15%', textAlign: 'center' }}>Would you like to load any past trips we might find in your device?</StyledText>
+              <StyledButton>Load past trips</StyledButton>
+            </View>
+          }
+        />
       </View>
     );
   }

@@ -8,7 +8,7 @@ import Modal from 'react-native-modal';
 import { Ionicons } from '@expo/vector-icons'; 
 
 /* MobX store */
-import store from '../store';
+import store from '../store/_index';
 
 /* Community packages */
 import { observer } from "mobx-react"

@@ -35,7 +35,6 @@ class Navigation {
     this.screens[options.name] = observable(options);
   }
 
-  @action.bound
   getScreens(parent, tabs) {
     return _.filter(this.screens, screen => {
       const passedCondition = (screen.condition !== undefined) ? screen.condition() : true;
@@ -43,7 +42,6 @@ class Navigation {
     });
   }  
 
-  @action.bound
   getScreenData(screen) {
     return this.screens[screen];
   }

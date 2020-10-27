@@ -14,7 +14,7 @@ import _ from 'lodash';
 import { NavigationBottom, NavigationHeader } from '../components';
 
 /* App library */
-import store from '../store';
+import store from '../store/_index';
 
 const slideOutIn = ({ current, next, layouts }) => {
   return {

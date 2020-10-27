@@ -316,6 +316,11 @@ class User {
       postCode: this.user.postCode,
     }
   }
+
+  @computed
+  get loggedUser() {
+    return async () => this.user || (await Realm.run(() => Realm.db.objects('User').filtered('isLogged = true LIMIT(1)')))[0];
+  }
 }
 
 export default User;

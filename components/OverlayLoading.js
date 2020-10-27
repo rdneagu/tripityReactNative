@@ -9,7 +9,7 @@ import { observable, action, computed } from "mobx"
 import { observer } from "mobx-react"
 
 /* MobX store */
-import store from '../store';
+import store from '../store/_index';
 
 /* App components */
 import IndeterminateLoading from './IndeterminateLoading';

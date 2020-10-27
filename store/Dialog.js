@@ -27,10 +27,7 @@ class Dialog {
    * The default functionality of a button press function
    * 
    * @param {function} fn       - Function to run before hiding the dialog
-   * 
-   * Function is @bound
    */
-  @action.bound
   async onPress(fn) {
     // Run the specified function if there is one
     if (typeof(fn) === 'function') {
@@ -54,7 +51,7 @@ class Dialog {
    *      @param {Function?} fn               - Function to run when the button is pressed
    * @param {Array<Object>?} buttons  - Custom buttons to be shown, accepts the same props as StyledButton
    * 
-   * Function is @bound
+   * @action @bound
    */
   @action.bound
   showDialog({ title, component, dismissable=true, onCancel=true, onConfirm=true, buttons=[] }) {
@@ -93,7 +90,7 @@ class Dialog {
   /**
    * Hides the active dialog (last dialog in the list)
    * 
-   * Function is @bound
+   * @action @bound
    */
   @action.bound
   hideDialog() {

@@ -14,7 +14,7 @@ import { Asset } from 'expo-asset';
 import { Entypo, Ionicons, EvilIcons, Fontisto } from '@expo/vector-icons';
 
 // MobX store
-import store from './store';
+import store from './store/_index';
 
 /* React routes */
 import ReactRoutes from './routes';
