@@ -96,7 +96,7 @@ class Loading {
 
   @computed
   get isVisible() {
-    return this.loaders.length;
+    return !!this.loaders.length;
   }
 
   @computed

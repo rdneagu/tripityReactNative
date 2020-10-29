@@ -124,30 +124,6 @@ class NavigationBottom extends Component {
         </View>
       </View>
     )
-
-    // const { Navigation } = this.props.store;
-
-    // if (!Navigation.navigationRefReady) {
-    //   return null;
-    // } else {
-    //   return (
-    //     <View style={{ width: '100%', paddingVertical: 8, backgroundColor: '#000e26', overflow: 'hidden' }}>
-    //       <Animated.View style={{ ...styles.marker, left: this.animation.left }}>
-    //         <View style={styles.markerLeft}>
-    //           <View style={styles.markerLeftRound} />
-    //         </View>
-    //         <View style={styles.markerMiddle} />
-    //         <View style={styles.markerRight}>
-    //           <View style={styles.markerRightRound} />
-    //         </View>
-    //       </Animated.View>
-    //       <View style={{ position: 'absolute', height: 8, width: '100%', backgroundColor: '#4169e1' }} />
-    //       <View style={{ flexDirection: 'row' }}>
-    //         {this.tabs.map((tab, i) => <NavigationBottomTab key={i} tabIndex={i} onPress={this.onPress} onLayout={this.onLayout} {...tab} />)}
-    //       </View>
-    //     </View>
-    //   )
-    // }
   }
 }
 

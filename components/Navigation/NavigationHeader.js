@@ -45,8 +45,6 @@ class NavigationHeader extends Component {
 
   render() {
     const { Navigation } = this.props.store;
-    console.log(Navigation.canGoBack());
-
     if (!this.selectedTab) {
       return null;
     }

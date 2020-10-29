@@ -309,7 +309,7 @@ class User {
   }
 
   isAdmin() {
-    return (this.user?.permission === 32);
+    return (this.user?.permission === 31);
   }
 
   @computed

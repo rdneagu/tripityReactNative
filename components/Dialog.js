@@ -29,28 +29,29 @@ class Dialog extends Component {
   render() {
     const dialog = store.Dialog.activeDialog;
 
+    if (!dialog) {
+      return null;
+    }
     return (
-      <Modal isVisible={dialog} style={{ margin: 0 }} animationIn="fadeIn" animationOut="fadeOut">
-        {dialog &&
-          <View style={styles.dialogWrapper}>
-            <View style={styles.dialog}>
-              <View style={styles.titleBar}>
-                <StyledText weight="bold">{dialog.title}</StyledText>
-                {dialog.dismissable &&
-                  <TouchableOpacity style={styles.close} onPress={store.Dialog.hideDialog}>
-                    <Ionicons name="md-close" size={18} color="white" />
-                  </TouchableOpacity>
-                }
-              </View>
-              <View style={styles.component}>
-                {dialog.component}
-              </View>
-              <View style={styles.control}>
-                {dialog.buttons.map(button => <StyledButton style={styles.button} type="bordered" inversed {...button} />)}
-              </View>
+      <Modal isVisible={!!dialog} style={{ margin: 0 }} animationIn="fadeIn" animationOut="fadeOut">
+        <View style={styles.dialogWrapper}>
+          <View style={styles.dialog}>
+            <View style={styles.titleBar}>
+              <StyledText weight="bold">{dialog.title}</StyledText>
+              {dialog.dismissable &&
+                <TouchableOpacity style={styles.close} onPress={store.Dialog.hideDialog}>
+                  <Ionicons name="md-close" size={18} color="white" />
+                </TouchableOpacity>
+              }
+            </View>
+            <View style={styles.component}>
+              {dialog.component}
+            </View>
+            <View style={styles.control}>
+              {dialog.buttons.map((button, i) => <StyledButton key={i} style={styles.button} type="bordered" inversed {...button} />)}
             </View>
           </View>
-        }
+        </View>
       </Modal>
     )
   }
