@@ -176,9 +176,9 @@ class User {
         this.store.Loading.createLoader(async () => {
           const trips = await AWS.invokeAPI('/trips/synchronize', {});
           const tripsToSync = trips.filter(trip => {
-            const conditionUpdated = (this.user.trips.find(local => trip.tripId === local.tripId && trip.synced > local.synced));
+            const conditionUpdated = (this.user.trips.find(local => trip.tripId === local.tripId && (trip.synced || 0) > (local.synced || 0)));
             const conditionNew = (!this.user.trips.find(local => trip.tripId === local.tripId));
-            return conditionUpdated || conditionNew;
+            return (conditionUpdated || conditionNew);
           });
           logger.info(tripsToSync);
           await Realm.write((realm) => {
@@ -308,6 +308,10 @@ class User {
     return { homeCountry, homeCity, homeCoords };
   }
 
+  isAdmin() {
+    return (this.user?.permission === 32);
+  }
+
   @computed
   get homeLocation() {
     return {
@@ -318,8 +322,8 @@ class User {
   }
 
   @computed
-  get loggedUser() {
-    return async () => this.user || (await Realm.run(() => Realm.db.objects('User').filtered('isLogged = true LIMIT(1)')))[0];
+  get currentUser() {
+    return this.user;
   }
 }
 

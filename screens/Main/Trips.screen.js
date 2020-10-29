@@ -22,8 +22,6 @@ import logger from '../../lib/log';
 import { StyledText, StyledButton } from '../../components';
 
 class TripItem extends React.PureComponent {
-  
-
   render() {
     const { onPress, startLocation, endLocation, startDate, endDate, visitedCountries, visitedLocations } = this.props;
     return  <TouchableOpacity onPress={onPress}>
@@ -34,7 +32,7 @@ class TripItem extends React.PureComponent {
                 <StyledText>Trip end: {endDate}</StyledText>
                 <View style={styles.separator} />
                 <StyledText>Countries visited: {visitedCountries}</StyledText>
-                <StyledText>Locations visited: {Object.keys(visitedLocations).length}</StyledText>
+                <StyledText>Locations visited: {visitedLocations}</StyledText>
               </View>
             </TouchableOpacity>
   }  
@@ -43,73 +41,90 @@ class TripItem extends React.PureComponent {
 @inject('store')
 @observer
 class ScreenMainTrips extends React.PureComponent {
+  @observable tripsList = [];
 
   constructor() {
     super();
+    this.generateTripsList();
   }
 
   openTrip = (tripId) => {
     this.props.navigation.push('Screen.Trip', { screen: 'Trip.Tab.Details', params: { tripId }});
   }
 
+  @action.bound
+  generateTripsList() {
+    const trips = TptyTrip.getAllTrips();
+
+    this.tripsList = _.map(trips, (trip => {
+      const pings = trip.pings;
+      const destination = {
+        counter: 0,
+      }
+      const visitedCountries = [];
+      const startLocation = pings[0].country;
+      const endLocation = pings.reduce((acc, ping) => {
+        if (ping.country) {
+          if (destination.name !== ping.country) {
+            destination.name = ping.country;
+            destination.counter = 0;
+          }
+          destination.counter++;
+          if (destination.counter > 4 && acc !== destination.name) {
+            visitedCountries.push(destination.name);
+            acc = destination.name;
+          }
+        }
+        return acc;
+      }, undefined);
+  
+      const visitedLocations = pings.reduce((acc, ping) => {
+        if (ping.venue) {
+          acc[ping.venue.name] = (acc[ping.venue.name] || 0) + 1;
+        }
+        return acc;
+      }, {})
+  
+      const startDate = new Date(trip.startedAt);
+      const [ startYear, startMonth, startDay ] = [ startDate.getFullYear(), startDate.getMonth() + 1, startDate.getDate() ];
+      const [ startHours, startMinutes ] = [ startDate.getHours().toString(), startDate.getMinutes().toString() ];
+  
+      const endDate = new Date(trip.finishedAt);
+      const [ endYear, endMonth, endDay ] = [ endDate.getFullYear(), endDate.getMonth() + 1, endDate.getDate() ];
+      const [ endHours, endMinutes ] = [ endDate.getHours().toString(), endDate.getMinutes().toString() ];
+
+      return {
+        tripId: trip.tripId,
+        startLocation,
+        endLocation,
+        startDate: `${startDay}/${startMonth}/${startYear} ${startHours.padStart(2, '0')}:${startMinutes.padStart(2, '0')}`,
+        endDate: `${endDay}/${endMonth}/${endYear} ${endHours.padStart(2, '0')}:${endMinutes.padStart(2, '0')}`,
+        visitedCountries,
+        visitedLocations,
+      }
+    }));
+  }
+
   // TODO: TPA-52
   renderItem = ({ item }) => {
-    const destination = {
-      counter: 0,
-    }
-    const visitedCountries = [];
-    const tripStartLocation = item.pings[0].country;
-    const tripEndLocation = item.pings.reduce((acc, ping) => {
-      if (ping.country) {
-        if (destination.name !== ping.country) {
-          destination.name = ping.country;
-          destination.counter = 0;
-        }
-        destination.counter++;
-        if (destination.counter > 4 && acc !== destination.name) {
-          visitedCountries.push(destination.name);
-          acc = destination.name;
-        }
-      }
-      return acc;
-    }, undefined);
-
-    const visitedLocations = item.pings.reduce((acc, ping) => {
-      if (ping.venue) {
-        acc[ping.venue.name] = (acc[ping.venue.name] || 0) + 1;
-      }
-      return acc;
-    }, {})
-
-    const tripStartDate = new Date(item.pings[0].timestamp);
-    const [ startYear, startMonth, startDay ] = [ tripStartDate.getFullYear(), tripStartDate.getMonth() + 1, tripStartDate.getDate() ];
-    const [ startHours, startMinutes ] = [ tripStartDate.getHours().toString(), tripStartDate.getMinutes().toString() ];
-
-    const tripEndDate = new Date(item.pings[item.pings.length-1].timestamp);
-    const [ endYear, endMonth, endDay ] = [ tripEndDate.getFullYear(), tripEndDate.getMonth() + 1, tripEndDate.getDate() ];
-    const [ endHours, endMinutes ] = [ tripEndDate.getHours().toString(), tripEndDate.getMinutes().toString() ];
-  
     return  <TripItem 
-                onPress={() => this.openTrip(item.tripId)}
-                startLocation={tripStartLocation}
-                endLocation={tripEndLocation}
-                startDate={`${startDay}/${startMonth}/${startYear} ${startHours.padStart(2, '0')}:${startMinutes.padStart(2, '0')}`}
-                endDate={`${endDay}/${endMonth}/${endYear} ${endHours.padStart(2, '0')}:${endMinutes.padStart(2, '0')}`}
-                visitedCountries={visitedCountries.join(', ')}
-                visitedLocations={visitedLocations}
+              onPress={() => this.openTrip(item.tripId)}
+              startLocation={item.startLocation}
+              endLocation={item.endLocation}
+              startDate={item.startDate}
+              endDate={item.endDate}
+              visitedCountries={item.visitedCountries.join(', ')}
+              visitedLocations={Object.keys(item.visitedLocations).length}
             />
   }
 
-  keyExtractor = (item) => item.tripId;
-
   render() {
-    const trips = Realm.toJSON(TptyTrip.getAllTrips());
     return (
       <View style={styles.content}>
         <FlatList
-          data={trips}
+          data={this.tripsList}
           renderItem={this.renderItem}
-          keyExtractor={this.keyExtractor}
+          keyExtractor={item => item.tripId}
           ListEmptyComponent={
             <View style={{ alignItems: 'center', paddingVertical: 10 }}>
               <StyledText style={{ marginBottom: 10 }} weight="semibold">It looks like you have no trips</StyledText>

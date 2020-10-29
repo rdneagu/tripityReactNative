@@ -38,10 +38,8 @@ class ScreenTripDetails extends React.Component {
 
   async componentDidMount() {
     const { tripId } = this.props.route.params;
-    console.log(tripId);
     if (tripId) {
       const trip = (await Realm.run(() => Realm.db.objects('Trip').filtered('tripId = $0', tripId)))[0]
-      console.log(trip);
       this.locations = trip.pings.reduce((acc, ping) => {
         if (ping.venue) {
           if (!acc[ping.venue.name]) {
@@ -77,7 +75,11 @@ class ScreenTripDetails extends React.Component {
   render() {
     return (
       <View style={styles.content}>
-        {this.locations && <FlatList data={_.orderBy(this.locations, ['count', 'timestamp'], ['desc', 'asc'])} renderItem={this.renderItem} keyExtractor={item => item.name} />}
+        <FlatList
+          data={_.orderBy(this.locations, ['count', 'timestamp'], ['desc', 'asc'])}
+          renderItem={this.renderItem}
+          keyExtractor={item => item.name}
+        />
       </View>
     );
   }

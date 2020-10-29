@@ -103,7 +103,7 @@ class RootStack extends Component {
 }
 
 import ScreenMainTrips from '../screens/Main/Trips.screen.js';
-import ScreenMainGrabPhotos from '../screens/Main/GrabPhotos.screen.js';
+import ScreenMainSimulator from '../screens/Main/Simulator.screen.js';
 class MainStack extends Component {
   #initialRoute = 'Main.Tab.Trips';
 
@@ -118,10 +118,10 @@ class MainStack extends Component {
       isTab: true,
     });
     store.Navigation.addScreen({
-      name: 'Main.Tab.GrabPhotos',
-      component: ScreenMainGrabPhotos,
+      name: 'Main.Tab.Simulator',
+      component: ScreenMainSimulator,
       title: 'SIMULATOR',
-      icon: <Ionicons name="md-photos" size={18} color="white" />,
+      icon: <Ionicons name="ios-play" size={18} color="white" />,
       isTab: true,
     });
   }
