@@ -21,8 +21,11 @@ import ReactRoutes from './routes';
 
 /* Community packages */
 import _ from 'lodash';
-import { observable, action } from "mobx"
+import { configure, observable, action } from "mobx"
 import { observer, Provider } from "mobx-react"
+configure({
+  enforceActions: "never",
+})
 
 /* App library */
 import TptyCipher from './lib/cipher';
@@ -75,9 +78,12 @@ TptyTasks.defineGeofencingTask(async ({ data: { eventType, region }, error }) =>
 class App extends React.Component {
   @observable assetsReady = false;
 
+  constructor() {
+    super();
+  }
   @action.bound
   async loadAssets() {
-    // SplashScreen.preventAutoHideAsync();
+    SplashScreen.preventAutoHideAsync();
     // Generate encryption key
     await TptyCipher.generateKey();
     // Load assets
@@ -96,7 +102,8 @@ class App extends React.Component {
       'Nunito-Black': require('./assets/fonts/Nunito-Black.ttf'),
     });
     this.assetsReady = true;
-    // SplashScreen.hideAsync();
+    console.log(this.assetsReady);
+    SplashScreen.hideAsync();
   }
 
   async componentDidMount() {

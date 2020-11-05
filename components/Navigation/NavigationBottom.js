@@ -4,7 +4,6 @@ import {
   StyleSheet, View,
   Animated, Easing,
 } from 'react-native';
-import PropTypes from 'prop-types';
 
 /* Community packages */
 import _ from 'lodash';
@@ -127,12 +126,12 @@ class NavigationBottom extends Component {
   }
 }
 
-NavigationBottom.propTypes = {
-  stack: PropTypes.string,
-  tabs: PropTypes.array,
-  navigation: PropTypes.any,
-  navigationRefReady: PropTypes.any,
-}
+// NavigationBottom.propTypes = {
+//   stack: PropTypes.string,
+//   tabs: PropTypes.array,
+//   navigation: PropTypes.any,
+//   navigationRefReady: PropTypes.any,
+// }
 
 const styles = StyleSheet.create({
   marker: {

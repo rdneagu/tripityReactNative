@@ -1,8 +1,7 @@
 /* React packages */
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { View } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 /* Expo packages */
 import { Entypo, Ionicons } from '@expo/vector-icons';
@@ -61,7 +60,7 @@ const getStackOptions = (options = {}) => {
 }
 
 import ScreenSplash from '../screens/Splash.screen.js';
-class RootStack extends Component {
+class RootStack extends PureComponent {
   #initialRoute = 'Screen.Splash';
 
   constructor() {
@@ -104,7 +103,7 @@ class RootStack extends Component {
 
 import ScreenMainTrips from '../screens/Main/Trips.screen.js';
 import ScreenMainSimulator from '../screens/Main/Simulator.screen.js';
-class MainStack extends Component {
+class MainStack extends PureComponent {
   #initialRoute = 'Main.Tab.Trips';
 
   constructor() {
@@ -160,7 +159,7 @@ class MainStack extends Component {
 
 import ScreenTripDetails from '../screens/Trip/Details.screen.js';
 import ScreenTripItinerary from '../screens/Trip/Itinerary.screen.js';
-class TripStack extends Component {
+class TripStack extends PureComponent {
   #initialRoute = 'Trip.Tab.Details';
 
   constructor() {
@@ -220,7 +219,7 @@ import ScreenAuthLogin from '../screens/Auth/Login.screen.js';
 import ScreenAuthRegister from '../screens/Auth/Register.screen.js';
 import ScreenAuthCountry from '../screens/Auth/Country.screen.js';
 import ScreenAuthPermissions from '../screens/Auth/Permissions.screen.js';
-class AuthStack extends Component {
+class AuthStack extends PureComponent {
   #initialRoute = 'Auth.Login';
 
   constructor() {

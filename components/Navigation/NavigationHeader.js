@@ -4,7 +4,6 @@ import {
   StyleSheet, View,
   TouchableOpacity,
 } from 'react-native';
-import PropTypes from 'prop-types';
 
 /* Expo packages */
 import { Ionicons } from '@expo/vector-icons';
@@ -65,10 +64,10 @@ class NavigationHeader extends Component {
   }
 }
 
-NavigationHeader.propTypes = {
-  text: PropTypes.string,
-  icon: PropTypes.any,
-}
+// NavigationHeader.propTypes = {
+//   text: PropTypes.string,
+//   icon: PropTypes.any,
+// }
 
 const styles = StyleSheet.create({
   header: {

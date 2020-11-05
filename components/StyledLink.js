@@ -2,7 +2,6 @@
 import React, { Component } from 'react';
 import { StyleSheet, TouchableWithoutFeedback } from 'react-native';
 import { Animated, Easing } from 'react-native';
-import PropTypes from 'prop-types';
 
 /* Community packages */
 import { observer } from "mobx-react"
@@ -89,11 +88,11 @@ class StyledLink extends Component {
   }
 }
 
-StyledLink.propTypes = {
-  style: PropTypes.any,
-  children: PropTypes.any,
-  onPress: PropTypes.any,
-}
+// StyledLink.propTypes = {
+//   style: PropTypes.any,
+//   children: PropTypes.any,
+//   onPress: PropTypes.any,
+// }
 
 const styles = StyleSheet.create({
   link: {

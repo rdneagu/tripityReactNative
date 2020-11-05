@@ -3,7 +3,6 @@ import React, { Component } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import { Animated, Easing } from 'react-native';
 import TextTicker from 'react-native-text-ticker';
-import PropTypes from 'prop-types';
 
 /* Expo packages */
 import { Entypo } from '@expo/vector-icons'; 
@@ -84,23 +83,23 @@ class Input extends Component {
   }
 }
 
-Input.propTypes = {
-  outerStyle: PropTypes.object,
-  innerStyle: PropTypes.object,
-  label: PropTypes.string,
-  icon: PropTypes.element,
-  inversed: PropTypes.bool,
-  align: PropTypes.string,
-  verticalSpacing: PropTypes.string,
-  type: PropTypes.number,
-  placeholder: PropTypes.string,
-  secured: PropTypes.bool,
-  model: PropTypes.any,
-  value: PropTypes.string,
-  error: PropTypes.string,
-  datePicker: PropTypes.any,
-  select: PropTypes.any,
-}
+// Input.propTypes = {
+//   outerStyle: PropTypes.object,
+//   innerStyle: PropTypes.object,
+//   label: PropTypes.string,
+//   icon: PropTypes.element,
+//   inversed: PropTypes.bool,
+//   align: PropTypes.string,
+//   verticalSpacing: PropTypes.string,
+//   type: PropTypes.number,
+//   placeholder: PropTypes.string,
+//   secured: PropTypes.bool,
+//   model: PropTypes.any,
+//   value: PropTypes.string,
+//   error: PropTypes.string,
+//   datePicker: PropTypes.any,
+//   select: PropTypes.any,
+// }
 
 const styles = StyleSheet.create({
   inputOuter: {

@@ -1,40 +1,46 @@
 /* React packages */
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, FlatList, TouchableOpacity, View, SafeAreaView } from 'react-native';
 
 /* Expo packages */
+import * as MediaLibrary from "expo-media-library";
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system';
 import * as Location from 'expo-location';
 
 /* Community packages */
 import _ from 'lodash';
+import axios from 'axios';
 import { observable, action } from "mobx"
 import { observer, inject } from "mobx-react"
 
 /* App library */
-import * as sim from '../../lib/sim';
 import logger from '../../lib/log';
 import TptyTrip from '../../lib/trip';
 
 /* App components */
-import { StyledButton, StyledText, IndeterminateLoading } from '../../components';
+import { Image, StyledButton, StyledText, IndeterminateLoading } from '../../components';
 
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-@inject('store')
-@observer
 /**
  * Class definition for the Simulator screen
  */
+@inject('store')
+@observer
 class ScreenMainSimulator extends React.Component {
+  @observable images = [];
   @observable scenario = {
     currentStatus: null,
     failed: null,
     success: false,
     parsed: {},
+  }
+
+  constructor() {
+    super();
   }
 
   /**
@@ -53,6 +59,45 @@ class ScreenMainSimulator extends React.Component {
   @action.bound
   failScenario(reason) {
     this.scenario.failed = reason;
+  }
+
+  /**
+   * 
+   */
+  @action.bound
+  async getPhotosAsync() {
+    const images = [];
+    const photos = await MediaLibrary.getAssetsAsync({ sortBy: MediaLibrary.SortBy.creationTime, first: 100 });
+    for (let i = 0; i < photos.assets.length; i++) {
+      const meta = await MediaLibrary.getAssetInfoAsync(photos.assets[i]);
+      images.push({
+        id: photos.assets[i].id,
+        src: meta.localUri,
+        location: meta.location,
+      });
+    }
+    this.images = images;
+  }
+
+  renderImage = ({ item }) => {
+    return  <TouchableOpacity style={{ marginHorizontal: 5 }} onPress={() => this.clickity(item)}>
+              <Image {...item } />
+            </TouchableOpacity>
+  }
+
+  /**
+   *
+   */
+  @action.bound
+  async clickity(image) {
+    if (!image.location) return;
+
+    const { latitude, longitude } = image.location;
+    const venueRequest = await axios.get(`https://api.foursquare.com/v2/venues/search?ll=${latitude},${longitude}&v=20200608&client_id=UD2LJ1YQ1AC3I2UG45LWWTULNS5PKYJ45YSYYMFIQSHFPCPX&client_secret=ND1NK05QUPSH4C1E3TBXHQEB51EFK40WG5N2LT12LNDJNRJJ`);
+    // const [ venue ] = _.sortBy(venueRequest.data.response.venues, (v) => v.location.distance);
+    const [ venue ] = venueRequest.data.response.venues;
+    alert(`Closest venue for clicked image: \n${venue.name}\n\nCity: ${venue.location.city}\nCountry: (${venue.location.cc}) ${venue.location.country}`)
+    console.log(venue);
   }
 
   /**
@@ -212,7 +257,7 @@ class ScreenMainSimulator extends React.Component {
     return (
       <View style={styles.content}>
         {this.props.store.User.isAdmin()
-          ? <View>
+          ? <View style={{ flex: 1 }}>
               <View style={{ margin: 10, alignItems: 'center' }}>
                 <StyledText style={{ marginVertical: 10 }} weight='bold'>Scenario</StyledText>
                 {this.scenario.currentStatus && !this.scenario.failed && !this.scenario.success &&
@@ -231,6 +276,22 @@ class ScreenMainSimulator extends React.Component {
                 {this.scenario.success &&
                   <StyledText>Trip successfully parsed, check your trips tab!</StyledText>
                 }
+              </View>
+              <View style={{ flex: 1, margin: 10, alignItems: 'center' }}>
+                {this.images.length ? <StyledText style={{ marginBottom: 10 }} weight="semibold">Loaded photos</StyledText> : null}
+                <FlatList
+                  contentContainerStyle={{ width: '100%', alignItems: 'center' }}
+                  data={this.images.slice()}
+                  renderItem={this.renderImage}
+                  numColumns={3}
+                  keyExtractor={item => item.id}
+                  ListEmptyComponent={
+                    <View style={{ alignItems: 'center', paddingVertical: 10 }}>
+                      <StyledText style={{ marginBottom: 10 }} weight="semibold">Tap on Grab Photos to retrieve all the photos</StyledText>
+                      <StyledButton style={{ marginVertical: 20 }} onPress={this.getPhotosAsync}>Grab Photos</StyledButton>
+                    </View>
+                  }
+                />
               </View>
             </View>
           : <StyledText>You cannot access this feature if you're not an Administrator</StyledText>

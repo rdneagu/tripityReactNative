@@ -1,7 +1,6 @@
 /* React packages */
 import React, { Component } from 'react';
 import { StyleSheet, Text } from 'react-native';
-import PropTypes from 'prop-types';
 
 /**
  * Class definition for the StyledText component
@@ -34,11 +33,11 @@ class StyledText extends Component {
   }
 }
 
-StyledText.propTypes = {
-  style: PropTypes.any,
-  weight: PropTypes.string,
-  size: PropTypes.number,
-}
+// StyledText.propTypes = {
+//   style: PropTypes.any,
+//   weight: PropTypes.string,
+//   size: PropTypes.number,
+// }
 
 StyledText.defaultProps = {
   color: '#eee',

@@ -4,7 +4,6 @@ import {
   StyleSheet, TouchableWithoutFeedback,
   Animated, Easing,
 } from 'react-native';
-import PropTypes from 'prop-types';
 
 const ANIMATION_TRANSLATE_Y = 12;
 
@@ -50,12 +49,12 @@ class NavigationBottomTab extends Component {
   }
 }
 
-NavigationBottomTab.propTypes = {
-  isFocused: PropTypes.any,
-  onLayout: PropTypes.any,
-  onPress: PropTypes.any,
-  icon: PropTypes.any,
-}
+// NavigationBottomTab.propTypes = {
+//   isFocused: PropTypes.any,
+//   onLayout: PropTypes.any,
+//   onPress: PropTypes.any,
+//   icon: PropTypes.any,
+// }
 
 const styles = StyleSheet.create({
   tab: {
