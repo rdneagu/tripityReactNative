@@ -1,0 +1,297 @@
+scenario:
+  name: 'Case #1'             # Scenario name
+  country: 'United Kingdom'   # Home country, ignored if scenario is 0
+  city: 'London'              # Home city, ignored if scenario is 0
+  type: 2                     # Types: 0 - Coordinates only; 1 - Full scenario simulation; 2 - Real scenario
+  interval: 900,              # Interval between pings, ignored if scenario is 0
+  pings:
+    - latitude: 50.482253     # Latitude
+      longitude: -1.462365    # Longitude
+      altitude: 3000          # Altitude, set to 0 if unknown
+      timeOffset: 0           # Time spent around this location, ignored if scenario type is 0
+      expectedVenue: null     # The expected venue to be shown (eg. Botanic Gardens), ignored if scenario type is not 0
+    - latitude: 47.350282
+      longitude: -3.846398
+      altitude: 4000
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 43.105309
+      longitude: -4.472619
+      altitude: 5000
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 40.49781
+      longitude: -3.568886
+      altitude: 0
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 40.631867
+      longitude: -3.159473
+      altitude: 0
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 40.592773
+      longitude: -3.099392
+      altitude: 0
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 40.567204
+      longitude: -3.065847
+      altitude: 0
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 40.559379
+      longitude: -2.900144
+      altitude: 0
+      timeOffset: 30
+      expectedVenue: null
+    - latitude: 40.509802
+      longitude: -2.785474
+      altitude: 0
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 40.370792
+      longitude: -2.450391
+      altitude: 0
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 40.133921
+      longitude: -2.244398
+      altitude: 0
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 40.074837
+      longitude: -2.135098
+      altitude: 0
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 39.680191
+      longitude: -1.921371
+      altitude: 0
+      timeOffset: 15
+      expectedVenue: null
+    - latitude: 39.546891
+      longitude: -1.510757
+      altitude: 0
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 39.50452
+      longitude: -1.10701
+      altitude: 0
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 39.469744
+      longitude: -0.424913
+      altitude: 0
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 39.457882
+      longitude: -0.346175
+      altitude: 0
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 39.49163
+      longitude: -0.474142
+      altitude: 0
+      timeOffset: 345
+      expectedVenue: null
+    - latitude: 40.774866
+      longitude: 4.400616
+      altitude: 3000
+      timeOffset: 30
+      expectedVenue: null
+    - latitude: 41.354693
+      longitude: 8.795147
+      altitude: 4000
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 41.952513
+      longitude: 12.504395
+      altitude: 0
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 41.945706
+      longitude: 12.521754
+      altitude: 0
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 41.752291
+      longitude: 12.708956
+      altitude: 0
+      timeOffset: 45
+      expectedVenue: null
+    - latitude: 41.765272
+      longitude: 12.95537
+      altitude: 0
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 41.661864
+      longitude: 13.224496
+      altitude: 0
+      timeOffset: 60
+      expectedVenue: null
+    - latitude: 41.54891
+      longitude: 13.462076
+      altitude: 0
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 41.458404
+      longitude: 13.796472
+      altitude: 0
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 41.374985
+      longitude: 14.009332
+      altitude: 0
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 41.189164
+      longitude: 14.156696
+      altitude: 0
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 40.866375
+      longitude: 14.296949
+      altitude: 0
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 40.882738
+      longitude: 14.291067
+      altitude: 0
+      timeOffset: 300
+      expectedVenue: null
+    - latitude: 40.088526
+      longitude: 16.846821
+      altitude: 3000
+      timeOffset: 30
+      expectedVenue: null
+    - latitude: 39.234327
+      longitude: 19.472554
+      altitude: 4000
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 37.936535
+      longitude: 23.946474
+      altitude: 0
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 37.980658
+      longitude: 23.908687
+      altitude: 0
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 37.981394
+      longitude: 23.909271
+      altitude: 0
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 37.982436
+      longitude: 23.921529
+      altitude: 0
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 37.978172
+      longitude: 23.918233
+      altitude: 0
+      timeOffset: 225
+      expectedVenue: null
+    - latitude: 37.995667
+      longitude: 23.869599
+      altitude: 0
+      timeOffset: 30
+      expectedVenue: null
+    - latitude: 38.011358
+      longitude: 23.810891
+      altitude: 0
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 37.993638
+      longitude: 23.775872
+      altitude: 0
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 37.968454
+      longitude: 23.728515
+      altitude: 0
+      timeOffset: 30
+      expectedVenue: null
+    - latitude: 37.971499
+      longitude: 23.725725
+      altitude: 0
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 37.973377
+      longitude: 23.717979
+      altitude: 0
+      timeOffset: 15
+      expectedVenue: null
+    - latitude: 37.957181
+      longitude: 23.701322
+      altitude: 0
+      timeOffset: 15
+      expectedVenue: null
+    - latitude: 38.011678
+      longitude: 23.665481
+      altitude: 0
+      timeOffset: 15
+      expectedVenue: null
+    - latitude: 38.011885
+      longitude: 23.665036
+      altitude: 0
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 38.011518
+      longitude: 23.664634
+      altitude: 0
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 38.020191
+      longitude: 23.643531
+      altitude: 0
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 38.014263
+      longitude: 23.636123
+      altitude: 0
+      timeOffset: 195
+      expectedVenue: null
+    - latitude: 38.02912
+      longitude: 23.597832
+      altitude: 0
+      timeOffset: 15
+      expectedVenue: null
+    - latitude: 38.035846
+      longitude: 23.593798
+      altitude: 0
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 38.056462
+      longitude: 23.549424
+      altitude: 0
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 38.306897
+      longitude: 21.678476
+      altitude: 3000
+      timeOffset: 15
+      expectedVenue: null
+    - latitude: 38.800908
+      longitude: 19.937143
+      altitude: 4000
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 40.755306
+      longitude: 13.056955
+      altitude: 5000
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 44.941217
+      longitude: 6.333323
+      altitude: 4000
+      timeOffset: 0
+      expectedVenue: null
+    - latitude: 48.81386
+      longitude: 1.499338
+      altitude: 3000
+      timeOffset: 0
+      expectedVenue: null

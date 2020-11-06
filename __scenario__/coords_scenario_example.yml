@@ -1,0 +1,88 @@
+scenario:
+  name: 'Coordinates only'
+  type: 0
+  pings:
+    - latitude: 55.86565599709542
+      longitude: -4.256483458422198
+      expectedVenue: 'citizenM Glasgow'
+    - latitude: 55.86360903165831
+      longitude: -4.264894865603752
+      expectedVenue: 'Malmaison Glasgow'
+    - latitude: 55.861971381586685
+      longitude: -4.248501204307574
+      expectedVenue: 'The Z Hotel Glasgow'
+    - latitude: 55.85972552126845
+      longitude: -4.250539683054887
+      expectedVenue: 'Paesano Pizza'
+    - latitude: 55.86565599709542
+      longitude: -4.256483458422198
+      expectedVenue: 'citizenM Glasgow'
+    - latitude: 55.86360903165831
+      longitude: -4.264894865603752
+      expectedVenue: 'Malmaison Glasgow'
+    - latitude: 55.861971381586685
+      longitude: -4.248501204307574
+      expectedVenue: 'The Z Hotel Glasgow'
+    - latitude: 55.85972552126845
+      longitude: -4.250539683054887
+      expectedVenue: 'Paesano Pizza'
+    - latitude: 55.86565599709542
+      longitude: -4.256483458422198
+      expectedVenue: 'citizenM Glasgow'
+    - latitude: 55.86360903165831
+      longitude: -4.264894865603752
+      expectedVenue: 'Malmaison Glasgow'
+    - latitude: 55.861971381586685
+      longitude: -4.248501204307574
+      expectedVenue: 'The Z Hotel Glasgow'
+    - latitude: 55.85972552126845
+      longitude: -4.250539683054887
+      expectedVenue: 'Paesano Pizza'
+    - latitude: 55.86565599709542
+      longitude: -4.256483458422198
+      expectedVenue: 'citizenM Glasgow'
+    - latitude: 55.86360903165831
+      longitude: -4.264894865603752
+      expectedVenue: 'Malmaison Glasgow'
+    - latitude: 55.861971381586685
+      longitude: -4.248501204307574
+      expectedVenue: 'The Z Hotel Glasgow'
+    - latitude: 55.85972552126845
+      longitude: -4.250539683054887
+      expectedVenue: 'Paesano Pizza'
+    - latitude: 55.86565599709542
+      longitude: -4.256483458422198
+      expectedVenue: 'citizenM Glasgow'
+    - latitude: 55.86360903165831
+      longitude: -4.264894865603752
+      expectedVenue: 'Malmaison Glasgow'
+    - latitude: 55.861971381586685
+      longitude: -4.248501204307574
+      expectedVenue: 'The Z Hotel Glasgow'
+    - latitude: 55.85972552126845
+      longitude: -4.250539683054887
+      expectedVenue: 'Paesano Pizza'
+    - latitude: 55.86565599709542
+      longitude: -4.256483458422198
+      expectedVenue: 'citizenM Glasgow'
+    - latitude: 55.86360903165831
+      longitude: -4.264894865603752
+      expectedVenue: 'Malmaison Glasgow'
+    - latitude: 55.861971381586685
+      longitude: -4.248501204307574
+      expectedVenue: 'The Z Hotel Glasgow'
+    - latitude: 55.85972552126845
+      longitude: -4.250539683054887
+      expectedVenue: 'Paesano Pizza'
+    - latitude: 55.86565599709542
+      longitude: -4.256483458422198
+      expectedVenue: 'citizenM Glasgow'
+    - latitude: 55.86360903165831
+      longitude: -4.264894865603752
+      expectedVenue: 'Malmaison Glasgow'
+    - latitude: 55.861971381586685
+      longitude: -4.248501204307574
+      expectedVenue: 'The Z Hotel Glasgow'
+    - latitude: 55.85972552126845
+      longitude: -4.250539683054887
+      expectedVenue: 'Paesano Pizza'

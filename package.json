@@ -20,7 +20,7 @@
     "@react-navigation/stack": "^5.12.3",
     "aws-sdk": "^2.785.0",
     "axios": "^0.21.0",
-    "expo": "~39.0.2",
+    "expo": "^39.0.2",
     "expo-asset": "~8.2.0",
     "expo-constants": "~9.2.0",
     "expo-document-picker": "~8.4.0",
@@ -34,7 +34,10 @@
     "expo-status-bar": "~1.0.2",
     "expo-task-manager": "~8.5.0",
     "expo-updates": "~0.3.2",
+    "js-yaml": "^3.14.0",
     "lodash": "^4.17.20",
+    "mobx": "^5.15.5",
+    "mobx-react": "^6.2.5",
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "react-native": "~0.63.3",
@@ -48,9 +51,7 @@
     "react-native-unimodules": "~0.11.0",
     "react-native-web": "~0.13.12",
     "realm": "^10.0.1",
-    "uuid": "3.4.0",
-    "mobx": "^5.15.5",
-    "mobx-react": "^6.2.5"
+    "uuid": "3.4.0"
   },
   "devDependencies": {
     "@babel/core": "~7.9.0",
