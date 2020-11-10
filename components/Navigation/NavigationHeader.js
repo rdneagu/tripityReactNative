@@ -9,7 +9,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 
 /* Community packages */
-import { observable, action, computed } from "mobx"
+import { observable, computed, action } from "mobx"
 import { observer, inject } from "mobx-react"
 
 /* App library */

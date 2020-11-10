@@ -404,7 +404,7 @@ class ScreenMainSimulator extends React.Component {
           expectedVenue: ping.expectedVenue,
         })
         await delay(2500);
-      } catch(e) {
+      } catch(err) {
         logger.error('SIM: sim_sendPing failed with err ->', err.message);
         logger.debug('SIM: Automatic retry in 5 seconds');
         await delay(5000);
@@ -469,7 +469,7 @@ class ScreenMainSimulator extends React.Component {
         await this.runScenario(scenario);
         this.scenario.success = true;
       } catch(err) {
-        logger.error(err);
+        logger.error('Simulator.screen.loadScenario >', err.message);
         this.scenario.failed = err?.message || err;
       }
     }

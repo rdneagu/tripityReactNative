@@ -84,7 +84,6 @@ class Dialog {
       dismissable: dismissable,
       buttons,
     });
-    logger.info(`Dialog ${title} is now on screen`);
   }
 
   /**

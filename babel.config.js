@@ -5,7 +5,8 @@ module.exports = function(api) {
     plugins: [
       ["@babel/plugin-transform-flow-strip-types"],
       ["@babel/plugin-proposal-decorators", { "legacy": true }],
-      ["@babel/plugin-proposal-class-properties", { "loose": true }]
+      ["@babel/plugin-proposal-class-properties", { "loose": true }],
+      "transform-inline-environment-variables",
     ]
   };
 };

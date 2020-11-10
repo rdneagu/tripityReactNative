@@ -31,20 +31,24 @@ class Store {
   @action.bound
   async OnApplicationReady() {
     try {
+      logger.info('store.OnApplicationReady > Initializing App');
       // Initialize AWS
-      AWS.ready();
+      // AWS.ready();
 
       // Set Mapbox token and disable telemetry
       Mapbox.setAccessToken('pk.eyJ1IjoiZGF2aWRwYWciLCJhIjoiY2szb3FwamRvMDFnMDNtcDA2bHV0ZWpwNCJ9.vY5NCGfl39eGMZozkUM9LA');
       Mapbox.setTelemetryEnabled(false);
 
+      logger.info('store.OnApplicationReady > Initializing Navigation');
       // Initialize navigation ref
       this.Navigation.ready();
 
+      logger.info('store.OnApplicationReady > Loading Realm');
       // Open Realm DB and get the user's session
       await Realm.openRealm();
       // Realm.clearRealm();
 
+      logger.info('store.OnApplicationReady > Retrieving user session');
       // Create a loader for user session authentication
       this.Loading.createLoader(async () => {
         await this.User.getUserSession();
@@ -54,8 +58,8 @@ class Store {
         failMessage: 'Authentication failed',
         obligatory: true,
       });
-    } catch(e) {
-      logger.error(e);
+    } catch(err) {
+      logger.error('store.OnApplicationReady >', err.message);
     }
   }
 }

@@ -56,7 +56,7 @@ class ScreenAuthCountry extends React.Component {
       onConfirm: {
         fn: () => form.submit(this.fields, this.props.store.User.setHome),
       }
-    })    
+    })
   }
 
   render() {

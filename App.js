@@ -1,6 +1,6 @@
 /* React packages */
 import React from 'react';
-import { StyleSheet, ImageBackground, SafeAreaView, View } from 'react-native';
+import { Dimensions, StyleSheet, ImageBackground, SafeAreaView, View, FlatList, TouchableOpacity, Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { enableScreens } from 'react-native-screens';
 enableScreens();
@@ -21,20 +21,17 @@ import ReactRoutes from './routes';
 
 /* Community packages */
 import _ from 'lodash';
-import { configure, observable, action } from "mobx"
+import { observable, action } from "mobx"
 import { observer, Provider } from "mobx-react"
-configure({
-  enforceActions: "never",
-})
 
 /* App library */
 import TptyCipher from './lib/cipher';
-import logger from './lib/log';
 import TptyTasks from './lib/tasks';
+import logger from './lib/log';
 import TptyTrip from './lib/trip';
 
 /* App components */
-import { OverlayLoading, Dialog } from './components';
+import { OverlayLoading, Dialog, StyledText } from './components';
 
 /* Initialize location and geofencing tasks */
 TptyTasks.defineLocationTask(async ({ data, error }) => {
@@ -57,7 +54,7 @@ TptyTasks.defineLocationTask(async ({ data, error }) => {
 
 TptyTasks.defineGeofencingTask(async ({ data: { eventType, region }, error }) => {
   if (error) {
-    logger.error(error.message);
+    logger.error('TptyTasks.defineGeofencingTask >', error.message);
     return;
   }
 
@@ -78,11 +75,9 @@ TptyTasks.defineGeofencingTask(async ({ data: { eventType, region }, error }) =>
 class App extends React.Component {
   @observable assetsReady = false;
 
-  constructor() {
-    super();
-  }
   @action.bound
   async loadAssets() {
+    logger.info('App > Loading assets');
     SplashScreen.preventAutoHideAsync();
     // Generate encryption key
     await TptyCipher.generateKey();
@@ -100,18 +95,35 @@ class App extends React.Component {
       'Nunito-SemiBold': require('./assets/fonts/Nunito-SemiBold.ttf'),
       'Nunito-Bold': require('./assets/fonts/Nunito-Bold.ttf'),
       'Nunito-Black': require('./assets/fonts/Nunito-Black.ttf'),
+      'FiraMono-Regular': require('./assets/fonts/FiraMono-Regular.ttf'),
+      'FiraMono-Medium': require('./assets/fonts/FiraMono-Medium.ttf'),
+      'FiraMono-Bold': require('./assets/fonts/FiraMono-Bold.ttf'),
     });
     this.assetsReady = true;
-    console.log(this.assetsReady);
+    logger.success('App > Assets loaded');
     SplashScreen.hideAsync();
   }
 
   async componentDidMount() {
     try {
       await this.loadAssets();
-    } catch (e) {
-      logger.error(e);
+    } catch (err) {
+      logger.error('App.componentDidMount >', err?.message || err);
     }
+  }
+
+  showLogs = () => {
+    store.Dialog.showDialog({
+      title: 'Logs',
+      component: <Logs />,
+      onCancel: {
+        text: 'Clear',
+        fn: () => logger.clear(),
+      },
+      onConfirm: {
+        text: 'Close',
+      },
+    })
   }
 
   render() {
@@ -126,12 +138,43 @@ class App extends React.Component {
             <Provider store={store}>
               <ReactRoutes />
             </Provider>
+            <TouchableOpacity style={styles.bug} onPress={this.showLogs}>
+              <Ionicons name="ios-bug" size={20} color='white' />
+            </TouchableOpacity>
             <OverlayLoading />
-            <Dialog />
+            <Dialog />           
           </SafeAreaView>
         </NavigationContainer>
       )
     }
+  }
+}
+
+class Logs extends React.PureComponent {
+  renderLogItem = ({ item }) => {
+    const bgColor = (item.id % 2) == 0 ? '#383838' : 'transparent';
+    return (
+      <View style={{ paddingVertical: 2 }}>
+        <Text style={{ fontFamily: 'FiraMono-Regular', fontSize: 12, color: item.color, backgroundColor: bgColor }}>{item.id + 1} {item.msg}</Text>
+      </View>
+    )
+  }
+
+  render() {
+    return (
+      <View style={{ maxHeight: Dimensions.get('window').height - 300 }}>
+        <FlatList
+          data={logger.logs.toJS()}
+          renderItem={this.renderLogItem}
+          keyExtractor={item => (item.id + 1).toString()}
+          ListEmptyComponent={
+            <View style={{ alignItems: 'center' }}>
+              <StyledText style={{ marginBottom: 10 }} weight="semibold">No logs found</StyledText>
+            </View>
+          }
+        />
+      </View>
+    )
   }
 }
 
@@ -145,6 +188,11 @@ const styles = StyleSheet.create({
     height: '100%',
     width: '100%',
     resizeMode: 'cover',
+  },
+  bug: {
+    position: 'absolute',
+    top: 20,
+    right: 20,
   },
 });
 

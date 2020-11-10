@@ -58,8 +58,8 @@ class Navigation {
         throw 'screenData() attempted to get screen data on unitialized navigationRef';
       }
       return this.screens[this.currentScreen];
-    } catch(e) {
-      logger.error(e);
+    } catch(err) {
+      logger.error('store.Navigation.screenData >', err.message);
     }
   }
 
@@ -80,8 +80,8 @@ class Navigation {
         state = routes[index].state;
       }
       return path;  
-    } catch(e) {
-      logger.error(e);
+    } catch(err) {
+      logger.error('store.Navigation.screenPath >', err.message);
     }
   }
 
@@ -96,8 +96,8 @@ class Navigation {
         state = state.routes[state.index].state;
       }
       return state;
-    } catch(e) {
-      logger.error(e);
+    } catch(err) {
+      logger.error('store.Navigation.currentState >', err.message);
     }
   }
 
@@ -108,8 +108,8 @@ class Navigation {
         throw 'currentRoute() attempted to get current route on unitialized navigationRef';
       }
       return this.currentState.routes[this.currentState.index];
-    } catch(e) {
-      logger.error(e);
+    } catch(err) {
+      logger.error('store.Navigation.currentRoute >', err.message);
     }
   }
 
@@ -120,8 +120,8 @@ class Navigation {
         throw 'currentScreen() attempted to get current screen on unitialized navigationRef';
       }
       return this.screenPath.screen;
-    } catch(e) {
-      logger.error(e);
+    } catch(err) {
+      logger.error('store.Navigation.currentScreen >', err.message);
     }
   }
 

@@ -72,8 +72,8 @@ class User {
       }
       // Save the user object in memory and in realm DB
       await this.setUser(user, local);
-    } catch (e) {
-      logger.error('getUserSession() ->', e);
+    } catch (err) {
+      logger.error('store.User.getUserSession >', err.message);
     }
   }
 
@@ -180,7 +180,7 @@ class User {
             const conditionNew = (!this.user.trips.find(local => trip.tripId === local.tripId));
             return (conditionUpdated || conditionNew);
           });
-          logger.info(tripsToSync);
+
           await Realm.write((realm) => {
             tripsToSync.forEach(trip => {
               const realmTrip = realm.create('Trip', trip, 'all');
@@ -195,8 +195,8 @@ class User {
       }
 
       await this.startHomeGeofencing();
-    } catch(e) {
-      logger.error('setUser() ->', e);
+    } catch(err) {
+      logger.error('store.User.setUser >', err.message);
     }
   }
 
@@ -266,8 +266,8 @@ class User {
         radius: 20 * 1000,
       }];
       await TptyTasks.restartGeofencing(regions);
-    } catch(e) {
-      logger.error('startHomeGeofencing() ->', e);
+    } catch(err) {
+      logger.error('store.User.startHomeGeofencing >', err.message);
     }
   }
 
@@ -281,8 +281,8 @@ class User {
       }
 
       await TptyTasks.stopGeofencing();
-    } catch(e) {
-      logger.error('stopHomeGeofencing() ->', e);
+    } catch(err) {
+      logger.error('store.User.stopHomeGeofencing >', err.message);
     }
   }
 
