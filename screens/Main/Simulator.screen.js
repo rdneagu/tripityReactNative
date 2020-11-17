@@ -400,6 +400,8 @@ class ScreenMainSimulator extends React.Component {
         const venues = await this.sim_fetchVenue(ping, true);
         this.scenario.sim.result.pings.push({
           key: i,
+          latitude: ping.latitude,
+          longitude: ping.longitude,
           venues,
           expectedVenue: ping.expectedVenue,
         })
@@ -483,15 +485,25 @@ class ScreenMainSimulator extends React.Component {
 
 
   renderCoordsResult = ({ item }) => {
-    const nOfVenues = 5;
+    const numOfVenues = 5;
+    let result;
+    if (item.venues) {
+      result =  <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                  <StyledText weight="bold">Top {numOfVenues} venues: </StyledText>
+                  {item.venues.slice(0, numOfVenues).map((venue, i) => {
+                    const closestMatch = venue.name.split(' ').find(s => item.expectedVenue.split(' ').find(e => e.toLowerCase().indexOf(s.toLowerCase()) !== -1));
+                    return <StyledText weight={closestMatch ? 'bold' : null} color={closestMatch ? '#0f0' : '#ff6347'}>{venue.name}{(i !== numOfVenues - 1) ? `, `  : ''}</StyledText>
+                  })}
+                </View>
+    } else {
+      result =  <>
+                  <StyledText weight="bold" color="#ff6347">No venue found at this location</StyledText>
+                  <StyledText>Latitude: {item.latitude}</StyledText>
+                  <StyledText>Longitude: {item.longitude}</StyledText>
+                </>
+    }
     return  <View style={styles.item}>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-                <StyledText weight="bold">Top 5 venues: </StyledText>
-                {item.venues.slice(0, nOfVenues).map((venue, i) => {
-                  const closestMatch = venue.name.split(' ').find(s => item.expectedVenue.split(' ').find(e => e.toLowerCase().indexOf(s.toLowerCase()) !== -1));
-                  return <StyledText weight={closestMatch ? 'bold' : null} color={closestMatch ? '#0f0' : '#ff6347'}>{venue.name}{(i !== nOfVenues - 1) ? `, `  : ''}</StyledText>
-                })}
-              </View>
+              {result}
               <StyledText><StyledText weight="bold">Expected venue:</StyledText> {item.expectedVenue}</StyledText>
             </View>
               
@@ -503,7 +515,7 @@ class ScreenMainSimulator extends React.Component {
       if (this.scenario.data?.type === SCENARIO_TYPE.TYPE_COORDS) {
         scenarioResult =  <View style={{ height: 200, alignItems: 'center' }}>
                             <FlatList
-                              contentContainerStyle={{ width: '100%', alignItems: 'center' }}
+                              contentContainerStyle={{ width: '100%' }}
                               data={this.scenario.sim.result.pings.slice()}
                               renderItem={this.renderCoordsResult}
                               keyExtractor={item => item.id}
