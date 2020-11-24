@@ -208,14 +208,14 @@ class ScreenMainSimulator extends React.Component {
   }
 
   /**
-   * Copy of TptyTrip.OnRegionEnter refactored for simulation purposes
+   * Copy of TripStore.OnRegionEnter refactored for simulation purposes
    */
   @action.bound
   sim_OnRegionEnter(region) {
     const scenario = this.scenario.data;
     const timestamp = scenario.pings[scenario.pings.length - 1].timestamp + (scenario.interval * 1000)
     if (scenario.type === SCENARIO_TYPE.TYPE_REAL) {
-      return TptyTrip.OnRegionEnter(region, timestamp);
+      return this.props.store.TripStore.OnRegionEnter(region, timestamp);
     }
 
     logger.debug('SIM: Entered region');
@@ -234,14 +234,14 @@ class ScreenMainSimulator extends React.Component {
   }
 
   /**
-   * Copy of TptyTrip.OnRegionLeave refactored for simulation purposes
+   * Copy of TripStore.OnRegionLeave refactored for simulation purposes
    */
   @action.bound
   sim_OnRegionLeave(region) {
     const scenario = this.scenario.data;
     const timestamp = this.scenario.sim.initialTime;
     if (scenario.type === SCENARIO_TYPE.TYPE_REAL) {
-      return TptyTrip.OnRegionLeave(region, timestamp);
+      return this.props.store.TripStore.OnRegionLeave(region, timestamp);
     }
 
     logger.debug('SIM: Left region');
@@ -262,12 +262,12 @@ class ScreenMainSimulator extends React.Component {
   }
 
   /**
-   * Copy of TptyTrip.OnLocationPing refactored for simulation purposes
+   * Copy of TripStore.OnLocationPing refactored for simulation purposes
    */
   @action.bound
   sim_OnLocationPing(ping) {
     if (this.scenario.data.type === SCENARIO_TYPE.TYPE_REAL) {
-      return TptyTrip.OnLocationPing(ping, ping.timestamp);
+      return this.props.store.TripStore.OnLocationPing(ping, ping.timestamp);
     }
 
     const currentPing = {
@@ -286,11 +286,11 @@ class ScreenMainSimulator extends React.Component {
    * @param {*} updateFn 
    */
   @action.bound
-  async sim_parseTrips(updateFn) {
+  async sim_parseTrips() {
     if (this.scenario.data.type === SCENARIO_TYPE.TYPE_REAL) {
-      return await TptyTrip.parseTrips(updateFn);
+      return await this.props.store.UserStore.user.parseTrips();
     }
-    await this.sim_parsePings(this.scenario.sim.result, updateFn);
+    await this.sim_parsePings(this.scenario.sim.result);
   }
 
   /**
@@ -529,7 +529,7 @@ class ScreenMainSimulator extends React.Component {
     }
     return (
       <View style={styles.content}>
-        {this.props.store.User.isAdmin()
+        {this.props.store.UserStore.isAdmin()
           ? <View style={{ flex: 1 }}>
               <View style={{ margin: 10, alignItems: 'center' }}>
                 <StyledText style={{ marginVertical: 10 }} weight='bold'>Scenario</StyledText>

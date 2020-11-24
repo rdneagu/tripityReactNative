@@ -21,9 +21,9 @@ import { Input, StyledButton, StyledText } from '../../components';
 @observer
 class ScreenAuthCountry extends React.Component {
   @observable fields = {
-    homeCountry: { icon: <Ionicons name="ios-pin" />, label: 'COUNTRY', placeholder: 'Home country', value: this.props.store.User.user.homeCountry },
-    homeCity: { icon: <Ionicons name="ios-pin" />, label: 'CITY', placeholder: 'Home city', value: this.props.store.User.user.homeCity },
-    postCode: { icon: <Ionicons name="ios-pin" />, label: 'POSTCODE', placeholder: 'Post code', value: this.props.store.User.user.postCode },
+    homeCountry: { icon: <Ionicons name="ios-pin" />, label: 'COUNTRY', placeholder: 'Home country', value: this.props.store.UserStore.user.homeCountry },
+    homeCity: { icon: <Ionicons name="ios-pin" />, label: 'CITY', placeholder: 'Home city', value: this.props.store.UserStore.user.homeCity },
+    postCode: { icon: <Ionicons name="ios-pin" />, label: 'POSTCODE', placeholder: 'Post code', value: this.props.store.UserStore.user.postCode },
   }
 
   constructor() {
@@ -54,7 +54,7 @@ class ScreenAuthCountry extends React.Component {
         text: 'Change',
       },
       onConfirm: {
-        fn: () => form.submit(this.fields, this.props.store.User.setHome),
+        fn: () => form.submit(this.fields, this.props.store.UserStore.update),
       }
     })
   }

@@ -30,7 +30,7 @@ class ScreenAuthLogin extends React.Component {
 
   @action.bound
   authenticate() {
-    form.submit(this.fields, this.props.store.User.authenticate);
+    form.submit(this.fields, this.props.store.UserStore.authenticate);
   }
 
   render() {

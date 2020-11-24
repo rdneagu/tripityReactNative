@@ -43,7 +43,7 @@ class ScreenAuthRegister extends React.Component {
 
   @action.bound
   register() {
-    form.submit(this.fields, this.props.store.User.register);
+    form.submit(this.fields, this.props.store.UserStore.register);
   }
 
   render() {

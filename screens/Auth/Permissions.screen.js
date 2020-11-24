@@ -58,7 +58,7 @@ class ScreenAuthPermissions extends React.Component {
 
   @action.bound
   finish() {
-    this.props.store.User.setPermissions();
+    this.props.store.UserStore.setPermissions();
   }
 
   render() {

@@ -14,8 +14,6 @@ import { observable, action } from "mobx"
 import { observer, inject } from "mobx-react"
 
 /* App library */
-import Realm from '../../lib/realm';
-import TptyTrip from '../../lib/trip';
 import logger from '../../lib/log';
 
 /* App components */
@@ -54,7 +52,7 @@ class ScreenMainTrips extends React.PureComponent {
 
   @action.bound
   generateTripsList() {
-    const trips = TptyTrip.getAllTrips();
+    const trips = this.props.store.TripStore.getAllTrips();
 
     this.tripsList = _.map(trips, (trip => {
       const pings = trip.pings;

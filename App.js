@@ -28,7 +28,6 @@ import { observer, Provider } from "mobx-react"
 import TptyCipher from './lib/cipher';
 import TptyTasks from './lib/tasks';
 import logger from './lib/log';
-import TptyTrip from './lib/trip';
 
 /* App components */
 import { OverlayLoading, Dialog, StyledText } from './components';
@@ -48,7 +47,7 @@ TptyTasks.defineLocationTask(async ({ data, error }) => {
       logger.warn(`Current time: ${new Date(Date.now())}`);
       return;
     }
-    TptyTrip.OnLocationPing(lastLocation);
+    store.TripStore.OnLocationPing(lastLocation);
   }
 });
 
@@ -58,16 +57,16 @@ TptyTasks.defineGeofencingTask(async ({ data: { eventType, region }, error }) =>
     return;
   }
 
-  if (!store.User.getLastLogged()) {
-    await store.User.stopHomeGeofencing();
+  if (!store.UserStore.getLastLogged()) {
+    await store.UserStore.stopHomeGeofencing();
     return;
   }
 
   switch (eventType) {
     case Location.GeofencingEventType.Enter: 
-      return TptyTrip.OnRegionEnter(region);
+      return store.TripStore.OnRegionEnter(region);
     case Location.GeofencingEventType.Exit:
-      return TptyTrip.OnRegionLeave(region);
+      return store.TripStore.OnRegionLeave(region);
   }
 });
 

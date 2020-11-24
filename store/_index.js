@@ -1,7 +1,8 @@
-import User from './User';
+import UserStore from './UserStore';
 import Navigation from './Navigation';
 import Loading from './Loading';
 import Dialog from './Dialog';
+import TripStore from './TripStore';
 
 /* Community packages */
 import { observable, action, computed } from "mobx"
@@ -16,11 +17,12 @@ import Mapbox from '@react-native-mapbox-gl/maps';
 class Store {
   @observable applicationReady = false;
 
-  constructor() {
-    this.User = new User(this);
+  constructor() { 
+    this.User = new UserStore(this);
     this.Navigation = new Navigation(this);
     this.Loading = new Loading(this);
     this.Dialog = new Dialog(this);
+    this.TripStore = new TripStore(this);
   }
 
   @computed
@@ -51,7 +53,7 @@ class Store {
       logger.info('store.OnApplicationReady > Retrieving user session');
       // Create a loader for user session authentication
       this.Loading.createLoader(async () => {
-        await this.User.getUserSession();
+        await this.UserStore.getUserSession();
         this.applicationReady = true;
       }, { 
         message: 'Authenticating',

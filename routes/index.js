@@ -228,22 +228,22 @@ class AuthStack extends PureComponent {
     store.Navigation.addScreen({
       name: this.#initialRoute,
       component: ScreenAuthLogin,
-      condition: () => !store.User.user,
+      condition: () => !store.UserStore.user,
     });
     store.Navigation.addScreen({
       name: 'Auth.Register',
       component: ScreenAuthRegister,
-      condition: () => !store.User.user,
+      condition: () => !store.UserStore.user,
     });
     store.Navigation.addScreen({
       name: 'Auth.Country',
       component: ScreenAuthCountry,
-      condition: () => !!store.User.user,
+      condition: () => !!store.UserStore.user,
     });
     store.Navigation.addScreen({
       name: 'Auth.Permissions',
       component: ScreenAuthPermissions,
-      condition: () => !!store.User.user,
+      condition: () => !!store.UserStore.user,
     });
   }
 
