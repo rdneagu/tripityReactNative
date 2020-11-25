@@ -1,6 +1,6 @@
 /* Community packages */
-import { observable, action, computed } from 'mobx';
 import _ from 'lodash';
+import { observable, action, computed } from 'mobx';
 
 /* App classes */
 import Trip from './Trip';
@@ -40,6 +40,11 @@ class User {
       throw new CUserError('id is missing from the user object!');
     }
     this.setProperties(props);
+  }
+
+  @computed
+  get isAdmin() {
+    return (this.permission === 31);
   }
 
   @computed
@@ -137,13 +142,13 @@ class User {
       this.setHomeCountry(props.homeCountry);
       this.setHomeCity(props.homeCity);
       this.setPostCode(props.postCode);
-      if (props.trips.length) {
+      if (props.trips?.length) {
         this.setTrips(props.trips);
       }
       this.setToken(props.token);
       this.setExpiration(props.expiration);
-      this.isLogged(props.isLogged);
-      this.loggedAt(props.loggedAt);
+      this.setLogged(props.isLogged);
+      this.setLoggedAt(props.loggedAt);
     } catch(err) {
       logger.error(`${err.name}: ${err.message}`);
       logger.error(err.stack);
@@ -155,7 +160,7 @@ class User {
     try {
       const result = Realm.toJSON(Realm.db.objectForPrimaryKey('User', this.userId));
       if (!result) {
-        throw new CTripError(`Could not reset the User (${this.userId})`);
+        throw new CUserError(`Could not reset the User (${this.userId})`);
       }
       this.setProperties(result);
     } catch(err) {
@@ -164,11 +169,11 @@ class User {
     }
   }
 
-  async parseTrips(trip) {
+  async parseTrips(trip, statusAck) {
     // Retrieve the last logged user (in background) or current user (in foreground)
     const user = await this.rootStore.UserStore.getLastLogged();
     if (!user) {
-      throw new Error('The system pinged with no user authenticated');
+      throw new CUserError('The system pinged with no user authenticated');
     }
 
     // Parse specific trip or all trips that have unparsed pings
@@ -178,7 +183,7 @@ class User {
     // Go through each of the unparsed ping of each trip that has unparsed pings
     const promises = trips.map(async trip => {
       logger.info(`Current trip: id=${trip.tripId} | pings=${trip.pings.length}`);
-      await trip.parsePings(null);
+      await trip.parsePings(null, statusAck);
       trip.setSynced(Date.now());
       trip.save();
 
@@ -216,7 +221,7 @@ class User {
 
   // @override
   toString() {
-    return `{ User: ${_.map(Object.getOwnPropertyNames(new User), prop => this[prop]).join(', ')} }\n`;
+    return `{ User: ${Object.getOwnPropertyNames(new User).map(prop => this[prop]).join(', ')} }\n`;
   }
 }
 

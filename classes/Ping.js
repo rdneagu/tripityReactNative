@@ -1,4 +1,5 @@
 /* Community packages */
+import _ from 'lodash';
 import { observable, action } from 'mobx';
 
 /* App classes */
@@ -23,12 +24,12 @@ class Ping {
   static FLIGHT_DISTANCE_TRIGGER_THRESHOLD = 80; // in KM
   static FLIGHT_ALTITUDE_TRIGGER_THRESHOLD = 4000; // in m
   static INTERVAL = 900; // in seconds
-  static TIME_REQUIRED_VISIT = (Ping.INTERVAL + Ping.INTERVAL/2); // in seconds
+  static TIME_REQUIRED_VISIT = (this.INTERVAL + this.INTERVAL/2); // in seconds
 
   @observable pingId;
   @observable latitude;
   @observable longitude;
-  @observabel altitude = 0;
+  @observable altitude = 0;
   @observable country = null;
   @observable city = null;
   @observable timestamp = Date.now();
@@ -268,7 +269,7 @@ class Ping {
 
   // @override
   toString() {
-    return `{ Ping: ${_.map(Object.getOwnPropertyNames(new Ping), prop => this[prop]).join(', ')} }\n`;
+    return `{ Ping: ${Object.getOwnPropertyNames(new Ping).map(prop => this[prop]).join(', ')} }\n`;
   }
 }
 

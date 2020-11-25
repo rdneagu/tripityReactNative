@@ -8,10 +8,12 @@ import { observable, reaction, action, computed } from 'mobx';
 import axios from 'axios';
 import _ from 'lodash';
 
+/* App classes */
+import User from '../classes/User';
+
 /* App library */
 import AWS from '../lib/aws';
 import Realm from '../lib/realm';
-import * as _Realm from 'realm';
 import logger from '../lib/log';
 import TptyTasks from '../lib/tasks';
 
@@ -24,7 +26,7 @@ const AUTH_STEP = {
   STEP_PERMISSIONS: 3,
 }
 
-class User {
+class UserStore {
   @observable user;
   @observable auth = {
     step: AUTH_STEP.STEP_SPLASH,
@@ -68,8 +70,8 @@ class User {
       });
       await this.setUser(user);
     } catch (err) {
-      logger.error('store.User.getUserSession >', err.message);
-      await Realm.write(() => Realm.db.delete(lastLogged));
+      logger.error('store.UserStore.getUserSession >', err.message);
+      await Realm.write(realm => realm.delete(lastLogged));
       this.changeStep(AUTH_STEP.STEP_LOGIN);
     }
   }
@@ -134,6 +136,7 @@ class User {
   @action.bound
   async setUser(user={}) {
     try {
+      logger.debug(user);
       this.user = new User(user);
 
       const requireSync = (Date.now() - (this.user.loggedAt || 0) > 60 * 1000);
@@ -285,10 +288,6 @@ class User {
     return { homeCountry, homeCity, homeCoords };
   }
 
-  isAdmin() {
-    return (this.user?.permission === 31);
-  }
-
   @computed
   get homeLocation() {
     return {
@@ -304,4 +303,4 @@ class User {
   }
 }
 
-export default User;
+export default UserStore;

@@ -88,7 +88,7 @@ class Photo {
 
   // @override
   toString() {
-    return `{ Photo: ${_.map(Object.getOwnPropertyNames(new Photo), prop => this[prop]).join(', ')} }\n`;
+    return `{ Photo: ${Object.getOwnPropertyNames(new Photo).map(prop => this[prop]).join(', ')} }\n`;
   }
 }
 

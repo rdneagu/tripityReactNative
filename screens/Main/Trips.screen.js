@@ -8,6 +8,9 @@ import {
 /* Expo packages */
 import { Entypo } from '@expo/vector-icons';
 
+/* MobX Store */
+import store from '../../store/_index';
+
 /* Community packages */
 import _ from 'lodash';
 import { observable, action } from "mobx"
@@ -36,7 +39,6 @@ class TripItem extends React.PureComponent {
   }  
 }
 
-@inject('store')
 @observer
 class ScreenMainTrips extends React.PureComponent {
   @observable tripsList = [];
@@ -52,7 +54,7 @@ class ScreenMainTrips extends React.PureComponent {
 
   @action.bound
   generateTripsList() {
-    const trips = this.props.store.TripStore.getAllTrips();
+    const trips = store.TripStore.getAllTrips();
 
     this.tripsList = _.map(trips, (trip => {
       const pings = trip.pings;

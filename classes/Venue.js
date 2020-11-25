@@ -46,12 +46,12 @@ class Photo {
 
   @action.bound
   setContact(contact) {
-    this.contact = JSON.parse(contact);
+    this.contact = JSON.parse(contact || null);
   }
 
   @action.bound
   setLocation(location) {
-    this.location = JSON.parse(location);
+    this.location = JSON.parse(location || null);
   }
 
   @action.bound
@@ -61,12 +61,12 @@ class Photo {
 
   @action.bound
   setDescription(description) {
-    this.description = JSON.parse(description);
+    this.description = JSON.parse(description || null);
   }
 
   @action.bound
   setHours(hours) {
-    this.hours = JSON.parse(hours);
+    this.hours = JSON.parse(hours || null);
   }
 
   @action.bound
@@ -120,7 +120,7 @@ class Photo {
 
   // @override
   toString() {
-    return `{ Venue: ${_.map(Object.getOwnPropertyNames(new Venue), prop => this[prop]).join(', ')} }\n`;
+    return `{ Venue: ${Object.getOwnPropertyNames(new Venue).map(prop => this[prop]).join(', ')} }\n`;
   }
 }
 

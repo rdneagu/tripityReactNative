@@ -18,7 +18,7 @@ class Store {
   @observable applicationReady = false;
 
   constructor() { 
-    this.User = new UserStore(this);
+    this.UserStore = new UserStore(this);
     this.Navigation = new Navigation(this);
     this.Loading = new Loading(this);
     this.Dialog = new Dialog(this);

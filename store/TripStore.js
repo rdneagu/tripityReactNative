@@ -23,7 +23,7 @@ class TripStore {
   static TRIP_DISTANCE_TRIGGER_THRESHOLD = 40; // in KM
 
   constructor(rootStore) {
-    this.rootStore = rootStore;
+    this.store = rootStore;
   }
 
   /**
@@ -42,7 +42,7 @@ class TripStore {
   }
 
   getAllTrips() {
-    return this.rootStore.UserStore.user?.trips;
+    return this.store.UserStore.user?.trips;
   }
 
   /**
@@ -64,7 +64,7 @@ class TripStore {
     try {
       logger.debug(`Ping received: ${new Date(ping.timestamp)}`);
 
-      const user = await this.rootStore.UserStore.getLastLogged();
+      const user = await this.store.UserStore.getLastLogged();
       if (!user) {
         throw new Error('The system pinged with no user authenticated');
       }
@@ -97,7 +97,7 @@ class TripStore {
     try {
       logger.debug('Entered region');
 
-      const user = await this.rootStore.UserStore.getLastLogged();
+      const user = await this.store.UserStore.getLastLogged();
       if (!user) {
         throw new Error('The system pinged with no user authenticated');
       }
@@ -129,7 +129,7 @@ class TripStore {
     try {
       logger.debug('Left region');
   
-      const user = await this.rootStore.UserStore.getLastLogged();
+      const user = await this.store.UserStore.getLastLogged();
       if (!user) {
         throw new Error('The system pinged with no user authenticated');
       }
@@ -160,14 +160,14 @@ class TripStore {
     }
   }
 
-  async parseTrips() {
+  async parseTrips(statusAck) {
     try {
       // Retrieve the last logged user (in background) or current user (in foreground)
-      const user = await this.rootStore.UserStore.getLastLogged();
+      const user = await this.store.UserStore.getLastLogged();
       if (!user) {
         throw new Error('The system pinged with no user authenticated');
       }
-      user.parseTrips(null);
+      user.parseTrips(null, statusAck);
     } catch(err) {
       logger.error('TripStore.parseTrips >', err.message);
     }
@@ -175,12 +175,12 @@ class TripStore {
 
   async parseMedia(sim) {
     try {
-      const user = await this.rootStore.UserStore.getLastLogged();
+      const user = await this.store.UserStore.getLastLogged();
       if (!user) {
         throw new Error('The system pinged with no user authenticated');
       }
 
-      const { homeCountry, homeCoords } = await this.rootStore.UserStore.getHomeLocation();
+      const { homeCountry, homeCoords } = await this.store.UserStore.getHomeLocation();
 
       logger.debug('User:', user.email);
       logger.info('Parsing images');

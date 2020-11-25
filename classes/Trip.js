@@ -1,6 +1,6 @@
 /* Community packages */
-import { observable, action, computed } from 'mobx';
 import _ from 'lodash';
+import { observable, action, computed } from 'mobx';
 
 /* App classes */
 import Ping from './Ping';
@@ -92,7 +92,7 @@ class Trip {
   setProperties(props={}) {
     try {
       this.setTripId(props.tripId);
-      if (props.pings.length) {
+      if (props.pings?.length) {
         this.setPings(props.pings);
       }
       this.setStarted(props.startedAt);
@@ -118,7 +118,7 @@ class Trip {
     }
   }
 
-  async parsePings(ping) {
+  async parsePings(ping, statusAck) {
     try {
       // Parse specific ping or all pings
       const pings = (ping) ? [ ping ] : this.pings;
@@ -127,6 +127,10 @@ class Trip {
       let pingsNum = (this.finishedAt) ? pings.length : pings.length - 1;
 
       for (let p = 0; p < pingsNum; p++) {
+        if (statusAck) {
+          statusAck(this, p);
+        }
+
         // Grab the previous ping related to the ping getting parsed
         const previousPing = this.findPreviousPing(pings[0]);
         const currentPing = pings[p];
@@ -220,7 +224,7 @@ class Trip {
 
   // @override
   toString() {
-    return `{ Trip: ${_.map(Object.getOwnPropertyNames(new Trip), prop => this[prop]).join(', ')} }\n`;
+    return `{ Trip: ${Object.getOwnPropertyNames(new Trip).map(prop => this[prop]).join(', ')} }\n`;
   }
 }
 
