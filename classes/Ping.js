@@ -53,11 +53,11 @@ class Ping {
   }
 
   isInFlight() {
-    return (this.isHighAltitude || this.isLongDistance || this.city === null);
+    return (this.isHighAltitude() || this.isLongDistance() || this.city === null);
   }
 
   isVisited(previousPing) {
-    return (this.getTimeBetweenCoords(previousPing) >= Ping.TIME_REQUIRED_VISIT && !this.transport)
+    return (previousPing.getTimeBetweenCoords(this) >= Ping.TIME_REQUIRED_VISIT && !this.transport);
   }
 
   /**
@@ -69,8 +69,8 @@ class Ping {
     }
     const t1 = this.timestamp;
     const t2 = to.timestamp;
-
-    return (t2 - t1) / 1000;
+  
+    return t2 - t1 / 1000;
   }
 
   /**
@@ -179,6 +179,9 @@ class Ping {
   @action.bound
   setProperties(props) {
     try {
+      if (!props) {
+        throw new CPingError("Cannot set props to Ping object cause props is not an object");
+      }
       this.setPingId(props.pingId);
       this.setLatitude(props.latitude);
       this.setLongitude(props.longitude);
@@ -189,7 +192,7 @@ class Ping {
       this.setDistance(props.distance);
       this.setTransport(props.transport);
       this.setVenue(props.venue);
-      if (props.photos.length) {
+      if (props.photos?.length) {
         this.setPhotos(props.photos);
       }
       this.setParsed(props.parsed);
@@ -269,7 +272,12 @@ class Ping {
 
   // @override
   toString() {
-    return `{ Ping: ${Object.getOwnPropertyNames(new Ping).map(prop => this[prop]).join(', ')} }\n`;
+    const props = Object.keys(this).filter(k => this[k]);
+    return `{ Ping: ${props.map(prop => {
+      if (this[prop]) {
+        return `${prop}=${this[prop].toString()}`;
+      }
+    }).join(', ')} }\n`;
   }
 }
 

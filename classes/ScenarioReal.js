@@ -5,7 +5,6 @@ import * as Location from 'expo-location';
 import store from '../store/_index';
 
 /* Community packages */
-import _ from 'lodash';
 import { action } from 'mobx';
 
 /* App classes */
@@ -22,20 +21,20 @@ class ScenarioReal extends Scenario {
     super(sim, props);
 
     if (props.country === null) {
-      throw new Scenario.CScenarioError('Scenario <country> is missing');
+      throw new Scenario.CScenarioValueError('Scenario <country> is missing');
     }
     if (props.city === null) {
-      throw new Scenario.CScenarioError('Scenario <city> is missing');
+      throw new Scenario.CScenarioValueError('Scenario <city> is missing');
     }
-    if (props.interval === null || _.isNaN(props.interval)) {
-      throw new Scenario.CScenarioError(`Scenario <interval> is not a number. Found ${props.interval}`);
+    if (!Number.isFinite(props.interval)) {
+      throw new Scenario.CScenarioValueError(`Scenario <interval> is not a number. Found ${props.interval}`);
     }
   }
 
   @action.bound
   async preRun() {
     const pings = this.data.pings;
-    const previousTimestamp = this.startTimestamp;
+    let previousTimestamp = this.startTimestamp;
     for (let i = 0; i < pings.length; i++) {
       const percentage = Math.round((i + 1) / pings.length * 100);
       this.simulator.setStatus(undefined, `Preparing pings [${percentage}%]`);
@@ -48,12 +47,12 @@ class ScenarioReal extends Scenario {
 
       this.data.pings[i] = {
         coords: {
-          latitude,
-          longitude,
-          altitude,
+          latitude: this.data.pings[i].latitude,
+          longitude: this.data.pings[i].longitude,
+          altitude: this.data.pings[i].altitude,
         },
-        timeOffset,
-        expectedVenue,
+        timeOffset: this.data.pings[i].timeOffset,
+        expectedVenue: this.data.pings[i].expectedVenue,
         timestamp: currentTimestamp,
       }
       await Scenario.delay(0);

@@ -170,30 +170,23 @@ class User {
   }
 
   async parseTrips(trip, statusAck) {
-    // Retrieve the last logged user (in background) or current user (in foreground)
-    const user = await this.rootStore.UserStore.getLastLogged();
-    if (!user) {
-      throw new CUserError('The system pinged with no user authenticated');
-    }
-
     // Parse specific trip or all trips that have unparsed pings
-    const trips = (trip) ? [ trip ] : user.trips.filter(trip => trip.pings.find(ping => !ping.parsed));
+    const trips = (trip) ? [ trip ] : this.trips.filter(trip => trip.pings.find(ping => !ping.parsed));
 
-    logger.debug('User:', user.email);
+    logger.debug('User:', this.email);
     // Go through each of the unparsed ping of each trip that has unparsed pings
-    const promises = trips.map(async trip => {
-      logger.info(`Current trip: id=${trip.tripId} | pings=${trip.pings.length}`);
-      await trip.parsePings(null, statusAck);
-      trip.setSynced(Date.now());
-      trip.save();
+    for (let t = 0; t < trips.length; t++) {
+      logger.info(`Current trip: id=${trips[t].tripId} | pings=${trips[t].pings.length}`);
+      await trips[t].parsePings(null, statusAck);
+      trips[t].setSync(Date.now());
+      trips[t].save();
 
       /* Synchronize trip */
       await AWS.invokeAPI('/trips/synchronize', {
         method: 'patch',
-        data: { trip }
+        data: { trip: trips[t] }
       });
-    })
-    await Promise.all(promises);
+    }
   }
 
   async save() {
@@ -221,7 +214,12 @@ class User {
 
   // @override
   toString() {
-    return `{ User: ${Object.getOwnPropertyNames(new User).map(prop => this[prop]).join(', ')} }\n`;
+    const props = Object.keys(this).filter(k => this[k]);
+    return `{ User: ${props.map(prop => {
+      if (this[prop]) {
+        return `${prop}=${this[prop].toString()}`;
+      }
+    }).join(', ')} }\n`;
   }
 }
 

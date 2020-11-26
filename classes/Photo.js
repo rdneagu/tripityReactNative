@@ -88,7 +88,12 @@ class Photo {
 
   // @override
   toString() {
-    return `{ Photo: ${Object.getOwnPropertyNames(new Photo).map(prop => this[prop]).join(', ')} }\n`;
+    const props = Object.keys(this).filter(k => this[k]);
+    return `{ Photo: ${props.map(prop => {
+      if (this[prop]) {
+        return `${prop}=${this[prop].toString()}`;
+      }
+    }).join(', ')} }\n`;
   }
 }
 

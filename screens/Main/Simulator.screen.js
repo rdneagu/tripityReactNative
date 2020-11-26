@@ -53,7 +53,6 @@ class ScreenMainSimulator extends React.Component {
 
   @action.bound
   async loadScenario() {
-    await this.simulator.loadScenario();
     await this.simulator.run();
   }
 

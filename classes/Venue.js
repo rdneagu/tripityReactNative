@@ -120,7 +120,12 @@ class Photo {
 
   // @override
   toString() {
-    return `{ Venue: ${Object.getOwnPropertyNames(new Venue).map(prop => this[prop]).join(', ')} }\n`;
+    const props = Object.keys(this).filter(k => this[k]);
+    return `{ Venue: ${props.map(prop => {
+      if (this[prop]) {
+        return `${prop}=${this[prop].toString()}`;
+      }
+    }).join(', ')} }\n`;
   }
 }
 

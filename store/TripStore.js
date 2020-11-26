@@ -74,7 +74,7 @@ class TripStore {
         throw new Error('Ping received when no trips have been found or all trips are finished!');
       }      
 
-      if (trip.lastPing && ping.timestamp < trip.lastPing.time + (INTERVAL * 1000)) {
+      if (trip.lastPing && ping.timestamp < trip.lastPing.time + (Ping.INTERVAL * 1000)) {
         throw new Error('Ping received too early!');
       }
 
@@ -87,7 +87,7 @@ class TripStore {
       });
       trip.save();
 
-      logger.debug(trip.lastPing);
+      logger.debug(trip.lastPing.toString());
     } catch(err) {
       logger.error('TripStore.OnLocationPing >', err.message);
     }
@@ -105,7 +105,6 @@ class TripStore {
       const lastTrip = user.lastTrip;
       // If the user has trips and the last one is not finished
       if (lastTrip && !lastTrip.finishedAt) {
-        logger.debug('Ending trip');
         // End the trip
         const ping = lastTrip.addPing({
           pingId: uuid_v4(),
@@ -116,6 +115,7 @@ class TripStore {
         });
         lastTrip.setFinished(ping.timestamp);
         lastTrip.save();
+        logger.debug('Ending trip');
       }
       if (!sim) {
         await TptyTasks.stopLocationUpdates();
@@ -137,7 +137,6 @@ class TripStore {
       const lastTrip = user.lastTrip;
       // If the user does not have any trips or the last trip has been finished 
       if (!lastTrip || lastTrip.finishedAt) {
-        logger.debug('Starting trip');
         // Create a new trip
         const trip = user.addTrip({
           tripId: uuid_v4(),
@@ -151,6 +150,7 @@ class TripStore {
         });
         trip.setStarted(ping.timestamp);
         user.save();
+        logger.debug('Starting trip');
       }
       if (!sim) {
         await TptyTasks.startLocationUpdates();
@@ -167,7 +167,7 @@ class TripStore {
       if (!user) {
         throw new Error('The system pinged with no user authenticated');
       }
-      user.parseTrips(null, statusAck);
+      await user.parseTrips(null, statusAck);
     } catch(err) {
       logger.error('TripStore.parseTrips >', err.message);
     }
@@ -241,7 +241,7 @@ class TripStore {
               });
               trip.addPing(lastPing);
               trip.setFinished(lastPing.timestamp);
-              trip.setSynced(Date.now());
+              trip.setSync(Date.now());
               user.addTrip(trip);
             }
             trip = null;
@@ -271,7 +271,7 @@ class TripStore {
             if (currentPing.distance !== null && currentPing.distance < 0.2) {
               logger.debug(`Photo with id ${assets[i].id} is within 200m of the first in batch`);
 
-              currentPing.mergePings(previousPing);
+              currentPing.merge(previousPing);
               trip.removePing('pop');
             }
 

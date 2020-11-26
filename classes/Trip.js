@@ -1,3 +1,6 @@
+/* Expo packages */
+import * as Location from 'expo-location';
+
 /* Community packages */
 import _ from 'lodash';
 import { observable, action, computed } from 'mobx';
@@ -6,6 +9,7 @@ import { observable, action, computed } from 'mobx';
 import Ping from './Ping';
 
 /* App library */
+import AWS from '../lib/aws';
 import Realm from '../lib/realm';
 import logger from '../lib/log';
 
@@ -28,6 +32,10 @@ class Trip {
 
   constructor(props) {
     this.setProperties(props);
+  }
+
+  static async delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   @computed
@@ -123,16 +131,13 @@ class Trip {
       // Parse specific ping or all pings
       const pings = (ping) ? [ ping ] : this.pings;
 
-      // If the trip is not finished, ignore the last ping
-      let pingsNum = (this.finishedAt) ? pings.length : pings.length - 1;
-
-      for (let p = 0; p < pingsNum; p++) {
+      for (let p = 0; p < pings.length; p++) {
         if (statusAck) {
           statusAck(this, p);
         }
 
         // Grab the previous ping related to the ping getting parsed
-        const previousPing = this.findPreviousPing(pings[0]);
+        const previousPing = this.findPreviousPing(pings[p]);
         const currentPing = pings[p];
 
         // If the ping has not been parsed yet
@@ -144,10 +149,10 @@ class Trip {
             // If the current ping has no location set, set location from coordinates
             if (!currentPing.country) {
               const location = await Location.reverseGeocodeAsync({ latitude: currentPing.latitude, longitude: currentPing.longitude });
-              currentPing.setCountry(location[0].country);
-              currentPing.setCity(location[0].city);
+              currentPing.setCountry(location[0]?.country);
+              currentPing.setCity(location[0]?.city);
             }
-
+            
             // If the current ping is the last ping and the trip is not finished yet, don't parse the ping
             if (isLastPing && !this.finishedAt) {
               continue;
@@ -161,13 +166,13 @@ class Trip {
             if (isFirstPing || (previousPing?.transport && currentPing.transport)) {
               // If this is the last ping and the trip is finished or is a transport ping, also merge the current ping with the previous ping
               if (previousPing?.transport) {
-                currentPing.mergePings(previousPing);
+                currentPing.merge(previousPing);
                 pings.splice(--p, 1);
               }
               continue;
             }
 
-            if (currentPing.isVisited()) {
+            if (currentPing.isVisited(previousPing)) {
               logger.debug('Location visited! Invoking API to find the venue');
               const venueResponse = await AWS.invokeAPI('/venues', {
                 params: {
@@ -184,14 +189,14 @@ class Trip {
                   // If the venue data is still the same as the previous one even if the user moved more than 200m
                   // or there is no venue at the current location (the user is most likely flying)
                   // Still merge the previous ping with the current one but keep the coords of the current one
-                  currentPing.mergePings(previousPing, { withCoords: true });
+                  currentPing.merge(previousPing, { withCoords: true });
                   pings.splice(--p, 1);
                 } else {
                   // Use the venue data
                   currentPing.setVenue(venueResponse);
                 }
               }
-              await asyncTimeout(1500);
+              await Trip.delay(1500);
             }
           } catch(err) {
             currentPing.setParsed(false);
@@ -202,8 +207,8 @@ class Trip {
     } catch(err) {
       logger.error('Parsing failed: ', err.message);
       logger.debug('Automatic retry in 5 seconds');
-      await asyncTimeout(5000);
-      await this.parsePings(null, trip);
+      await Trip.delay(5000);
+      await this.parsePings(null, statusAck);
     }
   }
 
@@ -224,7 +229,12 @@ class Trip {
 
   // @override
   toString() {
-    return `{ Trip: ${Object.getOwnPropertyNames(new Trip).map(prop => this[prop]).join(', ')} }\n`;
+    const props = Object.keys(this).filter(k => this[k]);
+    return `{ Trip: ${props.map(prop => {
+      if (this[prop]) {
+        return `${prop}=${this[prop].toString()}`;
+      }
+    }).join(', ')} }\n`;
   }
 }
 

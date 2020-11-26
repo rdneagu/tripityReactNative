@@ -1,5 +1,4 @@
 /* Community packages */
-import _ from 'lodash';
 import { observable, action, computed } from 'mobx';
 
 /* App library */
@@ -13,11 +12,19 @@ class CScenarioError extends Error {
   }
 }
 
+class CScenarioValueError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'CScenarioError';
+  }
+}
+
 /**
  * Class definition for the Scenario
  */
 class Scenario {
   static CScenarioError = CScenarioError;
+  static CScenarioValueError = CScenarioValueError;
   @observable simulator;
   @observable data = {};
   @observable result = {
@@ -28,11 +35,11 @@ class Scenario {
 
   constructor(sim, props) {
     if (props.name === null) {
-      throw new CScenarioError('Scenario <name> is missing');
+      throw new CScenarioValueError('Scenario <name> is missing');
     }
 
     if (!props.pings.length) {
-      throw new CScenarioError('Scenario <pings> are missing');
+      throw new CScenarioValueError('Scenario <pings> are missing');
     }
 
     for (let i = 0; i < props.pings.length; i++) {
@@ -40,16 +47,16 @@ class Scenario {
       sim.setStatus(undefined, `Verifying scenario pings [${percentage}%]`);
 
       const { latitude, longitude, altitude, timeOffset } = props.pings[i];
-      if (_.isNaN(latitude)) {
-        throw new CScenarioError(`Ping (${i}) <latitude> is not a number. Found ${latitude}`);
+      if (!Number.isFinite(latitude)) {
+        throw new CScenarioValueError(`Ping (${i}) <latitude> is not a number. Found ${latitude}`);
       }
-      if (_.isNaN(longitude)) {
-        throw new CScenarioError(`Ping (${i}) <longitude> is not a number. Found ${longitude}`);
+      if (!Number.isFinite(longitude)) {
+        throw new CScenarioValueError(`Ping (${i}) <longitude> is not a number. Found ${longitude}`);
       }
-      if (_.isNaN(altitude) && altitude !== null) {
+      if (!Number.isFinite(altitude)) {
         props.pings[i].altitude = 0;
       }
-      if (_.isNaN(timeOffset) && timeOffset !== null) {
+      if (!Number.isFinite(timeOffset)) {
         props.pings[i].timeOffset = 15;
       }
     }
@@ -116,7 +123,12 @@ class Scenario {
 
   // @override
   toString() {
-    return `{ Scenario: ${Object.getOwnPropertyNames(new Scenario).map(prop => this[prop]).join(', ')} }\n`;
+    const props = Object.keys(this).filter(k => this[k]);
+    return `{ Scenario: ${props.map(prop => {
+      if (this[prop]) {
+        return `${prop}=${this[prop].toString()}`;
+      }
+    }).join(', ')} }\n`;
   }
 }
 

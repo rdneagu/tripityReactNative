@@ -1,8 +1,8 @@
 name: 'Case #1'             # Scenario name
 country: 'United Kingdom'   # Home country, ignored if scenario is 0
 city: 'London'              # Home city, ignored if scenario is 0
-type: 2                     # Types: 0 - Coordinates only; 1 - Full scenario simulation; 2 - Real scenario
-interval: 900,              # Interval between pings, ignored if scenario is 0
+type: 'real'                # Types: 0 - Coordinates only; 1 - Full scenario simulation; 2 - Real scenario
+interval: 900               # Interval between pings, ignored if scenario is 0
 pings:
   - latitude: 50.482253     # Latitude
     longitude: -1.462365    # Longitude

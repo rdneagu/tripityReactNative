@@ -7,7 +7,9 @@ import * as yaml from 'js-yaml';
 import { observable, action } from 'mobx';
 
 /* App classes */
+import Scenario from './Scenario';
 import ScenarioCoords from './ScenarioCoords';
+import ScenarioReal from './ScenarioReal';
 
 /* App library */
 import logger from '../lib/log';
@@ -25,6 +27,7 @@ class CSimulatorError extends Error {
 class Simulator {
   static SCENARIO_TYPES = {
     'coords': ScenarioCoords,
+    'real': ScenarioReal,
   }
   static STATUS_TYPES = {
     FAIL: -1,
@@ -40,7 +43,7 @@ class Simulator {
   /**
    * Loads and attempts to create a scenario
    * 
-   * @returns {Scenario}    - The loaded scenario
+   * @returns {Scenario}    - The created scenario
    */
   @action.bound
   async loadScenario() {
@@ -55,35 +58,19 @@ class Simulator {
           throw new CSimulatorError(`Scenario "${document.name}" failed to load, please check the file contents`);
         }
         
-        return await this.createScenario(ymlScenario);
+        if (!Simulator.SCENARIO_TYPES[ymlScenario.type]) {
+          const typesNum = Object.keys(Simulator.SCENARIO_TYPES);
+          throw new CSimulatorError(`Scenario <type> must be a value from set {${typesNum.join(', ')}}. Found ${ymlScenario.type}`);
+        }
+        const scenario = new Simulator.SCENARIO_TYPES[ymlScenario.type](this, ymlScenario);
+        this.scenario = scenario;
       } catch(err) {
         logger.error(`${err.name}: ${err.message}`);
-        logger.error(err.stack);
+        if (!err instanceof Scenario.CScenarioValueError) {
+          logger.error(err.stack);
+        }
+        throw err;
       }
-    }
-  }
-
-  /**
-   * Creates a new scenario
-   *
-   * @param {Object} ymlScenario 
-   * 
-   * @returns {Scenario*}  The created scenario
-   * @throws {CSimulatorError}
-   */
-  @action.bound
-  async createScenario(ymlScenario) {
-    try {
-      if (!Simulator.SCENARIO_TYPES[ymlScenario.type]) {
-        const typesNum = Object.keys(Simulator.SCENARIO_TYPES);
-        throw new CSimulatorError(`Scenario <type> must be a value from set {${typesNum.join(', ')}}. Found ${ymlScenario.type}`);
-      }
-      const scenario = new Simulator.SCENARIO_TYPES[ymlScenario.type](this, ymlScenario);
-      this.scenario = scenario;
-
-      return scenario;
-    } catch(err) {
-      throw err;
     }
   }
 
@@ -101,16 +88,12 @@ class Simulator {
   @action.bound
   async run() {
     try {
+      await this.loadScenario();
       await this.scenario.run();
       this.setStatus(Simulator.STATUS_TYPES.SUCCESS, "Simulator finished successfully!");
     } catch(err) {
       this.setStatus(Simulator.STATUS_TYPES.FAIL, err.message);
     }
-  }
-
-  // @override
-  toString() {
-    return `{ Simulator: ${Object.getOwnPropertyNames(new Simulator).map(prop => this[prop]).join(', ')} }\n`;
   }
 }
 
