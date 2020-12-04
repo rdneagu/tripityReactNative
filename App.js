@@ -11,7 +11,7 @@ import * as Font from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { Asset } from 'expo-asset';
-import { Entypo, Ionicons, EvilIcons, Fontisto } from '@expo/vector-icons';
+import { Entypo, Ionicons, EvilIcons, Fontisto, FontAwesome } from '@expo/vector-icons';
 
 // MobX store
 import store from './store/_index';
@@ -89,6 +89,7 @@ class App extends React.Component {
       ...Entypo.font,
       ...EvilIcons.font,
       ...Fontisto.font,
+      ...FontAwesome.font,
       'Nunito-Light': require('./assets/fonts/Nunito-Light.ttf'),
       'Nunito-Regular': require('./assets/fonts/Nunito-Regular.ttf'),
       'Nunito-SemiBold': require('./assets/fonts/Nunito-SemiBold.ttf'),

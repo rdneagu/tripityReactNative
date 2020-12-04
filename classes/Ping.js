@@ -1,6 +1,6 @@
 /* Community packages */
 import _ from 'lodash';
-import { observable, action } from 'mobx';
+import { observable, action, computed } from 'mobx';
 
 /* App classes */
 import Photo from './Photo';
@@ -21,12 +21,21 @@ class CPingError extends Error {
  * Class definition for the Ping
  */
 class Ping {
+  static TRIP_DISTANCE_TRIGGER_THRESHOLD = 40; // in KM
+  static TRIP_MINIMUM_LOCATIONS = 3 // minimum number of visited locations for a trip to be recorded
+  static TRIP_MINIMUM_HOURS = 3600 * 2 // minimum hours spent in a trip to be recorded (in seconds)
   static FLIGHT_DISTANCE_TRIGGER_THRESHOLD = 80; // in KM
   static FLIGHT_ALTITUDE_TRIGGER_THRESHOLD = 4000; // in m
   static INTERVAL = 900; // in seconds
-  static TIME_REQUIRED_VISIT = (this.INTERVAL + this.INTERVAL/2); // in seconds
+  static TIME_REQUIRED_VISIT = (this.INTERVAL + this.INTERVAL/2); // time required to confirm a visit (in seconds)
+  static TIME_MAX_BETWEEN_TRIPS = 3600 * 24 * 3; // 3 days difference maximum between trips (in seconds)
+  static PING_TYPE = {
+    TYPE_REALTIME: 0,
+    TYPE_MEDIA: 1,
+  }
 
   @observable pingId;
+  @observable type = Ping.PING_TYPE.TYPE_REALTIME;
   @observable latitude;
   @observable longitude;
   @observable altitude = 0;
@@ -44,6 +53,21 @@ class Ping {
     this.setProperties(props);
   }
 
+  @computed
+  get sortedPhotos() {
+    return this.photos.slice().sort((p1, p2) => p1.timestamp - p2.timestamp);
+  }
+
+  @computed
+  get firstPhoto() {
+    return (this.photos.length) ? this.sortedPhotos[0] : null;
+  }
+
+  @computed
+  get lastPhoto() {
+    return (this.photos.length) ? this.sortedPhotos[this.photos.length - 1] : null;
+  }
+
   isHighAltitude() {
     return (this.altitude && this.altitude > Ping.FLIGHT_ALTITUDE_TRIGGER_THRESHOLD);
   }
@@ -56,25 +80,27 @@ class Ping {
     return (this.isHighAltitude() || this.isLongDistance() || this.city === null);
   }
 
-  isVisited(previousPing) {
-    return (previousPing.getTimeBetweenCoords(this) >= Ping.TIME_REQUIRED_VISIT && !this.transport);
+  checkIfVisited(previousPing) {
+    return (previousPing.getTimeBetweenPings(this) >= Ping.TIME_REQUIRED_VISIT && !this.transport);
+  }
+
+  isHome(homeCoords) {
+    return (this.getDistanceBetweenCoords(homeCoords) < Ping.TRIP_DISTANCE_TRIGGER_THRESHOLD);
   }
 
   /**
-   * Gets time taken between two pings
+   * Gets time taken, in seconds, between two pings
+   * Formula: (to - from) / 1000
    */
-  getTimeBetweenCoords(to) {
+  getTimeBetweenPings(to) {
     if (!to) {
-      return null;
+      return 0;
     }
-    const t1 = this.timestamp;
-    const t2 = to.timestamp;
-  
-    return t2 - t1 / 1000;
+    return (to.timestamp - this.timestamp) / 1000;
   }
 
   /**
-   * Gets distance in kilometers between two pings
+   * Gets distance, in kilometers, between two pings
    */
   getDistanceBetweenCoords(to) {
     if (!to) {
@@ -103,47 +129,52 @@ class Ping {
 
   @action.bound
   setPingId(pingId) {
-    this.pingId = pingId || this.pingId;
+    this.pingId = pingId ?? this.pingId;
+  }
+
+  @action.bound
+  setType(type) {
+    this.type = type ?? this.type;
   }
 
   @action.bound
   setLatitude(latitude) {
-    this.latitude = latitude || this.latitude;
+    this.latitude = latitude ?? this.latitude;
   }
 
   @action.bound
   setLongitude(longitude) {
-    this.longitude = longitude || this.longitude;
+    this.longitude = longitude ?? this.longitude;
   }
 
   @action.bound
   setAltitude(altitude) {
-    this.altitude = altitude || this.altitude;
+    this.altitude = altitude ?? this.altitude;
   }
 
   @action.bound
   setCountry(country) {
-    this.country = country || this.country;
+    this.country = country ?? this.country;
   }
 
   @action.bound
   setCity(city) {
-    this.city = city || this.city;
+    this.city = city ?? this.city;
   }
 
   @action.bound
   setTimestamp(timestamp) {
-    this.timestamp = timestamp || this.timestamp;
+    this.timestamp = timestamp ?? this.timestamp;
   }
 
   @action.bound
   setDistance(distance) {
-    this.distance = distance || this.distance;
+    this.distance = distance ?? this.distance;
   }
 
   @action.bound
   setTransport(transport) {
-    this.transport = transport || this.transport;
+    this.transport = transport ?? this.transport;
   }
 
   @action.bound
@@ -151,14 +182,15 @@ class Ping {
     if (venue) {
       venue = (venue instanceof Venue) ? venue : new Venue(venue);
     }
-    this.venue = venue || this.venue;
+    this.venue = venue ?? this.venue;
   }
 
   @action.bound
   addPhoto(photo) {
-    if (photo)
+    if (photo) {
       photo = (photo instanceof Photo) ? photo : new Photo(photo);
       this.photos.push(photo);
+    }
   }
 
   @action.bound
@@ -168,12 +200,12 @@ class Ping {
 
   @action.bound
   setParsed(parsed) {
-    this.parsed = parsed || this.parsed;
+    this.parsed = parsed ?? this.parsed;
   }
 
   @action.bound
   setMerged(merged) {
-    this.merged = merged || this.merged;
+    this.merged = merged ?? this.merged;
   }
 
   @action.bound
@@ -183,6 +215,7 @@ class Ping {
         throw new CPingError("Cannot set props to Ping object cause props is not an object");
       }
       this.setPingId(props.pingId);
+      this.setType(props.type);
       this.setLatitude(props.latitude);
       this.setLongitude(props.longitude);
       this.setAltitude(props.altitude);
@@ -217,10 +250,18 @@ class Ping {
       this.setCountry(withPing.country);
       this.setCity(withPing.city);
     }
-    this.setTimestamp(withPing.timestamp);
+    if (!options.keepTime) {
+      this.setTimestamp(withPing.timestamp);
+    }
     this.setTransport(withPing.transport);
     this.setVenue(withPing.venue);
-    this.photos.concat(withPing.photos);
+    console.log('-- this photos --');
+    console.log(this.photos);
+    console.log('-- with photos --');
+    console.log(withPing.photos);
+    this.setPhotos(this.photos.concat(withPing.photos));
+    console.log('-- this photos --');
+    console.log(this.photos);
     withPing.setMerged(true);
   }
 
@@ -242,6 +283,7 @@ class Ping {
     try {
       await Realm.write(realm => realm.create('Ping', {
         pingId: this.pingId,
+        type: this.type,
         latitude: this.latitude,
         longitude: this.longitude,
         altitude: this.altitude,

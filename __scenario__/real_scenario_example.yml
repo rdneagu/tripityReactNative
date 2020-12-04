@@ -1,14 +1,15 @@
 name: 'Case #1'             # Scenario name
-country: 'United Kingdom'   # Home country, ignored if scenario is 0
-city: 'London'              # Home city, ignored if scenario is 0
-type: 'real'                # Types: 0 - Coordinates only; 1 - Full scenario simulation; 2 - Real scenario
-interval: 900               # Interval between pings, ignored if scenario is 0
+country: 'United Kingdom'   # Home country, ignored if scenario is 'coords'
+city: 'London'              # Home city, ignored if scenario is 'coords'
+type: 'real'                # Types: 'coords', 'real', 'media'
+interval: 900               # Interval between pings, only used with scenario 'real'
 pings:
   - latitude: 50.482253     # Latitude
     longitude: -1.462365    # Longitude
     altitude: 3000          # Altitude, set to 0 if unknown
-    timeOffset: 0           # Time spent around this location, ignored if scenario type is 0
-    expectedVenue: null     # The expected venue to be shown (eg. Botanic Gardens), ignored if scenario type is not 0
+    timeOffset: 0           # Time spent around this location, ignored if scenario is 'coords'
+    expectedVenue: null     # The expected venue to be shown (eg. Botanic Gardens), only used with scenario 'coords'
+    photos: 0               # The amount of photos taken at location, only used with scenario 'media'
   - latitude: 47.350282
     longitude: -3.846398
     altitude: 4000

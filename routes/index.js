@@ -4,7 +4,7 @@ import { View } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 
 /* Expo packages */
-import { Entypo, Ionicons } from '@expo/vector-icons';
+import { Entypo, Ionicons, FontAwesome } from '@expo/vector-icons';
 
 /* Community packages */
 import _ from 'lodash';
@@ -103,6 +103,7 @@ class RootStack extends PureComponent {
 
 import ScreenMainTrips from '../screens/Main/Trips.screen.js';
 import ScreenMainSimulator from '../screens/Main/Simulator.screen.js';
+import ScreenMainUserProfile from '../screens/Main/UserProfile.screen.js';
 class MainStack extends PureComponent {
   #initialRoute = 'Main.Tab.Trips';
 
@@ -122,6 +123,14 @@ class MainStack extends PureComponent {
       title: 'SIMULATOR',
       icon: <Ionicons name="ios-play" size={18} color="white" />,
       isTab: true,
+    });
+    store.Navigation.addScreen({
+      name: 'Main.Tab.UserProfile',
+      component: ScreenMainUserProfile,
+      title: 'USER PROFILE',
+      icon: <FontAwesome name="user" size={18} color="white" />,
+      isTab: true,
+      condition: () => store.UserStore.user,
     });
   }
 

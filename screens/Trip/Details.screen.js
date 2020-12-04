@@ -48,6 +48,7 @@ class ScreenTripDetails extends React.Component {
               category: ping.venue.category,
               country: ping.country,
               timestamp: ping.timestamp,
+              photos: ping.photos.length,
               count: 0,
             };
           }
@@ -67,6 +68,7 @@ class ScreenTripDetails extends React.Component {
                 <StyledText style={styles.locationTitle}>{item.country}</StyledText>
                 <View style={styles.separator} />
                 <StyledText>{item.category}</StyledText>
+                <StyledText>Photos taken: {item.photos}</StyledText>
                 <StyledText>Times visited: {item.count}</StyledText>
               </View>
             </View>

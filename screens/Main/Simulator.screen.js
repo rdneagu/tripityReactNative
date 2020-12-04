@@ -124,7 +124,7 @@ class ScreenMainSimulator extends React.Component {
     }
     return (
       <View style={styles.content}>
-        {this.props.store.UserStore.user.isAdmin
+        {this.props.store.UserStore.user?.isAdmin || true  // TODO: CHANGE ON PRODUCTION
           ? <View style={{ flex: 1 }}>
               <View style={{ margin: 10, alignItems: 'center' }}>
                 <StyledText style={{ marginVertical: 10 }} weight='bold'>Scenario</StyledText>

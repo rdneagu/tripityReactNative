@@ -1,0 +1,95 @@
+name: 'Media Case #1'       # Scenario name
+country: 'United Kingdom'   # Home country, ignored if scenario is 'coords'
+city: 'London'              # Home city, ignored if scenario is 'coords'
+type: 'media'               # Types: 'coords', 'real', 'media'
+pings:
+  - latitude: 50.482253     # Latitude
+    longitude: -1.462365    # Longitude
+    altitude: 4000          # Altitude, set to 0 if unknown
+    timeOffset: 15          # Time spent to take {x} photos at location
+    photos: 1               # The amount of photos taken at location, only used with scenario 'media'
+  - latitude: 47.350282
+    longitude: -3.846398
+    altitude: 13000
+    timeOffset: 30
+    photos: 2  
+  - latitude: 40.559379
+    longitude: -2.900144
+    altitude: 0
+    timeOffset: 30
+    photos: 3
+  - latitude: 39.680191
+    longitude: -1.921371
+    altitude: 0
+    timeOffset: 40
+    photos: 8
+  - latitude: 39.49163
+    longitude: -0.474142
+    altitude: 0
+    timeOffset: 120
+    photos: 20
+  - latitude: 40.774866
+    longitude: 4.400616
+    altitude: 5000
+    timeOffset: 10
+    photos: 4
+  - latitude: 41.661864
+    longitude: 13.224496
+    altitude: 0
+    timeOffset: 20
+    photos: 5
+  - latitude: 40.882738
+    longitude: 14.291067
+    altitude: 0
+    timeOffset: 150
+    photos: 18
+  - latitude: 40.088526
+    longitude: 16.846821
+    altitude: 5000
+    timeOffset: 10
+    photos: 4
+  - latitude: 37.978172
+    longitude: 23.918233
+    altitude: 0
+    timeOffset: 80
+    photos: 13
+  - latitude: 37.995667
+    longitude: 23.869599
+    altitude: 0
+    timeOffset: 30
+    photos: 3
+  - latitude: 37.968454
+    longitude: 23.728515
+    altitude: 0
+    timeOffset: 10
+    photos: 3
+  - latitude: 37.973377
+    longitude: 23.717979
+    altitude: 0
+    timeOffset: 60
+    photos: 2
+  - latitude: 37.957181
+    longitude: 23.701322
+    altitude: 0
+    timeOffset: 80
+    photos: 3
+  - latitude: 38.011678
+    longitude: 23.665481
+    altitude: 0
+    timeOffset: 10
+    photos: 3
+  - latitude: 38.014263
+    longitude: 23.636123
+    altitude: 0
+    timeOffset: 120
+    photos: 11
+  - latitude: 38.02912
+    longitude: 23.597832
+    altitude: 0
+    timeOffset: 10
+    photos: 2
+  - latitude: 38.306897
+    longitude: 21.678476
+    altitude: 13000
+    timeOffset: 5
+    photos: 2

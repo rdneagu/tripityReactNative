@@ -39,18 +39,23 @@ class Trip {
   }
 
   @computed
+  get sortedPings() {
+    return this.pings.slice().sort((p1, p2) => p1.timestamp - p2.timestamp);
+  }
+
+  @computed
   get firstPing() {
-    return (this.pings.length) ? this.pings[0] : null;
+    return (this.sortedPings.length) ? this.sortedPings[0] : null;
   }
 
   @computed
   get lastPing() {
-    return (this.pings.length) ? this.pings[this.pings.length - 1] : null;
+    return (this.sortedPings.length) ? this.sortedPings[this.pings.length - 1] : null;
   }
 
   @action.bound
   setTripId(tripId) {
-    this.tripId = tripId || this.tripId;
+    this.tripId = tripId ?? this.tripId;
   }
 
   @action.bound
@@ -64,7 +69,7 @@ class Trip {
 
   @action.bound
   removePing(op='pop') {
-    this.pings[op];
+    this.pings[op]();
   }
 
   @action.bound
@@ -83,17 +88,17 @@ class Trip {
 
   @action.bound
   setStarted(timestamp) {
-    this.startedAt = timestamp || this.startedAt;
+    this.startedAt = timestamp ?? this.startedAt;
   }
 
   @action.bound
   setFinished(timestamp) {
-    this.finishedAt = timestamp || this.finishedAt;
+    this.finishedAt = timestamp ?? this.finishedAt;
   }
 
   @action.bound
   setSync(sync) {
-    this.synced = sync || this.synced;
+    this.synced = sync ?? this.synced;
   }
 
   @action.bound
@@ -112,18 +117,17 @@ class Trip {
     }
   }
 
-  @action.bound
-  reset() {
-    try {
-      const result = Realm.toJSON(Realm.db.objectForPrimaryKey('Trip', this.tripId));
-      if (!result) {
-        throw new CTripError(`Could not reset the Trip (${this.tripId})`);
-      }
-      this.setProperties(result);
-    } catch(err) {
-      logger.error(`${err.name}: ${err.message}`);
-      logger.error(err.stack);
+  @computed
+  get isValid() {
+    if (!this.finishedAt) {
+      return true;
     }
+    if (this.firstPing && this.lastPing && this.finishedAt) {
+      const minimumHours = (this.firstPing.getTimeBetweenPings(this.lastPing) >= Ping.TRIP_MINIMUM_HOURS);
+      const minimumPings = (this.pings.length >= Ping.TRIP_MINIMUM_LOCATIONS);
+      return minimumHours && minimumPings;
+    }
+    return false;
   }
 
   async parsePings(ping, statusAck) {
@@ -139,13 +143,11 @@ class Trip {
         // Grab the previous ping related to the ping getting parsed
         const previousPing = this.findPreviousPing(pings[p]);
         const currentPing = pings[p];
+        const nextPing = (!p === pings.length - 1) ? pings[p+1] : null;
 
         // If the ping has not been parsed yet
         if (!currentPing.parsed) {
           try {
-            const isFirstPing = currentPing.compare(this.firstPing, 'pingId');
-            const isLastPing = currentPing.compare(this.lastPing, 'pingId');
-
             // If the current ping has no location set, set location from coordinates
             if (!currentPing.country) {
               const location = await Location.reverseGeocodeAsync({ latitude: currentPing.latitude, longitude: currentPing.longitude });
@@ -153,18 +155,19 @@ class Trip {
               currentPing.setCity(location[0]?.city);
             }
             
-            // If the current ping is the last ping and the trip is not finished yet, don't parse the ping
-            if (isLastPing && !this.finishedAt) {
+            // If the current ping is not a media ping but is the last ping and the trip is not finished yet, don't parse the ping
+            if (currentPing.type !== Ping.PING_TYPE.TYPE_MEDIA && !nextPing && !this.finishedAt) {
               continue;
             }
 
             currentPing.setDistance(currentPing.getDistanceBetweenCoords(previousPing));
-            currentPing.setTransport(isLastPing || currentPing.isInFlight());
+            currentPing.setTransport(currentPing.transport ?? currentPing.isInFlight());
             currentPing.setParsed(true);
 
-            // If this is the first ping or both previous and current pings are transport pings skip venue saving
-            if (isFirstPing || (previousPing?.transport && currentPing.transport)) {
-              // If this is the last ping and the trip is finished or is a transport ping, also merge the current ping with the previous ping
+            // If the current ping is not a media ping but is the first ping, last ping,
+            // or both previous and current pings are transport pings skip venue saving
+            if (currentPing.type !== Ping.PING_TYPE.TYPE_MEDIA && (!previousPing || !nextPing || (previousPing.transport && currentPing.transport))) {
+              // If the previous ping is a transport ping, merge the current ping with the previous ping
               if (previousPing?.transport) {
                 currentPing.merge(previousPing);
                 pings.splice(--p, 1);
@@ -172,7 +175,8 @@ class Trip {
               continue;
             }
 
-            if (currentPing.isVisited(previousPing)) {
+            // If the current ping is a media ping or the ping difference to the next ping is enough to mark it as visited, get the venue data
+            if (currentPing.type === Ping.PING_TYPE.TYPE_MEDIA || currentPing.checkIfVisited(nextPing)) {
               logger.debug('Location visited! Invoking API to find the venue');
               const venueResponse = await AWS.invokeAPI('/venues', {
                 params: {
@@ -187,8 +191,7 @@ class Trip {
                 if (previousPing?.venue?.venueId === venueResponse.venueId) {
                   logger.debug(`This ping is not within 200m of the previous one but at the same venue`);
                   // If the venue data is still the same as the previous one even if the user moved more than 200m
-                  // or there is no venue at the current location (the user is most likely flying)
-                  // Still merge the previous ping with the current one but keep the coords of the current one
+                  // merge the previous ping with the current one but keep the coords of the current one
                   currentPing.merge(previousPing, { withCoords: true });
                   pings.splice(--p, 1);
                 } else {
@@ -209,6 +212,29 @@ class Trip {
       logger.debug('Automatic retry in 5 seconds');
       await Trip.delay(5000);
       await this.parsePings(null, statusAck);
+    }
+  }
+
+  async delete() {
+    try {
+      await Realm.write(realm => realm.delete(Realm.db.objectForPrimaryKey('Trip', this.tripId)));
+    } catch(err) {
+      logger.error(`${err.name}: ${err.message}`);
+      logger.error(err.stack);
+    }
+  }
+
+  @action.bound
+  reset() {
+    try {
+      const result = Realm.toJSON(Realm.db.objectForPrimaryKey('Trip', this.tripId));
+      if (!result) {
+        throw new CTripError(`Could not reset the Trip (${this.tripId})`);
+      }
+      this.setProperties(result);
+    } catch(err) {
+      logger.error(`${err.name}: ${err.message}`);
+      logger.error(err.stack);
     }
   }
 

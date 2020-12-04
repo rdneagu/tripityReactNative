@@ -1,3 +1,6 @@
+/* React packages */
+import { Platform } from 'react-native';
+
 /* Expo packages */
 // import * as SecureStore from 'expo-secure-store';
 import * as Permissions from 'expo-permissions';
@@ -102,7 +105,7 @@ class UserStore {
     });
 
     // Update the user and restart the geofencing service
-    await this.updateUser(data);
+    this.updateUser(data);
     await this.startHomeGeofencing();
     this.changeStep(AUTH_STEP.STEP_PERMISSIONS);
   }
@@ -116,18 +119,30 @@ class UserStore {
    * Updates the user in the realm DB
    */
   @action.bound
-  async updateUser(user={}) {
-    return new Promise((resolve, reject) => {
-      // Reject the promise if the user is not initialized yet or if the id is missing from the user object
-      if (!this.user) {
-        return reject('The user must be authenticated in order to update it');
-      }
-      
-      // Update the user in the realm DB and fulfill the promise
-      this.user.setProperties(user);
-      this.user.save();
-      resolve();
-    });
+  updateUser(user={}) {
+    if (!this.user) {
+      return reject('The user must be authenticated in order to update it');
+    }
+    
+    // Update the user in the realm DB
+    this.user.setProperties(user);
+    this.user.save();
+  }
+
+  @action.bound
+  async deleteUser() {
+    try {
+      await this.user.delete();
+      await AWS.invokeAPI(`/users/${this.user.userId}/delete`, {
+        method: 'delete',
+      });
+      await this.stopHomeGeofencing();
+      this.changeStep(AUTH_STEP.STEP_SPLASH);
+      this.user = null;
+    } catch(err) {
+      logger.error(`${err.name}: ${err.message}`);
+      logger.error(err.stack);
+    }
   }
 
   /**
@@ -152,7 +167,7 @@ class UserStore {
       }
 
       if (requireSync) {
-        this.store.Loading.createLoader(async () => {
+        this.store.LoadingStore.createLoader(async () => {
           const trips = await AWS.invokeAPI('/trips/synchronize', {});
           trips
             .filter(trip => {
@@ -186,7 +201,7 @@ class UserStore {
    */
   @action.bound
   async unsetUser(redirect=AUTH_STEP.STEP_SPLASH) {
-    await this.updateUser({ isLogged: false });
+    this.updateUser({ isLogged: false });
     this.user = null;
 
     await this.stopHomeGeofencing();
@@ -239,6 +254,9 @@ class UserStore {
       if (!this.user) {
         throw new Error('Attempted to start geofencing service without a logged in user');
       }
+      if (Platform.OS === 'android') {
+        throw new Error('Geofencing is currently disabled on android');
+      }
 
       const { homeCoords } = await this.getHomeLocation();
       const regions = [{
@@ -268,7 +286,6 @@ class UserStore {
 
   async getHomeLocation() {
     logger.info(`Fetching coords for user's home location...`);
-    console.log(await Location.geocodeAsync(`United Kingdom, Glasgow, G20 6AF`));
   
     const { homeCountry, homeCity } = this.homeLocation;
     if (!homeCountry || !homeCity) {

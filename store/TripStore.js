@@ -1,6 +1,8 @@
 // FURTHER TESTS: Ping receival on geofence trigger
 /* Expo packages */
+import * as Location from 'expo-location';
 import * as MediaLibrary from 'expo-media-library';
+import * as FileSystem from 'expo-file-system';
 
 /* Community packages */
 import _ from 'lodash';
@@ -20,29 +22,12 @@ import TptyTasks from '../lib/tasks';
  * Class definition for Trip Store
  */
 class TripStore {
-  static TRIP_DISTANCE_TRIGGER_THRESHOLD = 40; // in KM
-
   constructor(rootStore) {
     this.store = rootStore;
   }
 
-  /**
-   * Returns whether the current coordinates are lower than the trigger threshold
-   * 
-   * @param {Object} homeCoords         - Home coordinates
-   *      @param {Number} lat                 - Latitude
-   *      @param {Number} lon                 - Longitude
-   * @param {Object} targetCoords       - Target coordinates
-   *      @param {Number} lat                 - Latitude
-   *      @param {Number} lon                 - Longitude
-   */
-  isHome(homeCoords, targetCoords) {
-    const distance = getDistanceBetweenPoints(homeCoords, targetCoords);
-    return (distance < TripStore.TRIP_DISTANCE_TRIGGER_THRESHOLD);
-  }
-
   getAllTrips() {
-    return this.store.UserStore.user?.trips;
+    return this.store.UserStore.user?.sortedTrips;
   }
 
   /**
@@ -80,6 +65,7 @@ class TripStore {
 
       trip.addPing({
         pingId: uuid_v4(),
+        type: Ping.PING_TYPE.TYPE_REALTIME,
         latitude: ping.coords.latitude,
         longitude: ping.coords.longitude,
         altitude: ping.coords.altitude,
@@ -108,6 +94,7 @@ class TripStore {
         // End the trip
         const ping = lastTrip.addPing({
           pingId: uuid_v4(),
+          type: Ping.PING_TYPE.TYPE_REALTIME,
           latitude: region.latitude,
           longitude: region.longitude,
           transport: true,
@@ -143,6 +130,7 @@ class TripStore {
         });
         const ping = trip.addPing({
           pingId: uuid_v4(),
+          type: Ping.PING_TYPE.TYPE_REALTIME,
           latitude: region.latitude,
           longitude: region.longitude,
           transport: true,
@@ -173,74 +161,97 @@ class TripStore {
     }
   }
 
-  async parseMedia(sim) {
+  async parseMedia(sim, statusAck) {
     try {
       const user = await this.store.UserStore.getLastLogged();
       if (!user) {
-        throw new Error('The system pinged with no user authenticated');
+        throw new Error('The system attempted to parse the media with no user authenticated');
       }
 
-      const { homeCountry, homeCoords } = await this.store.UserStore.getHomeLocation();
+      const { homeCoords } = await this.store.UserStore.getHomeLocation();
 
       logger.debug('User:', user.email);
       logger.info('Parsing images');
+
+      let lastPhotoCursor = user.lastTrip?.lastPing?.lastPhoto;
       let trip = null;
-      let previousPing = null;
       let currentPing = null;
+      let previousPing = null;
       let page = 0;
-      
+
+      const album = await MediaLibrary.getAlbumAsync("Camera");
       do {
         if (!sim) {
-          var { assets, hasNextPage } = await MediaLibrary.getAssetsAsync({ sortBy: MediaLibrary.SortBy.creationTime, first: 100 });
+          var { assets, hasNextPage } = await MediaLibrary.getAssetsAsync({ sortBy: [ [ MediaLibrary.SortBy.creationTime, true ] ], album, first: 100 });
         } else {
           var { assets, hasNextPage } = { assets: sim, hasNextPage: false };
         }
         logger.info(`Fetching page ${++page}, hasNextPage=${hasNextPage}`);
         for (let i = 0; i < assets.length; i++) {
-          const meta = (sim) ? assets : await MediaLibrary.getAssetInfoAsync(assets[i]);
+          if (statusAck) {
+            statusAck(assets, i);
+          }
+
+          // Ignore all photos that have been already accessed
+          if (lastPhotoCursor && assets[i].creationTime <= lastPhotoCursor.timestamp) {
+            continue;
+          }
+          
+          const meta = (sim) ? assets[i].meta : await MediaLibrary.getAssetInfoAsync(assets[i]);   
+
           // If the photo does not have GPS location recorded, skip it
           if (!meta.location) {
-            logger.warn(`Image with id ${assets[i].id} does not have location set! Skipping...`);
+            logger.warn(`Image ${assets[i].uri} does not have location set! Skipping...`);
             continue;
           }
 
+          // Fetch the file md5 checksum
+          const { md5 } = (sim) ? { md5: uuid_v4() } : await FileSystem.getInfoAsync(assets[i].uri, { md5: true });       
+
+          // Create the photo object and save it in Realm
           const photo = new Photo({
-            photoId: assets[i].id,
+            hash: md5,
             uri: assets[i].uri,
           });
           photo.save();
 
-          logger.debug(meta.exif['{GPS}'].AltitudeRef, meta.exif['{GPS}'].Altitude);
+          console.log(photo.hash);
+          // logger.debug(`AltitudeRef: ${meta.exif['{GPS}'].AltitudeRef}, Altitude: ${meta.exif['{GPS}'].Altitude}`);
+
+          const altRef = meta.exif['{GPS}']?.AltitudeRef || meta.exif?.GPSAltitudeRef || 0;
+          const altitude = meta.exif['{GPS}']?.Altitude || meta.exif?.GPSAltitude || 0;
 
           currentPing = new Ping({
             pingId: uuid_v4(),
+            type: Ping.PING_TYPE.TYPE_MEDIA,
             latitude: meta.location.latitude,
             longitude: meta.location.longitude,
-            altitude: (meta.exif['{GPS}'].AltitudeRef === 0) ? meta.exif['{GPS}'].Altitude : 0,
+            altitude: (altRef === 0) ? altitude : 0,
             timestamp: assets[i].creationTime,
           })
-          currentPing.setDistance(previousPing);
+          currentPing.setDistance(currentPing.getDistanceBetweenCoords(previousPing));
+          currentPing.setTransport(false);
+
+          const location = await Location.reverseGeocodeAsync({ latitude: currentPing.latitude, longitude: currentPing.longitude });
+          currentPing.setCountry(location[0]?.country);
+          currentPing.setCity(location[0]?.city);
 
           // If the current photo was taken in a flight, skip it
-          if (currentPing.isHighAltitude()) {
-            logger.warn(`Image with id ${assets[i].id} has not been taken on ground! Skipping...`);
+          if (currentPing.isHighAltitude() || currentPing.country === null) {
+            logger.warn(`Photo ${photo.uri} with hash ${photo.hash} has not been taken on ground! Skipping...`);
             continue;
           }
 
-          // Finish the trip if started only if the current photo was taken at home or in a different country that the previous one
-          if (trip && (this.isHome(homeCoords, meta.location) || (previousPing?.country !== currentPing.country))) {
-            const minimumHours = (trip.lastPing.timestamp - trip.firstPing.timestamp > (2 * 3600 * 1000));
-            logger.debug(`Trip started at ${homeCountry} and ended at ${trip.lastPing.country}`);
-            if (minimumHours) {
-              const lastPing = new Ping({
-                pingId: uuid_v4(),
-                latitude: homeCoords.latitude,
-                longitude: homeCoords.longitude,
-                timestamp: currentPing.timestamp + 1,
-                parsed: true,
-              });
-              trip.addPing(lastPing);
-              trip.setFinished(lastPing.timestamp);
+          // Finish the trip if started only if the current photo was taken at home
+          // or in a different country than the previous one
+          // or the previous photo is 3 days older than the current photo
+          const timeDiff = (previousPing?.getTimeBetweenPings(currentPing) >= Ping.TIME_MAX_BETWEEN_TRIPS);
+          const sameCountry = (previousPing?.country === currentPing.country);
+          if (trip && (currentPing.isHome(homeCoords) || !sameCountry || timeDiff)) {
+            logger.info(`Trip to ${trip.lastPing.country} ended`);
+            trip.setFinished(trip.lastPing.timestamp);
+            if (trip.isValid) {
+              logger.debug('The trip has the minimum requirements to be recorded!')
               trip.setSync(Date.now());
               user.addTrip(trip);
             }
@@ -248,20 +259,12 @@ class TripStore {
           }
 
           // Start the trip if not started only if the user is not home anymore
-          if (!trip && !this.isHome(homeCoords, meta.location)) {
-            logger.debug('New trip detected');
-            const firstPing = new Ping({
-              pingId: uuid_v4(),
-              latitude: homeCoords.latitude,
-              longitude: homeCoords.longitude,
-              timestamp: currentPing.timestamp - 1,
-              parsed: true,
-            });
+          if (!trip && !currentPing.isHome(homeCoords)) {
+            logger.debug('New possible trip detected');
             trip = new Trip({
               tripId: uuid_v4(),
-              startedAt: firstPing.timestamp,
-            })
-            trip.addPing(firstPing);
+              startedAt: currentPing.timestamp,
+            });
           }
 
           // If a trip has started already
@@ -269,9 +272,8 @@ class TripStore {
             // If the distance of this current photo was taken within 200m of the first photo in the ping
             // Merge the previous ping with the current one
             if (currentPing.distance !== null && currentPing.distance < 0.2) {
-              logger.debug(`Photo with id ${assets[i].id} is within 200m of the first in batch`);
-
-              currentPing.merge(previousPing);
+              logger.debug(`Photo ${photo.uri} with hash ${photo.hash} is within 200m of the first in batch`);
+              currentPing.merge(previousPing, { keepTime: true });
               trip.removePing('pop');
             }
 
@@ -281,14 +283,20 @@ class TripStore {
             // Push the ping in the trip list
             trip.addPing(currentPing);
           } else {
-            logger.debug(`Photo with id ${assets[i].id} taken at home with no trips started, nothing to do with it`);
+            logger.debug(`Photo ${photo.uri} with hash ${photo.hash} taken at home with no trips started, nothing to do with it`);
           }
           previousPing = currentPing;
         }
       } while (hasNextPage);
+
+      // Add unfinished trip
+      if (trip) {
+        user.addTrip(trip);
+      }
       user.save();
     } catch(err) {
-      logger.error('TripStore.parseMedia >', err.message);
+      logger.error(`${err.name}: ${err.message}`);
+      logger.error(err.stack);
     }
   }
 }

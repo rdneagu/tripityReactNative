@@ -13,6 +13,7 @@ import ScenarioReal from './ScenarioReal';
 
 /* App library */
 import logger from '../lib/log';
+import ScenarioMedia from './ScenarioMedia';
 
 class CSimulatorError extends Error {
   constructor(message) {
@@ -28,6 +29,7 @@ class Simulator {
   static SCENARIO_TYPES = {
     'coords': ScenarioCoords,
     'real': ScenarioReal,
+    'media': ScenarioMedia,
   }
   static STATUS_TYPES = {
     FAIL: -1,

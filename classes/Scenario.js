@@ -46,7 +46,7 @@ class Scenario {
       const percentage = Math.round((i + 1) / props.pings.length * 100);
       sim.setStatus(undefined, `Verifying scenario pings [${percentage}%]`);
 
-      const { latitude, longitude, altitude, timeOffset } = props.pings[i];
+      const { latitude, longitude, altitude, timeOffset, photos } = props.pings[i];
       if (!Number.isFinite(latitude)) {
         throw new CScenarioValueError(`Ping (${i}) <latitude> is not a number. Found ${latitude}`);
       }
@@ -58,6 +58,9 @@ class Scenario {
       }
       if (!Number.isFinite(timeOffset)) {
         props.pings[i].timeOffset = 15;
+      }
+      if (props.type === 'media' && (!Number.isFinite(photos) || photos < 1)) {
+        props.pings[i].photos = 1;
       }
     }
 

@@ -1,6 +1,6 @@
 import UserStore from './UserStore';
 import Navigation from './Navigation';
-import Loading from './Loading';
+import LoadingStore from './Loading';
 import Dialog from './Dialog';
 import TripStore from './TripStore';
 
@@ -20,7 +20,7 @@ class Store {
   constructor() { 
     this.UserStore = new UserStore(this);
     this.Navigation = new Navigation(this);
-    this.Loading = new Loading(this);
+    this.LoadingStore = new LoadingStore(this);
     this.Dialog = new Dialog(this);
     this.TripStore = new TripStore(this);
   }
@@ -52,7 +52,7 @@ class Store {
 
       logger.info('store.OnApplicationReady > Retrieving user session');
       // Create a loader for user session authentication
-      this.Loading.createLoader(async () => {
+      this.LoadingStore.createLoader(async () => {
         await this.UserStore.getUserSession();
         this.applicationReady = true;
       }, { 

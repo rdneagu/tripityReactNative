@@ -29,19 +29,19 @@ class OverlayLoading extends Component {
 
   render() {
     let loader;
-    if (store.Loading.currentLoader) {
+    if (store.LoadingStore.currentLoader) {
       switch (this.loadingType) {
         case LOADING_TYPE.INDETERMINATE: 
-          loader = <IndeterminateLoading>{store.Loading.message}</IndeterminateLoading>
+          loader = <IndeterminateLoading>{store.LoadingStore.message}</IndeterminateLoading>
           break;
         case LOADING_TYPE.DETERMINATE:
-          loader = <IndeterminateLoading>{store.Loading.message}</IndeterminateLoading>
+          loader = <IndeterminateLoading>{store.LoadingStore.message}</IndeterminateLoading>
           // TODO: TPA-38
       }
     }
     
     return (
-      <Modal isVisible={store.Loading.isVisible} style={{ margin: 0 }} animationIn="fadeIn" animationOut="fadeOut">
+      <Modal isVisible={store.LoadingStore.isVisible} style={{ margin: 0 }} animationIn="fadeIn" animationOut="fadeOut">
         <View style={styles.loadingWrapper}>
           {loader}
         </View>

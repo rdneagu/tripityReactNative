@@ -16,7 +16,7 @@ class CPhotoError extends Error {
  * Class definition for the Photo
  */
 class Photo {
-  @observable photoId;
+  @observable hash;
   @observable uri;
   @observable s3;
   @observable thumbnail;
@@ -26,8 +26,8 @@ class Photo {
   }
 
   @action.bound
-  setPhotoId(photoId) {
-    this.photoId = photoId || this.photoId;
+  setHash(hash) {
+    this.hash = hash || this.hash;
   }
 
   @action.bound
@@ -48,7 +48,7 @@ class Photo {
   @action.bound
   setProperties(props) {
     try {
-      this.setPhotoId(props.photoId);
+      this.setHash(props.hash);
       this.setURI(props.uri);
       this.setS3(props.s3);
       this.setThumbnail(props.thumbnail);
@@ -61,9 +61,9 @@ class Photo {
   @action.bound
   reset() {
     try {
-      const result = Realm.toJSON(Realm.db.objectForPrimaryKey('Photo', this.photoId));
+      const result = Realm.toJSON(Realm.db.objectForPrimaryKey('Photo', this.hash));
       if (!result) {
-        throw new CPhotoError(`Could not reset the Photo (${this.photoId})`);
+        throw new CPhotoError(`Could not reset the Photo (${this.hash})`);
       }
       this.setProperties(result);
     } catch(err) {
@@ -75,7 +75,7 @@ class Photo {
   async save() {
     try {
       await Realm.write(realm => realm.create('Photo', {
-        photoId: this.photoId,
+        hash: this.hash,
         uri: this.uri,
         s3: this.s3,
         thumbnail: this.thumbnail,

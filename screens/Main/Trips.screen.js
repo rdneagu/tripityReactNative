@@ -27,7 +27,7 @@ class TripItem extends React.PureComponent {
     const { onPress, startLocation, endLocation, startDate, endDate, visitedCountries, visitedLocations } = this.props;
     return  <TouchableOpacity onPress={onPress}>
               <View style={styles.trip}>
-                <StyledText style={styles.tripTitle} weight='semibold'>{startLocation} to {endLocation}</StyledText>
+                <StyledText style={styles.tripTitle} weight='semibold'>Trip to {endLocation}</StyledText>
                 <View style={styles.separator} />
                 <StyledText>Trip start: {startDate}</StyledText>
                 <StyledText>Trip end: {endDate}</StyledText>
@@ -70,7 +70,7 @@ class ScreenMainTrips extends React.PureComponent {
             destination.counter = 0;
           }
           destination.counter++;
-          if (destination.counter > 4 && acc !== destination.name) {
+          if (destination.counter > 1 && acc !== destination.name) {
             visitedCountries.push(destination.name);
             acc = destination.name;
           }
@@ -105,6 +105,16 @@ class ScreenMainTrips extends React.PureComponent {
     }));
   }
 
+  loadPastTrips = () => {
+    store.LoadingStore.createLoader(async () => {
+      await store.TripStore.parseMedia();
+      await store.TripStore.parseTrips();
+    }, { 
+      message: 'Loading your past trips',
+      failMessage: 'Parsing failed',
+    });
+  }
+
   // TODO: TPA-52
   renderItem = ({ item }) => {
     return  <TripItem 
@@ -129,7 +139,7 @@ class ScreenMainTrips extends React.PureComponent {
             <View style={{ alignItems: 'center', paddingVertical: 10 }}>
               <StyledText style={{ marginBottom: 10 }} weight="semibold">It looks like you have no trips</StyledText>
               <StyledText style={{ marginBottom: 5, marginHorizontal: '15%', textAlign: 'center' }}>Would you like to load any past trips we might find in your device?</StyledText>
-              <StyledButton>Load past trips</StyledButton>
+              <StyledButton onPress={this.loadPastTrips}>Load past trips</StyledButton>
             </View>
           }
         />

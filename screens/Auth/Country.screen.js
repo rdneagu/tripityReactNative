@@ -54,8 +54,10 @@ class ScreenAuthCountry extends React.Component {
         text: 'Change',
       },
       onConfirm: {
-        fn: () => form.submit(this.fields, this.props.store.UserStore.update),
-      }
+        fn: () => {
+          form.submit(this.fields, this.props.store.UserStore.update);
+        },
+      },
     })
   }
 

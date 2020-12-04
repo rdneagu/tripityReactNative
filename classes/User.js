@@ -48,8 +48,13 @@ class User {
   }
 
   @computed
+  get sortedTrips() {
+    return this.trips.slice().sort((t1, t2) => t1.startedAt - t2.startedAt);
+  }
+
+  @computed
   get lastTrip() {
-    return (this.trips.length) ? this.trips[this.trips.length - 1] : null;
+    return (this.trips.length) ? this.sortedTrips[this.trips.length - 1] : null;
   }
 
   @action.bound
@@ -155,20 +160,6 @@ class User {
     }
   }
 
-  @action.bound
-  reset() {
-    try {
-      const result = Realm.toJSON(Realm.db.objectForPrimaryKey('User', this.userId));
-      if (!result) {
-        throw new CUserError(`Could not reset the User (${this.userId})`);
-      }
-      this.setProperties(result);
-    } catch(err) {
-      logger.error(`${err.name}: ${err.message}`);
-      logger.error(err.stack);
-    }
-  }
-
   async parseTrips(trip, statusAck) {
     // Parse specific trip or all trips that have unparsed pings
     const trips = (trip) ? [ trip ] : this.trips.filter(trip => trip.pings.find(ping => !ping.parsed));
@@ -186,6 +177,29 @@ class User {
         method: 'patch',
         data: { trip: trips[t] }
       });
+    }
+  }
+
+  async delete() {
+    try {
+      await Realm.write(realm => realm.delete(Realm.db.objectForPrimaryKey('User', this.userId)));
+    } catch(err) {
+      logger.error(`${err.name}: ${err.message}`);
+      logger.error(err.stack);
+    }
+  }
+
+  @action.bound
+  reset() {
+    try {
+      const result = Realm.toJSON(Realm.db.objectForPrimaryKey('User', this.userId));
+      if (!result) {
+        throw new CUserError(`Could not reset the User (${this.userId})`);
+      }
+      this.setProperties(result);
+    } catch(err) {
+      logger.error(`${err.name}: ${err.message}`);
+      logger.error(err.stack);
     }
   }
 
