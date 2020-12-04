@@ -1,22 +1,25 @@
+# Scenario properties
 A scenario object can have the next key: value properties:
 
-`name` - The name of the scenario
-`type` - The type of the scenario, supported types are: 'coords', 'real', 'media'
-`country` - Sets the home location of the simulator -- *ignored if type is 'coords'*
-`city` - Sets the home city of the simulator -- *ignored if type is 'coords'*
-`interval` - The interval between pings -- *only used when type is 'real'*
+`name` - The name of the scenario\
+`type` - The type of the scenario, supported types are: 'coords', 'real', 'media'\
+`country` - Sets the home location of the simulator -- **ignored if type is 'coords'**\
+`city` - Sets the home city of the simulator -- **ignored if type is 'coords'**\
+`interval` - The interval between pings -- **only used when type is 'real'**\
 `pings` - An array of key-value objects
 
+# Ping properties
 Each ping must start with a dash (`-`), that means the beginning of a new item and the way to separate pings. A ping object can have the next `key: value` properties:
 
-`latitude` - The latitude of ping location
-`longitude` - The longitude of the ping location
-`altitude` - The altitude of the ping location -- *set to 0 or skip if unknown*
-`timeOffset` - Time spent around this location -- *ignored if type is 'coords'*
-`photos` - The amount of photos taken at location -- *only used when type is 'media'*
-`expectedVenue` - The venue that you expect foursquares to return -- *only used when type is 'coords'*
+`latitude` - The latitude of ping location\
+`longitude` - The longitude of the ping location\
+`altitude` - The altitude of the ping location -- **set to 0 or skip if unknown**\
+`timeOffset` - Time spent around this location -- **ignored if type is 'coords'**\
+`photos` - The amount of photos taken at location -- **only used when type is 'media'**\
+`expectedVenue` - The venue that you expect foursquares to return -- **only used when type is 'coords'**
 
-## *coords* scenario example
+# Scenario Examples
+### Scenario Example: 'coords'
 This scenario can the pings in any order. It just parses the venues and detects if they are accurate or not
 ```
 name: 'Some Italy coords'               <-- the name
@@ -30,9 +33,9 @@ pings:                                  <-- the array of objects named pings
     longitude: -4.264894865603752
     expectedVenue: 'Malmaison Glasgow'
 ```
-See file `__scenario__/coords_scenario_example.yml` for full working example
+See file [`__scenario__/coords_scenario_example.yml`](https://github.com/rdneagu/tripityReactNative/blob/master/__scenario__/coords_scenario_example.yml) for full working example
 
-## *real* scenario example
+### Scenario Example: 'real'
 This scenario must have some sort of logical path between pings. Assumes a real world case
 ```
 name: 'Trip to Italy, France, Spain'    <-- the name
@@ -50,9 +53,9 @@ pings:                                  <-- the array of objects named pings
     altitude: 0
     timeOffset: 15
 ```
-See file `__scenario__/real_scenario_example.yml` for full working example
+See file [`__scenario__/real_scenario_example.yml`](https://github.com/rdneagu/tripityReactNative/blob/master/__scenario__/real_scenario_example.yml) for full working example
 
-## *media* scenario example
+### Scenario Example: 'media'
 This scenario must have some sort of logical path between pings. Assumes a real past trip that is parsed from photos
 ```
 name: 'Past trips #1'                   <-- the name
@@ -71,9 +74,9 @@ pings:                                  <-- the array of objects named pings
     timeOffset: 120
     photos: 20
 ```
-See file `__scenario__/media_scenario_example.yml` for full working example
+See file [`__scenario__/media_scenario_example.yml`](https://github.com/rdneagu/tripityReactNative/blob/master/__scenario__/media_scenario_example.yml) for full working example
 
-## Notes
+# Notes
 
 You have to add a space after the colon (`:`) and after the dash (`-`). I am not sure if indenting is necessary but helps to understand the nesting level (clearly shows that name, type and pings belong to scenario)
 
