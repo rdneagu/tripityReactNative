@@ -40,12 +40,13 @@ class OverlayLoading extends Component {
       }
     }
     
+    if (!store.LoadingStore.isVisible) {
+      return null;
+    }
     return (
-      <Modal isVisible={store.LoadingStore.isVisible} style={{ margin: 0 }} animationIn="fadeIn" animationOut="fadeOut">
-        <View style={styles.loadingWrapper}>
-          {loader}
-        </View>
-      </Modal>
+      <View style={styles.loadingWrapper}>
+        {loader}
+      </View>
     )
   }
 }
@@ -57,6 +58,7 @@ const styles = StyleSheet.create({
     height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: 'rgba(0, 0, 0, .6)',
   },
 });
 

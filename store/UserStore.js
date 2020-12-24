@@ -1,4 +1,5 @@
 /* React packages */
+import React from 'react';
 import { Platform } from 'react-native';
 
 /* Expo packages */
@@ -19,6 +20,9 @@ import AWS from '../lib/aws';
 import Realm from '../lib/realm';
 import logger from '../lib/log';
 import TptyTasks from '../lib/tasks';
+
+/* App components */
+import StyledText from '../components/StyledText';
 
 // AUTH_STEP enum
 const AUTH_STEP = {
@@ -287,31 +291,52 @@ class UserStore {
   async getHomeLocation() {
     logger.info(`Fetching coords for user's home location...`);
   
-    const { homeCountry, homeCity } = this.homeLocation;
-    if (!homeCountry || !homeCity) {
-      throw 'Cannot proceed without a home location set';
-    }
+    const [homeCountry, homeCity, postCode] = this.homeLocation;
+    let homeCoords;
+    try {
+      if (!homeCountry || (homeCountry && (!homeCity && !postCode))) {
+        throw new Error('Either city or postcode must be specified along the country');
+      }
 
-    const [ homeCoords ] = await Location.geocodeAsync(`${homeCountry}, ${homeCity}`);
-    if (!homeCoords) {
-      throw 'Failed to parse the home location';
+      const address = _.reject(this.homeLocation, f => f === null || !f.length);
+      homeCoords = (await Location.geocodeAsync(address.join(', ')))[0];
+      if (!homeCoords) {
+        throw new Error('Home location could not be geocoded!');
+      }
+    } catch (err) {
+      this.changeStep(AUTH_STEP.STEP_COUNTRY);
+      this.store.Dialog.showDialog({
+        title: 'Location cannot be geocoded',
+        alert: true,
+        component: 
+          <>
+            <StyledText color="#ff6347" weight="bold" style={{ textAlign: 'center' }}>The specified location is incomplete or invalid and cannot be geocoded</StyledText>
+            <StyledText style={{ marginTop: 20 }}>Either the city or postcode must be specified along the country</StyledText>
+            <StyledText style={{ marginTop: 20 }}>Country: {homeCountry || '<empty>'}</StyledText>
+            <StyledText>City: {homeCity || '<empty>'}</StyledText>
+            <StyledText>Postcode: {postCode || '<empty>'}</StyledText>
+            <StyledText color="#5390f6" weight="bold" style={{ marginTop: 20, textAlign: 'center' }}>Make sure the address is valid, check for spelling errors!</StyledText>
+          </>,
+        onCancel: false,
+        onConfirm: {
+          text: 'I understand',
+        },
+      });
+      throw err;
     }
 
     logger.success('Home location detected!');
     logger.info(`Country: ${homeCountry}`);
     logger.info(`City: ${homeCity}`);
+    logger.info(`Postcode: ${postCode}`);
     logger.info(`Coords: ${homeCoords.latitude} lat, ${homeCoords.longitude} lon`);
 
-    return { homeCountry, homeCity, homeCoords };
+    return { homeCountry, homeCity, postCode, homeCoords };
   }
 
   @computed
   get homeLocation() {
-    return {
-      homeCity: this.user.homeCity,
-      homeCountry: this.user.homeCountry,
-      postCode: this.user.postCode,
-    }
+    return [this.user.homeCountry, this.user.homeCity, this.user.postCode];
   }
 
   @computed

@@ -1,6 +1,6 @@
 /* React packages */
 import React from 'react';
-import { StyleSheet, FlatList, TouchableOpacity, View, SafeAreaView } from 'react-native';
+import { StyleSheet, FlatList, TouchableOpacity, View, SafeAreaView, Dimensions } from 'react-native';
 
 /* Expo packages */
 import * as MediaLibrary from "expo-media-library";
@@ -13,6 +13,7 @@ import { observer, inject } from "mobx-react"
 
 /* App library */
 import logger from '../../lib/log';
+import AWS from '../../lib/aws';
 
 /* App classes */
 import Simulator from '../../classes/Simulator';
@@ -64,10 +65,22 @@ class ScreenMainSimulator extends React.Component {
     if (!image.location) return;
 
     const { latitude, longitude } = image.location;
-    const venueRequest = await axios.get(`https://api.foursquare.com/v2/venues/search?ll=${latitude},${longitude}&v=20200608&client_id=UD2LJ1YQ1AC3I2UG45LWWTULNS5PKYJ45YSYYMFIQSHFPCPX&client_secret=ND1NK05QUPSH4C1E3TBXHQEB51EFK40WG5N2LT12LNDJNRJJ`);
-    // const [ venue ] = _.sortBy(venueRequest.data.response.venues, (v) => v.location.distance);
-    const [ venue ] = venueRequest.data.response.venues;
-    alert(`Closest venue for clicked image: \n${venue.name}\n\nCity: ${venue.location.city}\nCountry: (${venue.location.cc}) ${venue.location.country}`)
+    const venues = await AWS.invokeAPI('/venues/all', {
+      params: {
+        latitude,
+        longitude,
+        altitude: 0,
+      }
+    });
+
+    this.props.store.Dialog.showDialog({
+      title: 'Closest venues for image',
+      component: <VenueDialog venues={venues} latitude={latitude} longitude={longitude} />,
+      onCancel: false,
+      onConfirm: {
+        text: 'I understand',
+      },
+    });
   }
 
   renderImage = ({ item }) => {
@@ -169,6 +182,40 @@ class ScreenMainSimulator extends React.Component {
         }
       </View>
     );
+  }
+}
+
+class VenueDialog extends React.PureComponent {
+  renderVenueItem = ({ item, index }) => {
+    const bgColor = (index % 2) == 0 ? '#383838' : 'transparent';
+    return (
+      <View style={{ paddingVertical: 2, backgroundColor: bgColor, marginVertical: 5 }}>
+        <StyledText>Venue: {item.name}</StyledText>
+        <StyledText>Country: ({item.location.cc}) {item.location.country}</StyledText>
+        <StyledText>City: {item.location.city}</StyledText>
+        <StyledText>Distance: {(item.location.distance / 1000).toFixed(2)}km</StyledText>
+        <StyledText color="#5390f6" weight="bold" size={20} style={{ position: 'absolute', right: 5, top: 20 }}>{index + 1}</StyledText>
+      </View>
+    )
+  }
+
+  render() {
+    return (
+      <View style={{ maxHeight: Dimensions.get('window').height - 300 }}>
+        <StyledText color="#5390f6" weight="bold" style={{ marginTop: 10, textAlign: 'center' }}>Latitude: {this.props.latitude}</StyledText>
+        <StyledText color="#5390f6" weight="bold" style={{ marginBottom: 10, textAlign: 'center' }}>Longitude: {this.props.longitude}</StyledText>
+        <FlatList
+          data={this.props.venues}
+          renderItem={this.renderVenueItem}
+          keyExtractor={item => (item.id + 1).toString()}
+          ListEmptyComponent={
+            <View style={{ alignItems: 'center' }}>
+              <StyledText style={{ marginBottom: 10 }} weight="semibold">No venues found</StyledText>
+            </View>
+          }
+        />
+      </View>
+    )
   }
 }
 

@@ -6,7 +6,7 @@ module.exports = function(api) {
       ["@babel/plugin-transform-flow-strip-types"],
       ["@babel/plugin-proposal-decorators", { "legacy": true }],
       ["@babel/plugin-proposal-class-properties", { "loose": true }],
-      "transform-inline-environment-variables",
+      "inline-dotenv",
     ]
   };
 };

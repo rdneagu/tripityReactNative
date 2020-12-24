@@ -33,12 +33,6 @@ class StyledText extends Component {
   }
 }
 
-// StyledText.propTypes = {
-//   style: PropTypes.any,
-//   weight: PropTypes.string,
-//   size: PropTypes.number,
-// }
-
 StyledText.defaultProps = {
   color: '#eee',
   size: 14,

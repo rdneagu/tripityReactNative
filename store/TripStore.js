@@ -215,7 +215,7 @@ class TripStore {
           });
           photo.save();
 
-          console.log(photo.hash);
+          logger.debug(photo.hash);
           // logger.debug(`AltitudeRef: ${meta.exif['{GPS}'].AltitudeRef}, Altitude: ${meta.exif['{GPS}'].Altitude}`);
 
           const altRef = meta.exif['{GPS}']?.AltitudeRef || meta.exif?.GPSAltitudeRef || 0;

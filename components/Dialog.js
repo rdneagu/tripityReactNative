@@ -17,6 +17,9 @@ import { observer } from "mobx-react"
 import StyledText from './StyledText';
 import StyledButton from './StyledButton';
 
+/* App lib */
+import { mergeExistingProps } from '../lib/util';
+
 /**
  * Class definition for the Dialog component
  */
@@ -32,27 +35,32 @@ class Dialog extends Component {
     if (!dialog) {
       return null;
     }
+
+    let dialogStyle = { ...styles.dialog };
+    let titleBarStyle = { ...styles.titleBar };
+    if (dialog.alert) {
+      dialogStyle = { ...dialogStyle, borderColor: '#ff6347' };
+      titleBarStyle = { ...titleBarStyle, borderBottomColor: '#ff6347', backgroundColor: '#bf4a35' };
+    }
     return (
-      <Modal isVisible={!!dialog} style={{ margin: 0 }} animationIn="fadeIn" animationOut="fadeOut">
-        <View style={styles.dialogWrapper}>
-          <View style={styles.dialog}>
-            <View style={styles.titleBar}>
-              <StyledText weight="bold">{dialog.title}</StyledText>
-              {dialog.dismissable &&
-                <TouchableOpacity style={styles.close} onPress={store.Dialog.hideDialog}>
-                  <Ionicons name="md-close" size={18} color="white" />
-                </TouchableOpacity>
-              }
-            </View>
-            <View style={styles.component}>
-              {dialog.component}
-            </View>
-            <View style={styles.control}>
-              {dialog.buttons.map((button, i) => <StyledButton key={i} style={styles.button} type="bordered" inversed {...button} />)}
-            </View>
+      <View style={styles.dialogWrapper}>
+        <View style={dialogStyle}>
+          <View style={titleBarStyle}>
+            <StyledText weight="bold">{dialog.title}</StyledText>
+            {dialog.dismissable &&
+              <TouchableOpacity style={styles.close} onPress={store.Dialog.hideDialog}>
+                <Ionicons name="md-close" size={18} color="white" />
+              </TouchableOpacity>
+            }
+          </View>
+          <View style={styles.component}>
+            {dialog.component}
+          </View>
+          <View style={styles.control}>
+            {dialog.buttons.map((button, i) => <StyledButton key={i} style={styles.button} type="bordered" inversed {...button} />)}
           </View>
         </View>
-      </Modal>
+      </View>
     )
   }
 }
@@ -63,11 +71,11 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     justifyContent: 'center',
+    backgroundColor: 'rgba(0, 0, 0, .6)',
   },
   dialog: {
     marginHorizontal: 10,
     backgroundColor: '#000e26',
-    borderWidth: 1,
     borderColor: '#4169e1',
     borderRadius: 4,
   },

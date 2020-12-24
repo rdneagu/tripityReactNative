@@ -31,16 +31,6 @@ class ScreenAuthRegister extends React.Component {
     super(props);
   }
 
-  /**
-   * Cleans the active form of errors
-   */
-  @action.bound
-  clean() {
-    _.forEach(this.fields, (field, key) => {
-      delete this.fields[key].error;
-    });
-  }
-
   @action.bound
   register() {
     form.submit(this.fields, this.props.store.UserStore.register);

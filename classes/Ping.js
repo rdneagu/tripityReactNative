@@ -255,13 +255,7 @@ class Ping {
     }
     this.setTransport(withPing.transport);
     this.setVenue(withPing.venue);
-    console.log('-- this photos --');
-    console.log(this.photos);
-    console.log('-- with photos --');
-    console.log(withPing.photos);
     this.setPhotos(this.photos.concat(withPing.photos));
-    console.log('-- this photos --');
-    console.log(this.photos);
     withPing.setMerged(true);
   }
 

@@ -138,11 +138,11 @@ class App extends React.Component {
             <Provider store={store}>
               <ReactRoutes />
             </Provider>
+            <OverlayLoading />
+            <Dialog />
             <TouchableOpacity style={styles.bug} onPress={this.showLogs}>
               <Ionicons name="ios-bug" size={20} color='white' />
             </TouchableOpacity>
-            <OverlayLoading />
-            <Dialog />           
           </SafeAreaView>
         </NavigationContainer>
       )

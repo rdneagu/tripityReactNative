@@ -151,7 +151,8 @@ const styles = StyleSheet.create({
     height: 28,
     width: 80,
     backgroundColor: '#4169e1',
-    left: 39,
+    // right: 39,
+    left: '82%',
   },
   markerRightRound: {
     position: 'absolute',
@@ -166,7 +167,8 @@ const styles = StyleSheet.create({
     height: 28,
     width: 80,
     backgroundColor: '#4169e1',
-    right: 39,
+    // right: 39,
+    right: '82%',
   },
   markerLeftRound: {
     position: 'absolute',

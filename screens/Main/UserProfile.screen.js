@@ -39,12 +39,22 @@ class ScreenMainUserProfile extends React.Component {
     }
   }
 
+  changeHomeLocation = () => {
+    if (this.props.store.UserStore.user) {
+      this.props.store.UserStore.changeStep(2);
+    }
+  }
+
   render() {
     return (
       <View style={styles.content}>
         <View style={{ alignItems: 'center', marginVertical: 20 }}>
           <StyledText>Delete your user. This action cannot be undone!</StyledText>
           <StyledButton style={{ marginTop: 5 }} colors={[ '#CC3014', '#B31700' ]} onPress={this.deleteUser}>Delete your user</StyledButton>
+        </View>
+        <View style={{ alignItems: 'center', marginVertical: 20 }}>
+          <StyledText>Change your home location</StyledText>
+          <StyledButton style={{ marginTop: 5 }} onPress={this.changeHomeLocation}>Change home location</StyledButton>
         </View>
       </View>
     );

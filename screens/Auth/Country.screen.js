@@ -31,15 +31,6 @@ class ScreenAuthCountry extends React.Component {
   }
 
   @action.bound
-  OnCountryChange(option) {
-    if (option === this.fields.homeCountry.value) return;
-    
-    this.fields.homeCountry.value = option;
-    this.fields.homeCity.value = null;
-    this.fields.homeCity.select.options = cities[option];
-  }
-
-  @action.bound
   confirm() {
     const { store } = this.props;
     store.Dialog.showDialog({

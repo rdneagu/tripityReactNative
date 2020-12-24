@@ -40,7 +40,8 @@ class Dialog {
   /**
    * Prepares the dialog object and pushes it to the list of dialogs to be shown
    * 
-   * @param {String} title            - The title of the dialog
+   * @param {String} title            - The title of the dialogs
+   * @param {Boolean?} alert          - Whether the dialog should be red
    * @param {React} component         - The body of the dialog
    * @param {Boolean?} dismissable    - Whether the dialog can be dismissed, defaults to true
    * @param {Object?} onCancel        - Whether the default cancel button should be shown, defaults to true
@@ -54,7 +55,7 @@ class Dialog {
    * @action @bound
    */
   @action.bound
-  showDialog({ title, component, dismissable=true, onCancel=true, onConfirm=true, buttons=[] }) {
+  showDialog({ title, alert=false, component, dismissable=true, onCancel=true, onConfirm=true, buttons=[] }) {
     if (dismissable && onCancel) {
       const text = onCancel?.text || 'Cancel';
       const fn = () => this.onPress(onCancel?.fn || true);
@@ -80,6 +81,7 @@ class Dialog {
 
     this.dialogs.push({
       title,
+      alert,
       component,
       dismissable: dismissable,
       buttons,

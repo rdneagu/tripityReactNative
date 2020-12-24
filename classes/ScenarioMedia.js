@@ -39,7 +39,7 @@ class ScenarioMedia extends Scenario {
 
       const imageTimeOffset = (pings[i].timeOffset * 60 * 1000) / pings[i].photos;
       for (let p = 0; p < pings[i].photos; p++) {
-        console.log(`simulator://${i}_${p}.jpg`);
+        logger.debug(`simulator://${i}_${p}.jpg`);
         creationTime += imageTimeOffset;
         assets.push({
           uri: `simulator://${i}_${p}.jpg`,
