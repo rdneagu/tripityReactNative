@@ -28,7 +28,7 @@ class Ping {
   static FLIGHT_ALTITUDE_TRIGGER_THRESHOLD = 4000; // in m
   static INTERVAL = 900; // in seconds
   static TIME_REQUIRED_VISIT = (this.INTERVAL + this.INTERVAL/2); // time required to confirm a visit (in seconds)
-  static TIME_MAX_BETWEEN_TRIPS = 3600 * 24 * 3; // 3 days difference maximum between trips (in seconds)
+  static TIME_MAX_BETWEEN_TRIPS = 3600 * 24 * 7; // 7 days difference maximum between trips (in seconds)
   static PING_TYPE = {
     TYPE_REALTIME: 0,
     TYPE_MEDIA: 1,

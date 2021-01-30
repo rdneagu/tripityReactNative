@@ -1,13 +1,11 @@
 /* React packages */
 import React from 'react';
-import { StyleSheet, Image, View, Text } from 'react-native';
+import { StyleSheet, Image, PixelRatio, View, Text } from 'react-native';
 
-export default function Picture({ src, location }) {
+export default function Picture({ uri, location }) {
   return (
-    <View>
-      <React.Fragment>
-        <Image source={{ uri: src }} style={[styles.image, !location ? styles.disabled : null]} />
-      </React.Fragment>
+    <View style={{ width: '100%', flex: 1 }}>
+      <Image source={{ uri }} style={[ styles.image, !location ? styles.disabled : null ]} />
       {!location && <View style={styles.location}>
         <Text style={styles.locationText}>LOCATION DISABLED</Text>
       </View>}
@@ -17,8 +15,9 @@ export default function Picture({ src, location }) {
 
 const styles = StyleSheet.create({
   image: {
-    width: 128,
-    height: 128,
+    flex: 1,
+    width: PixelRatio.getPixelSizeForLayoutSize(56),
+    height: PixelRatio.getPixelSizeForLayoutSize(56),
     marginTop: 4,
     marginBottom: 4,
   },

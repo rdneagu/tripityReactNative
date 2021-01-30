@@ -102,11 +102,10 @@ class IndeterminateLoading extends Component {
 const styles = StyleSheet.create({
   loadingWrapper: {
     width: '100%',
-    alignItems: 'center',
     justifyContent: 'center',
   },
   loadingBarWrapper: {
-    width: '80%',
+    marginHorizontal: '10%',
     height: 5,
     backgroundColor: 'rgba(74, 141, 248, 0.4)',
     overflow: 'hidden',
@@ -117,8 +116,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgb(74, 141, 248)',
   },
   loadingMsg: {
-    textAlign: 'center',
-  },
+    alignSelf: 'center',
+    marginVertical: 2,
+  }
 });
 
 export default IndeterminateLoading;

@@ -16,6 +16,7 @@ import logger from '../../lib/log';
 import AWS from '../../lib/aws';
 
 /* App classes */
+import Loading from '../../classes/Loading';
 import Simulator from '../../classes/Simulator';
 
 /* App components */
@@ -29,9 +30,30 @@ import { Image, StyledButton, StyledText, IndeterminateLoading } from '../../com
 class ScreenMainSimulator extends React.Component {
   @observable images = [];
   @observable simulator = new Simulator();
+  @observable loading = {
+    photos: false,
+  }
 
   constructor() {
     super();
+    Loading.getQueue('background').add({
+      id: 'LoadingTest',
+      message: "Testing background loader",
+      action: (OnUpdate, OnFail) => new Promise((resolve, reject) => {
+        setTimeout(() => {
+          OnUpdate("Testing background loader_1");
+        }, 1000);
+        setTimeout(() => {
+          OnUpdate("Testing background loader_2");
+        }, 2000);
+        setTimeout(() => {
+          OnUpdate("Testing background loader_3");
+        }, 3000);
+        setTimeout(() => {
+          resolve();
+        }, 6000);
+      }),
+    });
   }
 
   /**
@@ -39,17 +61,9 @@ class ScreenMainSimulator extends React.Component {
    */
   @action.bound
   async getPhotosAsync() {
-    const images = [];
-    const photos = await MediaLibrary.getAssetsAsync({ sortBy: MediaLibrary.SortBy.creationTime, first: 100 });
-    for (let i = 0; i < photos.assets.length; i++) {
-      const meta = await MediaLibrary.getAssetInfoAsync(photos.assets[i]);
-      images.push({
-        id: photos.assets[i].id,
-        src: meta.localUri,
-        location: meta.location,
-      });
-    }
-    this.images = images;
+    this.loading.photos = true;
+    this.images = await this.props.store.TripStore.getAllPhotos();
+    this.loading.photos = false;
   }
 
   @action.bound
@@ -78,7 +92,7 @@ class ScreenMainSimulator extends React.Component {
       component: <VenueDialog venues={venues} latitude={latitude} longitude={longitude} />,
       onCancel: false,
       onConfirm: {
-        text: 'I understand',
+        text: 'Close',
       },
     });
   }
@@ -137,48 +151,60 @@ class ScreenMainSimulator extends React.Component {
     }
     return (
       <View style={styles.content}>
-        {this.props.store.UserStore.user?.isAdmin || true  // TODO: CHANGE ON PRODUCTION
-          ? <View style={{ flex: 1 }}>
-              <View style={{ margin: 10, alignItems: 'center' }}>
-                <StyledText style={{ marginVertical: 10 }} weight='bold'>Scenario</StyledText>
-                {this.simulator.status === Simulator.STATUS_TYPES.PENDING 
-                  ?
-                    <View style={{ width: '100%', alignItems: 'center' }}>
-                      <IndeterminateLoading>{this.simulator.statusMsg}</IndeterminateLoading>
-                    </View>
-                  :
-                    <StyledButton onPress={this.loadScenario}>Load scenario</StyledButton>
-                }
-                {this.simulator.status === Simulator.STATUS_TYPES.FAIL &&
-                  <View style={{ backgroundColor: 'rgba(0, 0, 0, .6)', marginVertical: 10, paddingVertical: 8, paddingHorizontal: 16, borderRadius: 4 }}>
-                    <StyledText color='#ff6347'>{this.simulator.statusMsg}</StyledText>
+        {(true || this.props.store.UserStore.user?.isAdmin)  // TODO: CHANGE ON PRODUCTION
+        ?
+          <View style={{ flex: 1 }}>
+            <View style={{ margin: 10, alignItems: 'center' }}>
+              <StyledText style={{ marginVertical: 10 }} weight='bold'>Scenario</StyledText>
+              {this.simulator.status === Simulator.STATUS_TYPES.PENDING 
+              ?
+                <View style={{ width: '100%', alignItems: 'center' }}>
+                  <IndeterminateLoading>{this.simulator.statusMsg}</IndeterminateLoading>
+                </View>
+              :
+                <StyledButton onPress={this.loadScenario}>Load scenario</StyledButton>
+              }
+              {this.simulator.status === Simulator.STATUS_TYPES.FAIL &&
+                <View style={{ backgroundColor: 'rgba(0, 0, 0, .6)', marginVertical: 10, paddingVertical: 8, paddingHorizontal: 16, borderRadius: 4 }}>
+                  <StyledText color='#ff6347'>{this.simulator.statusMsg}</StyledText>
+                </View>
+              }
+              {this.simulator.status === Simulator.STATUS_TYPES.SUCCESS &&
+                <>
+                  <StyledText weight="bold" style={{ marginVertical: 10 }}>Scenario: {this.simulator.scenario.name}</StyledText>
+                  {scenarioResult}
+                </>
+              }
+            </View>
+            <View style={{ flex: 1, margin: 10 }}>
+              {this.images.length ? <StyledText style={{ marginBottom: 10, alignSelf: 'center' }} weight="semibold">Loaded photos</StyledText> : null}
+              <FlatList
+                contentContainerStyle={{ width: '100%', alignItems: 'center' }}
+                data={this.images.slice()}
+                renderItem={this.renderImage}
+                numColumns={3}
+                keyExtractor={item => item.id}
+                ListEmptyComponent={
+                  <View style={{ width: '100%', alignItems: 'center', paddingVertical: 10 }}>
+                    {this.loading.photos 
+                    ?
+                      <View style={{ width: '100%' }}>
+                        <IndeterminateLoading>Loading photos</IndeterminateLoading>
+                      </View>
+                    :
+                      <>
+                        <StyledText style={{ marginBottom: 10 }} weight="semibold">Tap on Grab Photos to retrieve all the photos</StyledText>
+                        <StyledButton style={{ marginVertical: 20 }} onPress={this.getPhotosAsync}>Grab Photos</StyledButton>
+                      </>
+                    }
+                    
                   </View>
                 }
-                {this.simulator.status === Simulator.STATUS_TYPES.SUCCESS &&
-                  <>
-                    <StyledText weight="bold" style={{ marginVertical: 10 }}>Scenario: {this.simulator.scenario.name}</StyledText>
-                    {scenarioResult}
-                  </>
-                }
-              </View>
-              <View style={{ flex: 1, margin: 10, alignItems: 'center' }}>
-                {this.images.length ? <StyledText style={{ marginBottom: 10 }} weight="semibold">Loaded photos</StyledText> : null}
-                <FlatList
-                  contentContainerStyle={{ width: '100%', alignItems: 'center' }}
-                  data={this.images.slice()}
-                  renderItem={this.renderImage}
-                  numColumns={3}
-                  keyExtractor={item => item.id}
-                  ListEmptyComponent={
-                    <View style={{ alignItems: 'center', paddingVertical: 10 }}>
-                      <StyledText style={{ marginBottom: 10 }} weight="semibold">Tap on Grab Photos to retrieve all the photos</StyledText>
-                      <StyledButton style={{ marginVertical: 20 }} onPress={this.getPhotosAsync}>Grab Photos</StyledButton>
-                    </View>
-                  }
-                />
-              </View>
+              />
             </View>
-          : <StyledText>You cannot access this feature if you're not an Administrator</StyledText>
+          </View>
+        :
+          <StyledText>You cannot access this feature if you're not an Administrator</StyledText>
         }
       </View>
     );

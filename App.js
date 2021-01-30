@@ -30,6 +30,7 @@ import TptyTasks from './lib/tasks';
 import logger from './lib/log';
 
 /* App components */
+import StatusBarCstm from './components/StatusBarCstm';
 import { OverlayLoading, Dialog, StyledText } from './components';
 
 /* Initialize location and geofencing tasks */
@@ -133,16 +134,17 @@ class App extends React.Component {
       return (
         <NavigationContainer ref={store.Navigation.navigationRef} onReady={store.OnApplicationReady} onStateChange={store.Navigation.OnStateChange}>
           <SafeAreaView style={styles.main}>
-            <StatusBar hidden />
             <ImageBackground source={require('./assets/images/tripity_bg.png')} style={styles.background} />
+            <StatusBar hidden />
+            <StatusBarCstm />
             <Provider store={store}>
               <ReactRoutes />
             </Provider>
             <OverlayLoading />
-            <Dialog />
             <TouchableOpacity style={styles.bug} onPress={this.showLogs}>
               <Ionicons name="ios-bug" size={20} color='white' />
             </TouchableOpacity>
+            <Dialog />
           </SafeAreaView>
         </NavigationContainer>
       )

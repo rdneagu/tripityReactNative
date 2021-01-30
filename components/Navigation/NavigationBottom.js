@@ -107,7 +107,7 @@ class NavigationBottom extends Component {
 
   render() {
     return (
-      <View style={{ width: '100%', paddingVertical: 8, backgroundColor: '#000e26', overflow: 'hidden' }}>
+      <View style={styles.bar}>
         <Animated.View style={{ ...styles.marker, transform: [{ translateX: this.animation.left }] }}>
           <View style={styles.markerLeft}>
             <View style={styles.markerLeftRound} />
@@ -134,6 +134,12 @@ class NavigationBottom extends Component {
 // }
 
 const styles = StyleSheet.create({
+  bar: {
+    width: '100%',
+    paddingVertical: 8,
+    backgroundColor: '#000e26',
+    overflow: 'hidden',
+  },
   marker: {
     position: 'absolute',
     flexDirection: 'row',

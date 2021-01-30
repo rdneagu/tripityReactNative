@@ -16,6 +16,7 @@ class CPhotoError extends Error {
  * Class definition for the Photo
  */
 class Photo {
+  @observable id;
   @observable hash;
   @observable uri;
   @observable s3;
@@ -23,6 +24,11 @@ class Photo {
 
   constructor(props) {
     this.setProperties(props);
+  }
+
+  @action.bound
+  setId(id) {
+    this.id = id || this.id;
   }
 
   @action.bound
@@ -48,6 +54,7 @@ class Photo {
   @action.bound
   setProperties(props) {
     try {
+      this.setId(props.id);
       this.setHash(props.hash);
       this.setURI(props.uri);
       this.setS3(props.s3);
@@ -75,6 +82,7 @@ class Photo {
   async save() {
     try {
       await Realm.write(realm => realm.create('Photo', {
+        id: this.id,
         hash: this.hash,
         uri: this.uri,
         s3: this.s3,

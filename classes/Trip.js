@@ -125,7 +125,7 @@ class Trip {
     if (this.firstPing && this.lastPing && this.finishedAt) {
       const minimumHours = (this.firstPing.getTimeBetweenPings(this.lastPing) >= Ping.TRIP_MINIMUM_HOURS);
       const minimumPings = (this.pings.length >= Ping.TRIP_MINIMUM_LOCATIONS);
-      return minimumHours && minimumPings;
+      return minimumHours;
     }
     return false;
   }

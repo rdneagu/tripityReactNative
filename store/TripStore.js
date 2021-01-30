@@ -30,6 +30,35 @@ class TripStore {
     return this.store.UserStore.user?.sortedTrips;
   }
 
+  async getAllPhotos(albums=['Camera', 'Restored'], md5checksum=true) {
+    const photos = [];
+    for (let i = 0; i < albums.length; i++) {
+      const album = await MediaLibrary.getAlbumAsync(albums[i]);
+
+      // Asset fetching vars
+      let assets = [];
+      let hasNextPage = false;
+      let endCursor;
+
+      do {
+        ({ assets, hasNextPage, endCursor } = await MediaLibrary.getAssetsAsync({ sortBy: [ [ MediaLibrary.SortBy.creationTime, true ] ], album, after: endCursor }));
+        for (let j = 0; j < assets.length; j++) {
+          const meta = await MediaLibrary.getAssetInfoAsync(assets[j]);
+          const hash = (md5checksum) ? await FileSystem.getInfoAsync(assets[j].uri, { md5: true }) : null;
+          photos.push({
+            id: assets[j].id,
+            uri: assets[j].uri,
+            exif: meta.exif,
+            location: meta.location,
+            creationTime: assets[j].creationTime,
+            md5: hash?.md5,
+          });
+        }
+      } while (hasNextPage);
+    }
+    return photos.sort((ph1, ph2) => ph2.creationTime - ph1.creationTime);
+  }
+
   /**
    * Triggered when the device receives a new location ping
    * 
@@ -161,7 +190,7 @@ class TripStore {
     }
   }
 
-  async parseMedia(sim, statusAck) {
+  async parseMedia(sim, statusEvt) {
     try {
       const user = await this.store.UserStore.getLastLogged();
       if (!user) {
@@ -175,119 +204,105 @@ class TripStore {
 
       let lastPhotoCursor = user.lastTrip?.lastPing?.lastPhoto;
       let trip = null;
-      let currentPing = null;
       let previousPing = null;
-      let page = 0;
 
-      const album = await MediaLibrary.getAlbumAsync("Camera");
-      do {
-        if (!sim) {
-          var { assets, hasNextPage } = await MediaLibrary.getAssetsAsync({ sortBy: [ [ MediaLibrary.SortBy.creationTime, true ] ], album, first: 100 });
-        } else {
-          var { assets, hasNextPage } = { assets: sim, hasNextPage: false };
+      const photos = sim || this.getAllPhotos();
+      for (let i = 0; i < photos.length; i++) {
+        // If listening to photo loader, send updates to the event
+        if (typeof (statusEvt) === 'function') {
+          statusEvt(photos, i);
         }
-        logger.info(`Fetching page ${++page}, hasNextPage=${hasNextPage}`);
-        for (let i = 0; i < assets.length; i++) {
-          if (statusAck) {
-            statusAck(assets, i);
+
+        // Ignore all photos that have been already stored in trips
+        if (lastPhotoCursor && photos[i].creationTime <= lastPhotoCursor.timestamp) {
+          continue;
+        }
+
+        // If the photo does not have GPS location recorded, skip it
+        if (!photos[i].location) {
+          logger.info(`Photo ${photos[i].uri} does not have location set! Skipping...`);
+          continue;
+        }
+
+        // Generate a custom uuid v4 if checksum is not specified
+        photos[i].md5 = photos[i].md5 || uuid_v4();
+
+        // Create the photo object
+        const photo = new Photo({
+          id: photos[i].id,
+          hash: photos[i].md5,
+          uri: photos[i].uri,
+        });
+
+        const altRef = photos[i].exif['{GPS}']?.AltitudeRef || photos[i].exif?.GPSAltitudeRef || 0;
+        const altitude = photos[i].exif['{GPS}']?.Altitude || photos[i].exif?.GPSAltitude || 0;
+
+        const currentPing = new Ping({
+          pingId: uuid_v4(),
+          type: Ping.PING_TYPE.TYPE_MEDIA,
+          latitude: photos[i].location.latitude,
+          longitude: photos[i].location.longitude,
+          altitude: (altRef === 0) ? altitude : 0,
+          timestamp: photos[i].creationTime,
+        })
+        currentPing.setDistance(currentPing.getDistanceBetweenCoords(previousPing));
+        currentPing.setTransport(false);
+
+        const location = await Location.reverseGeocodeAsync({ latitude: currentPing.latitude, longitude: currentPing.longitude });
+        currentPing.setCountry(location[0]?.country);
+        currentPing.setCity(location[0]?.city);
+
+        // If the current photo was taken in a flight, skip it
+        if (currentPing.isHighAltitude() || currentPing.country === null) {
+          logger.warn(`Photo ${photo.uri} with hash ${photo.hash} has not been taken on ground! Skipping...`);
+          continue;
+        }
+
+        // Finish the trip if started only if the current photo was taken at home
+        // or in a different country than the previous one
+        // or the previous photo is 3 days older than the current photo
+        const timeDiff = (previousPing?.getTimeBetweenPings(currentPing) >= Ping.TIME_MAX_BETWEEN_TRIPS);
+        const sameCountry = (previousPing?.country === currentPing.country);
+        if (trip && (currentPing.isHome(homeCoords) || !sameCountry || timeDiff)) {
+          logger.info(`Trip to ${trip.lastPing.country} ended`);
+          trip.setFinished(trip.lastPing.timestamp);
+          if (trip.isValid) {
+            logger.debug('The trip has met the minimum requirements to be recorded!')
+            trip.setSync(Date.now());
+            user.addTrip(trip);
           }
+          trip = null;
+        }
 
-          // Ignore all photos that have been already accessed
-          if (lastPhotoCursor && assets[i].creationTime <= lastPhotoCursor.timestamp) {
-            continue;
-          }
-          
-          const meta = (sim) ? assets[i].meta : await MediaLibrary.getAssetInfoAsync(assets[i]);   
-
-          // If the photo does not have GPS location recorded, skip it
-          if (!meta.location) {
-            logger.warn(`Image ${assets[i].uri} does not have location set! Skipping...`);
-            continue;
-          }
-
-          // Fetch the file md5 checksum
-          const { md5 } = (sim) ? { md5: uuid_v4() } : await FileSystem.getInfoAsync(assets[i].uri, { md5: true });       
-
-          // Create the photo object and save it in Realm
-          const photo = new Photo({
-            hash: md5,
-            uri: assets[i].uri,
+        // Start the trip if not started only if the user is not home anymore
+        if (!trip && !currentPing.isHome(homeCoords)) {
+          logger.info('New possible trip detected');
+          trip = new Trip({
+            tripId: uuid_v4(),
+            startedAt: currentPing.timestamp,
           });
-          photo.save();
-
-          logger.debug(photo.hash);
-          // logger.debug(`AltitudeRef: ${meta.exif['{GPS}'].AltitudeRef}, Altitude: ${meta.exif['{GPS}'].Altitude}`);
-
-          const altRef = meta.exif['{GPS}']?.AltitudeRef || meta.exif?.GPSAltitudeRef || 0;
-          const altitude = meta.exif['{GPS}']?.Altitude || meta.exif?.GPSAltitude || 0;
-
-          currentPing = new Ping({
-            pingId: uuid_v4(),
-            type: Ping.PING_TYPE.TYPE_MEDIA,
-            latitude: meta.location.latitude,
-            longitude: meta.location.longitude,
-            altitude: (altRef === 0) ? altitude : 0,
-            timestamp: assets[i].creationTime,
-          })
-          currentPing.setDistance(currentPing.getDistanceBetweenCoords(previousPing));
-          currentPing.setTransport(false);
-
-          const location = await Location.reverseGeocodeAsync({ latitude: currentPing.latitude, longitude: currentPing.longitude });
-          currentPing.setCountry(location[0]?.country);
-          currentPing.setCity(location[0]?.city);
-
-          // If the current photo was taken in a flight, skip it
-          if (currentPing.isHighAltitude() || currentPing.country === null) {
-            logger.warn(`Photo ${photo.uri} with hash ${photo.hash} has not been taken on ground! Skipping...`);
-            continue;
-          }
-
-          // Finish the trip if started only if the current photo was taken at home
-          // or in a different country than the previous one
-          // or the previous photo is 3 days older than the current photo
-          const timeDiff = (previousPing?.getTimeBetweenPings(currentPing) >= Ping.TIME_MAX_BETWEEN_TRIPS);
-          const sameCountry = (previousPing?.country === currentPing.country);
-          if (trip && (currentPing.isHome(homeCoords) || !sameCountry || timeDiff)) {
-            logger.info(`Trip to ${trip.lastPing.country} ended`);
-            trip.setFinished(trip.lastPing.timestamp);
-            if (trip.isValid) {
-              logger.debug('The trip has the minimum requirements to be recorded!')
-              trip.setSync(Date.now());
-              user.addTrip(trip);
-            }
-            trip = null;
-          }
-
-          // Start the trip if not started only if the user is not home anymore
-          if (!trip && !currentPing.isHome(homeCoords)) {
-            logger.debug('New possible trip detected');
-            trip = new Trip({
-              tripId: uuid_v4(),
-              startedAt: currentPing.timestamp,
-            });
-          }
-
-          // If a trip has started already
-          if (trip) {
-            // If the distance of this current photo was taken within 200m of the first photo in the ping
-            // Merge the previous ping with the current one
-            if (currentPing.distance !== null && currentPing.distance < 0.2) {
-              logger.debug(`Photo ${photo.uri} with hash ${photo.hash} is within 200m of the first in batch`);
-              currentPing.merge(previousPing, { keepTime: true });
-              trip.removePing('pop');
-            }
-
-            // Add the photo to the list of photos taken at this ping
-            currentPing.addPhoto(photo);
-
-            // Push the ping in the trip list
-            trip.addPing(currentPing);
-          } else {
-            logger.debug(`Photo ${photo.uri} with hash ${photo.hash} taken at home with no trips started, nothing to do with it`);
-          }
-          previousPing = currentPing;
         }
-      } while (hasNextPage);
+
+        // If a trip has started already
+        if (trip) {
+          // If the distance of this current photo was taken within 200m of the first photo in the ping
+          // Merge the previous ping with the current one
+          if (currentPing.distance !== null && currentPing.distance < 0.2) {
+            logger.debug(`Photo ${photo.uri} with hash ${photo.hash} is within 200m of the first in batch`);
+            currentPing.merge(previousPing, { keepTime: true });
+            trip.removePing('pop');
+          }
+
+          // Add the photo to the list of photos taken at this ping
+          currentPing.addPhoto(photo);
+
+          // Push the ping in the trip list
+          trip.addPing(currentPing);
+        } else {
+          logger.debug(`Photo ${photo.uri} with hash ${photo.hash} taken at home with no trips started, nothing to do with it`);
+        }
+        previousPing = currentPing;
+      }
 
       // Add unfinished trip
       if (trip) {

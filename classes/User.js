@@ -6,6 +6,7 @@ import { observable, action, computed } from 'mobx';
 import Trip from './Trip';
 
 /* App library */
+import { PERMISSION_LEVEL } from '../lib/permissions';
 import AWS from '../lib/aws';
 import Realm from '../lib/realm';
 import logger from '../lib/log';
@@ -44,7 +45,7 @@ class User {
 
   @computed
   get isAdmin() {
-    return (this.permission === 31);
+    return (this.permission & PERMISSION_LEVEL.ADMIN);
   }
 
   @computed
