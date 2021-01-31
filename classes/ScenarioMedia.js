@@ -9,6 +9,7 @@ import { action } from 'mobx';
 
 /* App classes */
 import Scenario from './Scenario';
+import Loading from './Loading';
 
 /* App library */
 import logger from '../lib/log';
@@ -43,17 +44,15 @@ class ScenarioMedia extends Scenario {
         creationTime += imageTimeOffset;
         assets.push({
           uri: `simulator://${i}_${p}.jpg`,
-          meta: {
-            location: {
-              latitude: this.data.pings[i].latitude,
-              longitude: this.data.pings[i].longitude,
+          location: {
+            latitude: this.data.pings[i].latitude,
+            longitude: this.data.pings[i].longitude,
+          },
+          exif: {
+            '{GPS}': {
+              AltitudeRef: 0,
+              Altitude: this.data.pings[i].altitude,
             },
-            exif: {
-              '{GPS}': {
-                AltitudeRef: 0,
-                Altitude: this.data.pings[i].altitude,
-              },
-            }
           },
           creationTime,
         })
@@ -66,9 +65,12 @@ class ScenarioMedia extends Scenario {
 
   @action.bound
   async postRun() {
-    await store.TripStore.parseTrips((trip, p) => {
-      const percentage = Math.round((p + 1) / trip.pings.length * 100);
-      this.simulator.setStatus(undefined, `Parsing media trips [${percentage}%]`);
+    Loading.getQueue('background').add({
+      id: 'ParseTrips',
+      initialMessage: "Parsing your past trips",
+      action: async (OnUpdate, OnFail) => {
+        await store.TripStore.parseTrips();
+      },
     });
     // store.UserStore.user.reset();
   }
@@ -82,10 +84,14 @@ class ScenarioMedia extends Scenario {
     }
     store.UserStore.user.setHomeCountry(this.data.country);
     store.UserStore.user.setHomeCity(this.data.city);
-    await store.TripStore.parseMedia(this.data.pings, (assets, i) => {
-      const percentage = Math.round((i + 1) / assets.length * 100);
-      this.simulator.setStatus(undefined, `Parsing assets [${percentage}%]`);
-    })
+    Loading.getQueue('background').add({
+      id: 'FetchMedia',
+      initialMessage: "Fetching your media",
+      action: async (OnUpdate, OnFail) => {
+        await store.TripStore.parseMedia(this.data.pings);
+      },
+    });
+    
     await this.postRun();
   }
 }

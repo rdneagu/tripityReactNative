@@ -27,7 +27,7 @@ class TripStore {
   }
 
   getAllTrips() {
-    return this.store.UserStore.user?.sortedTrips;
+    return this.store.UserStore.user?.sortedTrips || [];
   }
 
   async getAllPhotos(albums=['Camera', 'Restored'], md5checksum=true) {
@@ -177,20 +177,20 @@ class TripStore {
     }
   }
 
-  async parseTrips(statusAck) {
+  async parseTrips({ OnUpdate, OnFail }={}) {
     try {
       // Retrieve the last logged user (in background) or current user (in foreground)
       const user = await this.store.UserStore.getLastLogged();
       if (!user) {
         throw new Error('The system pinged with no user authenticated');
       }
-      await user.parseTrips(null, statusAck);
+      await user.parseTrips(null, { OnUpdate, OnFail });
     } catch(err) {
       logger.error('TripStore.parseTrips >', err.message);
     }
   }
 
-  async parseMedia(sim, statusEvt) {
+  async parseMedia(sim, { OnUpdate, OnFail }={}) {
     try {
       const user = await this.store.UserStore.getLastLogged();
       if (!user) {
@@ -206,13 +206,8 @@ class TripStore {
       let trip = null;
       let previousPing = null;
 
-      const photos = sim || this.getAllPhotos();
+      const photos = sim || await this.getAllPhotos();
       for (let i = 0; i < photos.length; i++) {
-        // If listening to photo loader, send updates to the event
-        if (typeof (statusEvt) === 'function') {
-          statusEvt(photos, i);
-        }
-
         // Ignore all photos that have been already stored in trips
         if (lastPhotoCursor && photos[i].creationTime <= lastPhotoCursor.timestamp) {
           continue;
@@ -233,6 +228,7 @@ class TripStore {
           hash: photos[i].md5,
           uri: photos[i].uri,
         });
+        photo.save();
 
         const altRef = photos[i].exif['{GPS}']?.AltitudeRef || photos[i].exif?.GPSAltitudeRef || 0;
         const altitude = photos[i].exif['{GPS}']?.Altitude || photos[i].exif?.GPSAltitude || 0;
@@ -263,14 +259,10 @@ class TripStore {
         // or the previous photo is 3 days older than the current photo
         const timeDiff = (previousPing?.getTimeBetweenPings(currentPing) >= Ping.TIME_MAX_BETWEEN_TRIPS);
         const sameCountry = (previousPing?.country === currentPing.country);
-        if (trip && (currentPing.isHome(homeCoords) || !sameCountry || timeDiff)) {
-          logger.info(`Trip to ${trip.lastPing.country} ended`);
-          trip.setFinished(trip.lastPing.timestamp);
-          if (trip.isValid) {
-            logger.debug('The trip has met the minimum requirements to be recorded!')
-            trip.setSync(Date.now());
-            user.addTrip(trip);
-          }
+        const isHome = (getDistanceBetweenPoints(currentPing, homeCoords) < Ping.TRIP_DISTANCE_TRIGGER_THRESHOLD);
+        if (trip && (isHome || !sameCountry || timeDiff)) {
+          trip.endTrip();
+          user.addTrip(trip);
           trip = null;
         }
 
@@ -305,7 +297,15 @@ class TripStore {
       }
 
       // Add unfinished trip
+      const timeDiff = (Date.now() - trip.lastPing.timestamp) >= Ping.TIME_MAX_BETWEEN_TRIPS;
+      const nowLocation = await Location.getLastKnownPositionAsync();
+      const nowCountry = await Location.reverseGeocodeAsync({ latitude: nowLocation.latitude, longitude: nowLocation.longitude });
+      const sameCountry = (trip.lastPing.country === nowCountry[0]?.country);
+      const isHome = (getDistanceBetweenPoints(nowLocation, homeCoords) < Ping.TRIP_DISTANCE_TRIGGER_THRESHOLD);
       if (trip) {
+        if (isHome || timeDiff || !sameCountry) {
+          trip.endTrip();
+        }
         user.addTrip(trip);
       }
       user.save();

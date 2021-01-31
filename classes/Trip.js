@@ -38,6 +38,52 @@ class Trip {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
+  /**
+   * Returns the start location, destination and the countries visited during the trip
+   */
+  @computed get destination() {
+    const start = this.pings[0].country;
+    let tmp = null;
+    let counter = 0;
+    let countries = [ start ];
+    const end = this.pings.reduce((acc, ping) => {
+      if (ping.country) {
+        if (tmp !== ping.country) {
+          tmp = ping.country;
+          counter = 0;
+        }
+        counter++;
+        if (counter > 1 && acc !== tmp) {
+          if (!countries.find(ping.country)) {
+            countries.push(ping.country);
+          }
+          acc = tmp;
+        }
+      }
+      return acc;
+    }, start);
+    return { start, end, countries };
+  }
+
+  /**
+   * Returns all the locations (venues) visited during the trip including a counter
+   */
+  @computed get locations() {
+    return this.pings.reduce((acc, ping) => {
+      if (ping.venue) {
+        acc[ping.venue.name] = (acc[ping.venue.name] || 0) + 1;
+      }
+      return acc;
+    }, {});
+  }
+
+  /**
+   * Returns whether all the pings have been parsed or not
+   */
+  @computed get isParsed() {
+    return !(this.pings.find(ping => !ping.parsed));
+  }
+
   @computed
   get sortedPings() {
     return this.pings.slice().sort((p1, p2) => p1.timestamp - p2.timestamp);
@@ -117,6 +163,15 @@ class Trip {
     }
   }
 
+  @action.bound endTrip() {
+    logger.info(`Trip to ${this.lastPing.country} ended`);
+    this.setFinished(this.lastPing.timestamp);
+    if (this.isValid) {
+      logger.debug('The trip has met the minimum requirements to be recorded!');
+      this.setSync(Date.now());
+    }
+  }
+
   @computed
   get isValid() {
     if (!this.finishedAt) {
@@ -130,16 +185,12 @@ class Trip {
     return false;
   }
 
-  async parsePings(ping, statusAck) {
+  async parsePings(ping, { OnUpdate, OnFail }={}) {
     try {
       // Parse specific ping or all pings
       const pings = (ping) ? [ ping ] : this.pings;
 
       for (let p = 0; p < pings.length; p++) {
-        if (statusAck) {
-          statusAck(this, p);
-        }
-
         // Grab the previous ping related to the ping getting parsed
         const previousPing = this.findPreviousPing(pings[p]);
         const currentPing = pings[p];
@@ -211,7 +262,7 @@ class Trip {
       logger.error('Parsing failed: ', err.message);
       logger.debug('Automatic retry in 5 seconds');
       await Trip.delay(5000);
-      await this.parsePings(null, statusAck);
+      await this.parsePings(null);
     }
   }
 

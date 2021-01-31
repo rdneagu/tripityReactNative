@@ -4,6 +4,12 @@ import { observable, action, computed } from 'mobx';
 /* App library */
 import logger from '../lib/log';
 
+export const LOADING_STATES = {
+  FAILED: -1,
+  PENDING: 0,
+  FINISHED: 1,
+}
+
 class LoadingQueue {
   @observable queue = [];
   
@@ -18,7 +24,7 @@ class LoadingQueue {
   }
 
   @action.bound
-  add({ id, message, action, retryLimit=-1 }={}) {
+  add({ id, initialMessage, action, tryLimit=-1 }={}) {
     if (this.exists(id)) {
       logger.error(`Multiple loader instances are forbidden! Constraint failed for '${id}'`);
       return;
@@ -26,13 +32,17 @@ class LoadingQueue {
 
     this.queue.push({
       id,
-      message,
-      retryLimit,
-      retryTimes: 0,
+      message: initialMessage,
+      tryLimit,
+      tryTimes: 0,
       run: async () => {
         try {
+          this.active.startTz = Date.now();
+          this.active.tryTimes++;
+          this.active.message = initialMessage;
+          this.active.state = LOADING_STATES.PENDING;
           await action(this.update, this.fail);
-          this.finish();
+          this.success(initialMessage);
         } catch (e) {
           this.fail(e);
         }
@@ -47,7 +57,7 @@ class LoadingQueue {
   @action.bound
   next() {
     if (this.queue.length) {
-      this.queue[0].run();
+      this.active.run();
     }
   }
 
@@ -59,18 +69,24 @@ class LoadingQueue {
   @action.bound
   fail(e) {
     logger.error(e);
-    this.active.fail = e?.message || e;
-    this.active.retryTimes++;
-    if (this.active.retryLimit === 0 && this.active.retryTimes <= this.active.retryLimit) {
-      setTimeout(() => this.next(), 5000);
+    this.active.state = LOADING_STATES.FAILED;
+    this.active.message = e?.message || e;
+    if (this.active.tryLimit === 0 || this.active.tryTimes < this.active.tryLimit) {
+      setTimeout(this.active.run.bind(this), 5000);
     } else {
-      this.finish();
+      setTimeout(this.finish.bind(this), 3000);
     }
   }
 
   @action.bound
+  success(message) {
+    this.active.message = message || this.active.message;
+    this.active.state = LOADING_STATES.FINISHED;
+    this.finish();
+  }
+
+  @action.bound
   finish() {
-    this.active.message = `Success: ${this.active.message}`;
     setTimeout(() => {
       this.queue.shift();
       this.next();

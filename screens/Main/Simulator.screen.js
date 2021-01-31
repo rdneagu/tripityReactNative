@@ -34,36 +34,20 @@ class ScreenMainSimulator extends React.Component {
     photos: false,
   }
 
-  constructor() {
-    super();
-    Loading.getQueue('background').add({
-      id: 'LoadingTest',
-      message: "Testing background loader",
-      action: (OnUpdate, OnFail) => new Promise((resolve, reject) => {
-        setTimeout(() => {
-          OnUpdate("Testing background loader_1");
-        }, 1000);
-        setTimeout(() => {
-          OnUpdate("Testing background loader_2");
-        }, 2000);
-        setTimeout(() => {
-          OnUpdate("Testing background loader_3");
-        }, 3000);
-        setTimeout(() => {
-          resolve();
-        }, 6000);
-      }),
-    });
-  }
-
   /**
    * 
    */
   @action.bound
   async getPhotosAsync() {
     this.loading.photos = true;
-    this.images = await this.props.store.TripStore.getAllPhotos();
-    this.loading.photos = false;
+    Loading.getQueue('background').add({
+      id: 'FetchPhotos',
+      initialMessage: "Fetching your device photos",
+      action: async (OnUpdate, OnFail) => {
+        this.images = await this.props.store.TripStore.getAllPhotos();
+        this.loading.photos = false;
+      },
+    });
   }
 
   @action.bound

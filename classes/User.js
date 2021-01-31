@@ -100,7 +100,7 @@ class User {
   
   @action.bound
   addTrip(trip) {
-    if (trip) {
+    if (trip?.isValid) {
       trip = (trip instanceof Trip) ? trip : new Trip(trip);
       this.trips.push(trip);
     }
@@ -161,15 +161,15 @@ class User {
     }
   }
 
-  async parseTrips(trip, statusAck) {
+  async parseTrips(trip, { OnUpdate, OnFail }={}) {
     // Parse specific trip or all trips that have unparsed pings
-    const trips = (trip) ? [ trip ] : this.trips.filter(trip => trip.pings.find(ping => !ping.parsed));
+    const trips = (trip) ? [ trip ] : this.trips.filter(trip => !trip.isParsed);
 
     logger.debug('User:', this.email);
     // Go through each of the unparsed ping of each trip that has unparsed pings
     for (let t = 0; t < trips.length; t++) {
       logger.info(`Current trip: id=${trips[t].tripId} | pings=${trips[t].pings.length}`);
-      await trips[t].parsePings(null, statusAck);
+      await trips[t].parsePings(null, { OnUpdate, OnFail });
       trips[t].setSync(Date.now());
       trips[t].save();
 
