@@ -2,7 +2,7 @@
 
 This project requires Expo CLI and can be installed using `npm install -g expo-cli`
 
-1. Create a fresh React Native using `expo init <project-name>` with the Bare Workflow option.
+1. Create a fresh React Native using `expo init <project-name>` with the **Bare Workflow** option.
 2. Copy all the source files from the previous project folder into the new project folder making sure to exclude the next files/folders:
    * `package.json`
    * `ios/`
