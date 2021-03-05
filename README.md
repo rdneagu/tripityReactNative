@@ -24,7 +24,7 @@ https://flutter.dev/docs/get-started/install/macos#ios-setup
 
 ## How to upgrade Expo SDK:
 
-Upgrading can be done using `expo upgrade`. Please note that sometimes it may cause the project to break which requires a fresh installation.
+Upgrading can be done using `expo upgrade`. Please note that sometimes it may cause the project to break which requires a [fresh installation](https://github.com/rdneagu/tripityReactNative/blob/master/FRESH_INSTALLATION.md).
 
 ## How to build an APK file to run on an Android device in production environment
 
