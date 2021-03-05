@@ -15,7 +15,7 @@ This project requires Expo CLI and can be installed using `npm install -g expo-c
 `expo install @react-native-community/async-storage @react-native-community/datetimepicker @react-native-community/masked-view @react-native-mapbox-gl/maps @react-navigation/bottom-tabs @react-navigation/native @react-navigation/stack aws-sdk axios react-native-crypto-js expo-asset expo-constants expo-document-picker expo-font expo-linear-gradient expo-permissions expo-secure-store expo-task-manager lodash mobx mobx-react react-native-modal react-native-safe-area-context react-native-text-ticker realm uuid@^3.4.0 mobx@^5.15.5 mobx-react@^6.2.5 react-native-indicators`  
 **This command will install the majority of the runtime packages that do not required any special configuration for neither iOS nor Android**
 
-### Install and configure `expo-location`
+## Install and configure `expo-location`
 `expo install expo-location`
 
 #### Configure for iOS
